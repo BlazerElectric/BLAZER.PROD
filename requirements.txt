@@ -1,0 +1,6 @@
+google-genai
+pandas
+pydantic
+tqdm
+python-dotenv
+tenacity

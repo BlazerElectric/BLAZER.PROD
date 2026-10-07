@@ -1,0 +1,4 @@
+.env
+__pycache__/
+*.pyc
+enriched_products.checkpoint.csv

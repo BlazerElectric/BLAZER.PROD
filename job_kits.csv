@@ -1,0 +1,215 @@
+job,slot,path,keywords,max
+EV charger,ev charger,Renewable Energy > EV Charging,.,2
+EV charger,50A 2P breaker,Power Distribution > Circuit Breakers,(^|\s)(QO|HOM|BR|Q|THQL|THQP|THQB|CH|BD|QOB|HOMT)2?-?50\b|\b50\s?A(MP)?\b.*\b(2|two).?P,3
+EV charger,14-50 receptacle,Wiring Devices,14-50|14.50\s?R,3
+EV charger,6/3 NM cable,Wire,\b6/3\b.*(NM|WG|ROMEX|COIL|RL)|\b6-3\b.*(NM|WG),2
+EV charger,#6 THHN,Wire,"THHN.{0,12}\b-?6\b(?!/)|\b6\b.{0,4}THHN",3
+EV charger,weatherproof cover,Boxes & Enclosures,in.?use|weatherproof.*(cover|box)|wp.*cover,3
+EV charger,liquidtight conduit,Conduit,liquid.?tight|LFMC,2
+RV / generator inlet,power inlet,,inlet|SS2-50|L14-30|L14-50|14-30P|PBBI,3
+RV / generator inlet,generator cord,,generator.*cord|L14-30P|L14-20P|power cord.*(30|50)\s?A,3
+RV / generator inlet,2P breaker 30-50A,Power Distribution > Circuit Breakers,(^|\s)(QO|HOM|BR|Q|THQL|THQP|THQB|CH|BD)2?-?(30|50)\b,3
+RV / generator inlet,interlock / transfer,Power Distribution,interlock|transfer switch|generator.*(panel|breaker),3
+RV / generator inlet,weatherproof box,Boxes & Enclosures,in.?use|weatherproof.*(cover|box)|N3R|nema 3r,3
+RV / generator inlet,wire,Wire,"\b(6|8|10)/3\b|THHN.{0,12}\b-?(6|8|10)\b",3
+RV / generator inlet,pedestal / receptacle,Wiring Devices,14-50|14-30|TT-30|\b30\s?A.*\bRV\b|RV,3
+Hot tub / spa,spa disconnect,Power Distribution,spa|hot tub,3
+Hot tub / spa,GFCI breaker,Power Distribution > Circuit Breakers,(GFCI|GFI|ground fault).*(50|60)|(50|60).*(GFCI|GFI|ground fault),3
+Hot tub / spa,bonding conductor,Wire,bare.*\b-?(8|6)\b|\b-?(8|6)\b.*(bare|solid)|SD.?BARE,2
+Hot tub / spa,bonding lug,Connectors & Crimps,ground.*lug|bonding|water pipe|acorn|bar.*lug|lay.?in lug,3
+Hot tub / spa,liquidtight / PVC,Conduit,liquid.?tight|PVC.*conduit|LFNC,3
+Hot tub / spa,weatherproof box,Boxes & Enclosures,in.?use|weatherproof|N3R|nema 3r|wp,3
+Service upgrade,meter socket,,meter (socket|base|pan|main)|meter.?main|socket.*meter,3
+Service upgrade,load center,Power Distribution > Load Centers,load center|main breaker|main lug|panel,3
+Service upgrade,main breaker,Power Distribution > Circuit Breakers,(^|\s)(QO|HOM|BR|Q|THQL|THQP)2?-?(100|125|150|200)\b|\bmain\b,3
+Service upgrade,grounding rod,,ground(ing)? rod|\bground rod,2
+Service upgrade,ground clamp,,acorn|rod clamp|ground clamp|grounding clamp|water pipe clamp|GRC.?clamp,3
+Service upgrade,service entrance cable,Wire,\bSE[RU]?\b|service.?entrance|\bSER\b|\bSEU\b,3
+Service upgrade,weatherhead / hub,,weatherhead|service head|meter hub|sealing ring|sealtite.*hub,3
+Service upgrade,anti-oxidant compound,,\boxide|noalox|penetrox|anti.?ox|alumi.?shield|joint compound|\bPEN\b,2
+Service upgrade,lugs,Connectors & Crimps,lug|split bolt|connector.*aluminum|\bAL\b.*CU,3
+Rough-in,old-work/new-work box,Boxes & Enclosures > Boxes - Non-Metallic,old work|new work|1-gang|zip|adj,1
+Rough-in,NM cable,Wire,\b(14|12)/(2|3)\b.*(NM|WG|ROMEX|COIL|RL),3
+Rough-in,cable staples/straps,,staple|strap.*(nm|romex|cable)|\bnm\b.*strap|cable.*clip,3
+Rough-in,NM connector,Fittings,romex|nm.*connector|connector.*nm|\bNM\b,3
+Rough-in,drill bits,Tools & Meters > Bits,auger|spade|ship|hole ?saw|\bbit\b,3
+Rough-in,fish tools,Tools & Meters,fish tape|glow rod|fish rod|pull string|wire guide,2
+Rough-in,wire connectors,Connectors & Crimps,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector),1
+Trim-out,receptacles,Wiring Devices > Receptacles,duplex|receptacle|\brecp\b|\brcpt\b,3
+Trim-out,switches,Wiring Devices > Switches,switch|toggle|decora|dimmer,3
+Trim-out,GFCI,Wiring Devices,GFCI|GFI,2
+Trim-out,labels / markers,,label|marker|wire marker|tags,1
+Trim-out,testers,Tools & Meters,tester|\bGFCI tester|voltage|outlet.*test|receptacle.*tester,1
+Recessed lighting,recessed housing/fixture,Lighting,recessed|can light|IC housing|wafer|downlight|slim.*LED,3
+Recessed lighting,fixture whip,,whip|flex.*lighting|fixture.*whip,2
+Recessed lighting,dimmer,Wiring Devices,dimmer|0-10V,2
+Recessed lighting,junction box,Boxes & Enclosures > Boxes - Non-Metallic,old work|new work|zip|adj|4.?sq,1
+Recessed lighting,wire connectors,Connectors & Crimps,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector),1
+Recessed lighting,NM cable,Wire,\b(14|12)/(2|3)\b.*(NM|WG|ROMEX|COIL|RL),2
+Network / data install,rack or cabinet,Data & Telecom > Cabinets,rack|cabinet|enclosure,2
+Network / data install,patch panel,Data & Telecom,patch panel|keystone panel,3
+Network / data install,voice data cable,,\bcat.?[56]|\butp\b|ethernet,3
+Network / data install,keystone / jack,Data & Telecom,keystone|\bjack\b|RJ.?45,3
+Network / data install,low voltage plate,Data & Telecom,faceplate|wall.?plate|frame|\bplate\b|surface mount box,3
+Network / data install,cable management,Fasteners & Hardware > Cable Management,.,3
+Network / data install,patch cords,Data & Telecom,patch cord|patch cable|\bcat.?[56]e?\b.*(ft|'|foot),3
+Network / data install,firestop,,fire.?stop|putty|caulk,2
+Network / data install,tools / testers,Data & Telecom,tester|crimp|punch.?down|cable.*tool|strip,2
+Kitchen / bath remodel,GFCI receptacle,Wiring Devices,GFCI|GFI,2
+Kitchen / bath remodel,bath fan,Fans,exhaust|bath fan|ventilat|\bCFM\b,2
+Kitchen / bath remodel,under-cabinet / vanity light,Lighting,under.?cab|vanity|puck|light bar|linkable,2
+Kitchen / bath remodel,dimmer / switch,Wiring Devices > Switches,dimmer|decora|3.?way,2
+Kitchen / bath remodel,20A NM cable,Wire,\b12/(2|3)\b.*(NM|WG|ROMEX),2
+Kitchen / bath remodel,old-work box,Boxes & Enclosures > Boxes - Non-Metallic,old work|zip|adj,1
+Kitchen / bath remodel,AFCI/GFCI breaker,Power Distribution > Circuit Breakers,AFCI|GFCI|GFI|combo|dual function,2
+Whole-house rewire,old-work box,Boxes & Enclosures > Boxes - Non-Metallic,old work|zip|adj|remodel,2
+Whole-house rewire,fish tools,Tools & Meters,fish tape|glow rod|fish rod|pull string|wire guide|flex.?bit|extension bit,2
+Whole-house rewire,NM cable,Wire,\b(14|12)/(2|3)\b.*(NM|WG|ROMEX),2
+Whole-house rewire,cable staples,,staple|jiffy clip|nm.*strap,2
+Whole-house rewire,receptacles,Wiring Devices > Receptacles,duplex|receptacle|\brecp\b|\brcpt\b,2
+Whole-house rewire,switches,Wiring Devices > Switches,switch|decora|toggle,2
+Whole-house rewire,wire connectors,Connectors & Crimps,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector),1
+Whole-house rewire,AFCI breaker,Power Distribution > Circuit Breakers,AFCI|combo|dual function,2
+Whole-house rewire,smoke/CO alarm,Fire Alarm,smoke|carbon monoxide|\bCO\b,2
+Ceiling fan / fixture swap,fan rated box,Boxes & Enclosures,fan.?(rated|brace|box|support)|brace,2
+Ceiling fan / fixture swap,ceiling fan,Fans,ceiling fan|fan,2
+Ceiling fan / fixture swap,fixture,Lighting,fixture|flush|pendant|ceiling,2
+Ceiling fan / fixture swap,fan control / dimmer,Wiring Devices,fan (control|speed)|dimmer,2
+Ceiling fan / fixture swap,wire connectors,Connectors & Crimps,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector),1
+Ceiling fan / fixture swap,bulbs,"Lamps, Bulbs",A19|A21|BR30|candelabra|LED lamp|\bLED\b.*(bulb|lamp),2
+Panel / sub-panel,load center,Power Distribution > Load Centers,load center|main breaker|main lug|subpanel|panel,2
+Panel / sub-panel,breakers,Power Distribution > Circuit Breakers,"(^|\s)(QO|HOM|BR|Q|THQL|THQP|THQB|CH|BD)\d?-?\d{2,3}\b",3
+Panel / sub-panel,ground bar,,ground bar|neutral bar|GBK|bonding,2
+Panel / sub-panel,service wire,Wire,"THHN.{0,12}\b-?(6|4|2|1/0|2/0)\b|SER|SE[RU]\b",2
+Panel / sub-panel,conduit fittings,Fittings,connector|locknut|bushing|hub,2
+Panel / sub-panel,lugs,Connectors & Crimps,lug|split bolt,2
+Panel / sub-panel,panel labels,,label|directory|circuit.*(label|marker),1
+Smoke / CO / doorbell,smoke or CO alarm,Fire Alarm,smoke|carbon monoxide|\bCO\b,3
+Smoke / CO / doorbell,batteries,Tools & Meters > Batteries,\b(AA|AAA|9V|9 ?volt)\b,2
+Smoke / CO / doorbell,doorbell / chime,"Fire Alarm, Safety, Security",doorbell|chime|ring,2
+Smoke / CO / doorbell,low voltage wire,Wire,18/2|18-2|thermostat|bell wire|18/3,2
+Smoke / CO / doorbell,test spray,,test spray|detector spray|smoke test,1
+Smoke / CO / doorbell,old-work box,Boxes & Enclosures > Boxes - Non-Metallic,old work|zip|adj|round|rnd,1
+Outdoor / landscape lighting,landscape fixture,Lighting,landscape|path ?light|flood|spot|bollard|post,3
+Outdoor / landscape lighting,photocell / timer,"Lighting Fixtures, Control",photocell|photo.?control|timer|astro|dusk,2
+Outdoor / landscape lighting,outdoor box / cover,Boxes & Enclosures,in.?use|weatherproof|\bwp\b|N3R,2
+Outdoor / landscape lighting,direct burial wire,Wire,UF|direct burial|landscape|\b12/2\b|low voltage,2
+Outdoor / landscape lighting,GFCI receptacle,Wiring Devices,GFCI|WR|weather.?resist|tamper,2
+Outdoor / landscape lighting,PVC conduit and fittings,,PVC|schedule 40|sch 40,2
+Tenant improvement,troffer / panel,Lighting,troffer|2x2|2x4|flat panel|panel.*LED,3
+Tenant improvement,occupancy sensor,"Lighting Fixtures, Control",occupan|vacancy|motion|PIR|dual tech,2
+Tenant improvement,0-10V dimmer,Wiring Devices,0-10|dimmer,2
+Tenant improvement,MC cable,Wire,\bMC\b|armored|AC.?90|BX,3
+Tenant improvement,MC connector,Fittings,MC|AC.?\/?MC|armored.*conn|snap,2
+Tenant improvement,4-sq box and ring,Boxes & Enclosures,4.?sq|4-11/16|plaster ring|mud ring|\bring\b,2
+Tenant improvement,drop ceiling support,Caddy,grid|ceiling|support wire|clip|bar hanger,2
+Tenant improvement,wire connectors,Connectors & Crimps,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector),1
+Emergency / exit lighting,exit sign,Lighting,exit,3
+Emergency / exit lighting,emergency light,Lighting,emergency|bug eye|remote head|twin head,3
+Emergency / exit lighting,battery / driver,,emergency.*(driver|ballast|battery)|battery pack|\bEM\b.*driver|inverter,2
+Emergency / exit lighting,test switch / label,,\btest (switch|button)\b|\blabel\b|sticker|break glass,1
+Emergency / exit lighting,whip / MC,Wire,\bMC\b|\bwhip\b,1
+Emergency / exit lighting,4-sq / octagon box,Boxes & Enclosures,octagon|4.?sq|\boct\b|junction,2
+EMT / MC branch run,EMT conduit,Conduit,\bEMT\b,1
+EMT / MC branch run,EMT connector,Fittings,EMT.*(conn|coupling|SSCR|set.?screw|comp)|SSCR|SCREW CONN,2
+EMT / MC branch run,EMT coupling,Fittings,EMT.*coupl|coupling.*EMT|\bSSCP\b,2
+EMT / MC branch run,EMT strap,,one.?hole.*strap|EMT.*strap|\bstrap\b.*EMT|\b1.?H\b,2
+EMT / MC branch run,box and cover,Boxes & Enclosures,4.?sq|handy|1900|cover,2
+EMT / MC branch run,THHN wire,Wire,"THHN.{0,12}\b-?(12|10|14)\b",2
+EMT / MC branch run,benders / tools,Tools & Meters,bender|reamer|conduit|fish tape|pull,1
+EMT / MC branch run,wire connectors,Connectors & Crimps,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector),1
+Fire alarm install,fire alarm devices,Fire Alarm,horn|strobe|pull station|detector|smoke|heat|\bFACP\b|panel,3
+Fire alarm install,FPL cable,Wire,\bFPLP?\b|fire alarm,2
+Fire alarm install,back box,Boxes & Enclosures,4.?sq|1900|\bring\b|plate|\bbox\b,2
+Fire alarm install,firestop,,fire.?stop|putty|caulk|intumescent|pillow,1
+Fire alarm install,labels,,label|marker|tag,1
+Fire alarm install,power supply / battery,,power supply|battery|12V|24V|NAC,2
+Floor box / data power,floor box,Boxes & Enclosures,floor box|floor,3
+Floor box / data power,receptacle,Wiring Devices,duplex|receptacle|recp|rcpt,1
+Floor box / data power,data jack,Data & Telecom,keystone|jack|RJ.?45|cat.?[56],2
+Floor box / data power,floor cover,,cover|carpet|flange|plate,2
+Floor box / data power,raceway,Conduit,underfloor|raceway|PVC|EMT,1
+Motor circuit,disconnect,Control & Automation > Disconnect,disconnect|safety switch|motor switch|manual,2
+Motor circuit,starter / contactor,Control & Automation,starter|contactor|soft.?start|\bVFD\b|drive,3
+Motor circuit,overload relay,Control & Automation,overload|thermal|heater,2
+Motor circuit,fuses,Fuses,\bRK5\b|\bCC\b|class|time delay|dual element|fuse,3
+Motor circuit,liquidtight,Conduit,liquid.?tight|LFMC|sealtite,2
+Motor circuit,LT connectors,Fittings,liquid.?tight|sealtite|LT.*conn|\bST\b.*conn,2
+Motor circuit,pilot devices,Control & Automation > Pilot,push.?button|selector|pilot|start|stop|indicator,2
+Motor circuit,wire,Wire,"THHN.{0,12}\b-?(14|12|10|8|6)\b|\bTHWN\b|\bTHHN\b",2
+Control panel build,DIN rail,Control & Automation,DIN rail|din.?rail,1
+Control panel build,terminal blocks,Control & Automation > Terminal Blocks,.,3
+Control panel build,relays,Control & Automation,relay|socket|timer|contactor,3
+Control panel build,pilot devices,Control & Automation > Pilot,push.?button|selector|pilot|indicator|e.?stop,3
+Control panel build,power supply,Control & Automation > Power Supply,power supply|24V|DIN,2
+Control panel build,panel enclosure,Boxes & Enclosures,N12|N4|screw cover|enclosure|panel|back ?panel|subpanel,2
+Control panel build,wire duct,"Conduit, Strut & Raceways > Wire Duct",.,2
+Control panel build,control wire / ferrules,,MTW|TFFN|ferrule|control wire|\b16 AWG|\b18 AWG,2
+Control panel build,fuse blocks,Fuses,fuse (block|holder)|holder,2
+Strut / hanger run,strut channel,"Conduit, Strut",strut|channel|unistrut|1-5/8,2
+Strut / hanger run,strut fittings,"Conduit, Strut",fitting|bracket|corner|splice|angle|plate|end cap,3
+Strut / hanger run,threaded rod,Fasteners,threaded rod|all.?thread|rod,2
+Strut / hanger run,spring nuts / hex hardware,Fasteners,spring nut|channel nut|hex nut|\bbolt\b|washer,3
+Strut / hanger run,pipe/conduit clamps,,clamp|strap|pipe hanger|one.?hole|two.?hole|beam clamp,3
+Strut / hanger run,anchors,Fasteners,anchor|tapcon|wedge|drop.?in|lag|toggle|strike,2
+Strut / hanger run,hand tools,Tools & Meters,strut|channel|cutter|hacksaw|bolt|saw,1
+Wireway / cable tray,wireway,"Conduit, Strut & Raceways > Wire Duct",wireway|trough|gutter|lay.?in,2
+Wireway / cable tray,wireway fittings,"Conduit, Strut & Raceways > Wire Duct",elbow|connector|coupling|cover|hanger|end cap|tee|flange|nipple,3
+Wireway / cable tray,cable tray,Data & Telecom > Cable Tray,.,2
+Wireway / cable tray,tray fittings,Data & Telecom > Cable Tray,fitting|splice|bracket|elbow|cap|hold.?down|support|trapeze|clamp,3
+Wireway / cable tray,hardware,Fasteners,rod|bolt|nut|washer|beam clamp|anchor,2
+Wireway / cable tray,cable ties / supports,,cable tie|j.?hook|support|bridle|strap,2
+High-bay / HID lighting,high bay / HID fixture,Lighting,high.?bay|HID|metal halide|wall pack|flood|low bay|linear,3
+High-bay / HID lighting,ballast / driver,"Lamps, Bulbs & Ballast",ballast|driver|capacitor|ignitor|\bHID\b,2
+High-bay / HID lighting,lamps,"Lamps, Bulbs",metal halide|MH|\bHPS\b|LED.*(lamp|retrofit)|\bMH\b|MP\d,2
+High-bay / HID lighting,chain / hook,,chain|hook|hanger|cable.*(hanger|kit)|pendant|aircraft cable,2
+High-bay / HID lighting,sensor,"Lighting Fixtures, Control",sensor|occupan|motion|daylight|photocell,1
+High-bay / HID lighting,cord / plug,,\bwhip\b|\bcord\b|\bplug\b(?!-)|twist.?lock|pigtail|\bSOW?O?\b,1
+Power distribution,transformer,Power Distribution,transformer|\bKVA\b|buck,2
+Power distribution,panelboard / load center,Power Distribution > Load Centers,panel|load center,2
+Power distribution,breakers,Power Distribution > Circuit Breakers,"(^|\s)(QO|HOM|BR|Q|THQL|THQP|THQB|CH|BD)\d?-?\d{2,3}\b",2
+Power distribution,fuses and holders,Fuses,fuse|holder|block,2
+Power distribution,lugs and splices,Connectors & Crimps,lug|split bolt|compression|crimp|splice|terminal,3
+Power distribution,feeder wire,Wire,THHN|THWN|XHHW|\bTHHN\b|\bCU\b.*\b(1/0|2/0|3/0|4/0|250|350|500)\b,2
+Power distribution,conduit and fittings,Fittings,RGS|rigid|\bGRC\b|\bEMT\b|conduit|hub|locknut|bushing|nipple,2
+Power distribution,labels / lockout,,label|lockout|arc flash|tag|danger|warning,1
+Security / camera install,camera,Data & Telecom > Video & Surveillance,camera|dome|bullet|fisheye|PTZ|turret|\bFD\d|\bMS\d|\bIB\d,3
+Security / camera install,NVR / recorder,Data & Telecom > Video & Surveillance,NVR|recorder|DVR|hard drive|\bHDD\b|\bND\d,2
+Security / camera install,mount / bracket,Data & Telecom > Video & Surveillance,mount|bracket|adapter|gooseneck|pendant|\bAM-|junction,3
+Security / camera install,PoE switch / injector,Data & Telecom,PoE|injector|midspan|managed.*switch|ethernet switch|network switch,2
+Security / camera install,outdoor cable,"Wire, Cable & Cord > Voice, Data",.,2
+Security / camera install,RJ45 connectors,Data & Telecom,RJ.?45|keystone|connector|coupler|boot,2
+Security / camera install,weather box / cover,Boxes & Enclosures,weatherproof|in.?use|N3R|\bWP\b,1
+Security / camera install,surge / liquidtight,,surge|protector|liquid.?tight,1
+A/V and coax,coax cable,"Wire, Cable & Cord > Voice, Data",coax|RG.?6|RG.?59|CATV|quad,3
+A/V and coax,F connectors,Data & Telecom,F.?type|F.?conn|splitter|coax,3
+A/V and coax,wall plates,Data & Telecom,coax|F.?type|F.?conn|HDMI|plate|keystone,2
+A/V and coax,speaker wire,Wire,speaker|\bCL[23]\b|in.?wall,2
+A/V and coax,cable tools,Data & Telecom > Tools,compression|crimp|strip|cutter|tool|tester,2
+A/V and coax,low-voltage bracket,Boxes & Enclosures,low.?volt|old work|bracket|mounting ring|\bLV\b,2
+A/V and coax,cable management,Data & Telecom,velcro|hook.?loop|j.?hook|cable tie|lacing|cable manage,2
+Fiber termination,fiber cable,Data & Telecom > Fiber Optic,.,2
+Fiber termination,fiber connectors,Data & Telecom > Fiber Optic,.,3
+Fiber termination,fiber enclosure,Data & Telecom,fiber|enclosure|panel|splice tray|cassette|housing,3
+Fiber termination,fiber tools,Data & Telecom > Tools,fiber|cleaver|stripper|polish|cleaning|\bOTDR\b|visual fault|tool,2
+Fiber termination,patch cords,Data & Telecom,fiber|patch|jumper|LC.*LC|SC.*SC|\bduplex\b,2
+Van stock,wire connectors,Connectors & Crimps,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector),1
+Van stock,boxes,Boxes & Enclosures > Boxes - Non-Metallic,old work|zip|adj,1
+Van stock,fasteners,Fasteners,TEK|screw|anchor|tapcon|lag|toggle,1
+Van stock,tape and ties,,electrical tape|vinyl.*tape|cable tie|zip tie|wire tie,1
+Van stock,bits and blades,Tools & Meters > Bits,bit|hole ?saw|blade|auger|step,1
+Van stock,testers,Tools & Meters,tester|voltage detect|multimeter|NCVT|receptacle tester|volt,1
+Van stock,hand tools,Tools & Meters > Hand Tools,pliers|stripper|screwdriver|knife|snips|lineman|nut driver,1
+Van stock,devices and plates,Wiring Devices,duplex|receptacle|switch|plate|GFCI,1
+Van stock,fittings,Fittings,connector|coupling|locknut|bushing|strap|clamp,1
+Van stock,breakers,Power Distribution > Circuit Breakers,"(^|\s)(QO|HOM|BR|Q|THQL|THQP|THQB|CH|BD)\d?-?\d{2,3}\b",1
+Van stock,lighting,"Lamps, Bulbs",\bLED\b|A19|BR30,1
+Shop stock,bulk wire,Wire,THHN|NM-B|MC|SO|romex,1
+Shop stock,conduit,Conduit,EMT|PVC|RGS|IMC|rigid|conduit,1
+Shop stock,conduit fittings,Fittings,connector|coupling|locknut|bushing|nipple|elbow|strap|clamp,1
+Shop stock,strut,"Conduit, Strut",strut|channel|unistrut,1
+Shop stock,hardware,Fasteners,threaded rod|bolt|nut|washer|anchor|screw,1
+Shop stock,benders and tools,Tools & Meters,bender|reamer|knockout|punch|saw|drill|cutter|crimp,1
+Shop stock,lugs and terminals,Connectors & Crimps,lug|terminal|crimp|split bolt|ring|spade|butt,1
+Shop stock,consumables,,tape|label|ties|lube|lubricant|cutting oil|marker|pulling,1
+Shop stock,boxes,Boxes & Enclosures,4.?sq|handy|junction|pull box|1900|octagon|cover,1

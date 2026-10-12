@@ -47,7 +47,6 @@ Fittings > EMT Fittings,Fittings > Conduit Bodies,no,no,strict,,,,
 Boxes & Enclosures > Boxes - Non-Metallic,Fittings > NM Cable Fittings,no,no,none,,,,
 Fittings > Cord/Cable Fittings,"Wire, Cable & Cord > Portable Cords & Cables",no,no,none,,,,
 Boxes & Enclosures > Floor Boxes,Wiring Devices > Receptacles,yes,no,none,,,,
-"Connectors & Crimps > Small Terminals, Forks, Rings",Control & Automation > Terminal Blocks,no,no,none,,,,
 Control & Automation > Terminal Blocks,"Connectors & Crimps > Small Terminals, Forks, Rings",no,no,none,,,,
 Control & Automation > Starters & Contactors,Control & Automation > Pilot Devices,yes,no,none,,,,
 Control & Automation > Starters & Contactors,Control & Automation > Relays,no,no,none,,,,
@@ -55,12 +54,12 @@ Control & Automation > Starters & Contactors,Control & Automation > Terminal Blo
 Control & Automation > Pilot Devices,Control & Automation > Starters & Contactors,yes,no,none,,,,
 Control & Automation > Relays,Control & Automation > Terminal Blocks,no,no,none,,,,
 Control & Automation > Terminal Blocks,Control & Automation > Relays,no,no,none,,,,
-Data & Telecom > Fiber Optic Products,Data & Telecom > Tools,no,no,none,,,,
-Data & Telecom > Fiber Optic Products,"Data & Telecom > Cabinets, Racks & Wire Management",no,no,none,,,,
-Data & Telecom > Fiber Optic Products,Data & Telecom > Distribution Devices,no,no,none,,,,
+Data & Telecom > Fiber Optic Products,Data & Telecom > Tools,no,no,none,,,,fiber|fusion|cleav|clean|strip
+Data & Telecom > Fiber Optic Products,"Data & Telecom > Cabinets, Racks & Wire Management",no,no,none,,,,fiber|enclosure|wall ?mount
+Data & Telecom > Fiber Optic Products,Data & Telecom > Distribution Devices,no,no,none,,,,fiber|\blc\b|\bsc\b|coupler
 Data & Telecom > Tools,Data & Telecom > Workstation,no,no,none,,,,
 "Lighting Fixtures, Control > Indoor Lighting","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,,,^(?!.*\b(?:led|panel|troffer|high ?bay|low ?bay|strip|integrated|wrap|vapor)\b)|lamp ready|socket|medium base,
-"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,,,^(?!.*(?:0-10|010 ?v)),
+"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,,,^(?!.*(?:0-10|010 ?v|\btube|\bt[5-8]\b|\bt12\b|hybrid)),
 "Lighting Fixtures, Control > Indoor Lighting - Recessed","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,,,,
 "Lighting Fixtures, Control > Indoor Lighting - Recessed","Lamps, Bulbs & Ballast > Drivers - LED",no,no,none,,,,
 "Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Lampholders, Adapters & Extensions",no,no,none,,,^(?!.*(\bhid\b|high ?bay|fan cooled|\btube|\bt[58]\b|jack|\ba\d{2}\b)),
@@ -286,7 +285,7 @@ Data & Telecom > Grounding and Bonding,"Wire, Cable & Cord > Building Wire",no,n
 Data & Telecom > Grounding and Bonding,Connectors & Crimps > Lugs & Split Bolts,no,no,none,top100b,none,,
 Data & Telecom > Grounding and Bonding,Tools & Meters > Hand Tools,no,no,none,top100b,none,,crimp|strip|cutter|wrench|nut ?driver
 "Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,fixture,none,0-10|010 ?v,0-10|dvstv|dv\b|010
-"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Occupancy Sensors",no,no,none,fixture,none,,ceiling|dual tech|ultrasonic|corner|sensor
+"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Occupancy Sensors",no,no,none,fixture,none,^(?!.*(?:\btube|\bt[5-8]\b|\bt12\b|hybrid)),ceiling|dual tech|ultrasonic|corner|sensor
 "Lighting Fixtures, Control > Indoor Lighting","Wire, Cable & Cord > Armored Cable",no,no,none,fixture,none,,whip|fixture
 "Lighting Fixtures, Control > Indoor Lighting",Connectors & Crimps > Wire Connectors,no,no,none,fixture,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 "Lighting Fixtures, Control > Indoor Lighting",Wiring Devices > Switches,no,no,none,fixture,none,0-10|010 ?v,0-10|dvstv
@@ -356,7 +355,6 @@ Power Distribution > Metering & Temporary Power,"Fittings > Flashings, Weatherhe
 "Wire, Cable & Cord > Direct Burial",Connectors & Crimps > Wire Connectors,no,no,none,batch4,none,,underground|direct burial|waterproof|gel
 "Lighting Fixtures, Control > Outdoor Lighting",Connectors & Crimps > Wire Connectors,no,no,none,batch4,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gel))
 "Lighting Fixtures, Control > Emergency Lighting & Signs",Connectors & Crimps > Wire Connectors,no,no,none,batch4,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gel))
-"Lighting Fixtures, Control > Emergency Lighting & Signs","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,batch4,none,emergency|exit,
 "Lighting Fixtures, Control > Indoor Lighting - Recessed","Lighting Fixtures, Control > Indoor Lighting - Recessed",no,no,loose,batch5,none,housing,trim|baffle|reflector|eyeball
 "Lighting Fixtures, Control > Indoor Lighting - Recessed","Lighting Fixtures, Control > Indoor Lighting - Recessed",no,no,loose,batch5,none,trim|baffle|eyeball,housing|frame
 "Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Indoor Lighting",no,no,none,batch5,none,high bay|ufo|highbay,hook|chain|cable|mount|reflector|guard|lens|bracket
@@ -445,3 +443,15 @@ Fasteners & Hardware > Cable Management,Tools & Meters > Hand Tools,no,no,none,b
 Wiring Devices > Receptacles,Wiring Devices > Wallplates,no,no,none,batch9,none,range|dryer|50 amp|30 amp|nema 14|nema 10|nema 6,range|dryer
 "Wire, Cable & Cord > Building Wire",Connectors & Crimps > Lugs & Split Bolts,no,no,none,batch9,none,mobile home|feeder,\bAL\b|alum|dual
 "Wire, Cable & Cord > Building Wire",Power Distribution > Load Centers / Panelboards,no,no,none,batch9,none,mobile home|feeder,main|loadcenter|load center
+"Connectors & Crimps > Small Terminals, Forks, Rings",Tools & Meters > Hand Tools,no,no,none,batch10,none,,crimp
+"Connectors & Crimps > Small Terminals, Forks, Rings","Connectors & Crimps > Cold Shrink, Heat Shrink",no,no,none,batch10,none,,
+"Connectors & Crimps > Small Terminals, Forks, Rings",Fasteners & Hardware > Tapes,no,no,none,batch10,none,,electrical tape|vinyl
+"Connectors & Crimps > Small Terminals, Forks, Rings","Connectors & Crimps > Small Terminals, Forks, Rings",no,no,none,batch10,none,,
+Data & Telecom > Fiber Optic Products,Data & Telecom > Fiber Optic Products,no,no,none,batch10,none,,coupler|panel|cleaner|enclosure|connector|pigtail|sleeve|splice
+"Lighting Fixtures, Control > Emergency Lighting & Signs","Lighting Fixtures, Control > Emergency Lighting & Signs",no,no,none,batch10,none,,^(?!.*(?:pres sen|danger)).*(?:exit|emerg|combo|unit|battery)
+Power Distribution > Transformers,Connectors & Crimps > Lugs & Split Bolts,no,no,none,batch10,none,^(?!.*(?:chime|doorbell|bell|button)),
+Power Distribution > Transformers,Power Distribution > Load Centers / Panelboards,no,no,none,batch10,none,^(?!.*(?:chime|doorbell|bell|button)),panel|load ?center
+Power Distribution > Transformers,Power Distribution > Circuit Breakers,no,no,none,batch10,none,^(?!.*(?:chime|doorbell|bell|button)),^(?!.*(?:gfci|afci|arc))
+Power Distribution > Transformers,Connectors & Crimps > Grounding Products,no,no,none,batch10,none,^(?!.*(?:chime|doorbell|bell|button)),
+Power Distribution > Power Quality/Protection,Power Distribution > Power Quality/Protection,no,no,none,batch10,none,,
+Power Distribution > Power Quality/Protection,Power Distribution > Metering & Temporary Power,no,no,none,batch10,none,,cord|temporary|strip

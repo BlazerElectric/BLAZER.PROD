@@ -695,6 +695,8 @@ def box_kind(row: dict[str, str]) -> str:
         return "4-11/16"
     if re.search(r"\bsquare\b.*\b4\b|\b4\b.*\bsquare\b|\b4(?:-| )?(?:inch|in)\b.*square|\b4s\b|\b4 ?sq", text):
         return "4sq"
+    if re.search(r"\boct|\b[34]o(?:box|ext)?\b", text):
+        return "oct3" if re.search(r"3-1/2|\b3o|\b30\b", text) else "oct4"
     if re.search(r"\b(?:2|two)[- ]gang", text):
         return "2g"
     if re.search(r"single[- ]gang|\b1[- ]gang|handy|switch box|device", text):
@@ -1438,6 +1440,7 @@ async def run(
     checkpoint_path: str,
     model: str,
     sample: int = 0,
+    seed: int = 42,
 ) -> int:
     load_dotenv()
     api_key = os.getenv("GEMINI_API_KEY")
@@ -1454,7 +1457,7 @@ async def run(
         has_pool = source[
             [bool(build_candidates(t, by_group)) for t in source.to_dict("records")]
         ]
-        source = has_pool.sample(n=min(sample, len(has_pool)), random_state=42)
+        source = has_pool.sample(n=min(sample, len(has_pool)), random_state=seed)
     done = load_checkpoint(checkpoint_path)
     pending = source[~source[ID_COL].isin(set(done[OUTPUT_ID_COL]))]
     logger.info("%d rows total, %d done, %d pending", len(source), len(done), len(pending))
@@ -1522,6 +1525,7 @@ def main() -> None:
         default=0,
         help="Run Gemini on N random products only, using separate sample output/checkpoint files.",
     )
+    parser.add_argument("--seed", type=int, default=42, help="Random seed for --sample.")
     args = parser.parse_args()
     if args.sample:
         if args.output == "product_accessories.csv":
@@ -1543,7 +1547,7 @@ def main() -> None:
             parser.error(str(exc))
         return
     try:
-        failures = asyncio.run(run(args.input, args.output, args.checkpoint, args.model, args.sample))
+        failures = asyncio.run(run(args.input, args.output, args.checkpoint, args.model, args.sample, args.seed))
     except (OSError, RuntimeError, ValueError) as exc:
         parser.error(str(exc))
     sys.exit(1 if failures else 0)

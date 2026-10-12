@@ -29,7 +29,7 @@ from tenacity import (
 )
 from tqdm.asyncio import tqdm
 
-MODEL = "gemini-2.5-flash"
+MODEL = "gemini-3.1-flash-lite"
 CONCURRENCY = 12
 CHECKPOINT_EVERY = 100
 MAX_ATTEMPTS = 6

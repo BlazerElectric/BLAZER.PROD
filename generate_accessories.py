@@ -967,13 +967,28 @@ def _path_parts(row: dict[str, str]) -> list[str]:
     return [part.strip() for part in str(row.get(TAX_COL, "")).split(">")]
 
 
+_GAUGE_MAINS = frozenset({"Wire, Cable & Cord", "Connectors & Crimps"})
+
+
 def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
-    """Return 'gang', 'color' or 'series' when a pair can never go together, else ''."""
+    """Return 'gang', 'color', 'series', 'box' or 'gauge' when a pair can never go together, else ''."""
     tparts, cparts = _path_parts(target), _path_parts(cand)
     if tparts[0] == cparts[0] == "Power Distribution":
         tseries, cseries = breaker_series(target), breaker_series(cand)
         if tseries and cseries and tseries != cseries:
             return "series"
+    if tparts[0] == cparts[0] == "Boxes & Enclosures":
+        tkind, ckind = box_kind(target), box_kind(cand)
+        if tkind and ckind and tkind != ckind:
+            return "box"
+    if (
+        tparts[0] in _GAUGE_MAINS
+        and cparts[0] in _GAUGE_MAINS
+        and "Instrumentation Cable" not in (tparts[1:2] + cparts[1:2])
+    ):
+        trange, crange = gauge_range(target), gauge_range(cand)
+        if trange and crange and not (crange[0] * 0.999 <= trange[1] and trange[0] <= crange[1] * 1.001):
+            return "gauge"
     if tparts[0] not in GANG_MAINS or cparts[0] not in GANG_MAINS:
         return ""
     tgang, cgang = gang_count(target), gang_count(cand)

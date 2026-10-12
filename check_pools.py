@@ -60,7 +60,7 @@ def issues(target: dict[str, str], cand: dict[str, str]) -> list[str]:
         tp, cp = g.platform(target), g.platform(cand)
         if tp and cp and tp != cp:
             found.append("platform")
-    if tm in WIRE_MAINS and cm in WIRE_MAINS | {"Connectors & Crimps"}:
+    if tm in WIRE_MAINS and cm in WIRE_MAINS and "Instrumentation" not in node(target) + node(cand):
         tr, cr = g.gauge_range(target), g.gauge_range(cand)
         if tr and cr and not (cr[0] * 0.999 <= tr[1] and tr[0] <= cr[1] * 1.001):
             found.append("gauge")

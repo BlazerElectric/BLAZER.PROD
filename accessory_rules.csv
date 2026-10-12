@@ -263,8 +263,8 @@ Boxes & Enclosures > Boxes - Metallic,Wiring Devices > Receptacles,no,no,none,to
 Boxes & Enclosures > Boxes - Non-Metallic,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,top100,box,box|cover|ring,cover|ring|extension
 Boxes & Enclosures > Boxes - Non-Metallic,Wiring Devices > Wallplates,no,no,none,top100,none,gang|device|old work|new work,wall plate|wallplate
 Boxes & Enclosures > Boxes - Non-Metallic,Connectors & Crimps > Wire Connectors,no,no,none,top100,none,box,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
-Boxes & Enclosures > Boxes - Weatherproof,Boxes & Enclosures > Boxes - Weatherproof,no,no,none,top100,none,box,cover|gasket|plug|extension|in-use
-Boxes & Enclosures > Boxes - Weatherproof,Boxes & Enclosures > Boxes - Weatherproof,no,no,none,top100,none,cover,box|gasket|extension
+Boxes & Enclosures > Boxes - Weatherproof,Boxes & Enclosures > Boxes - Weatherproof,no,no,none,top100,box,box,cover|gasket|plug|extension|in-use
+Boxes & Enclosures > Boxes - Weatherproof,Boxes & Enclosures > Boxes - Weatherproof,no,no,none,top100,box,cover,box|gasket|extension
 Boxes & Enclosures > Boxes - Weatherproof,Wiring Devices > Receptacles,no,no,none,top100,none,,weather|wr\b|gfci
 Boxes & Enclosures > Boxes - Weatherproof,Wiring Devices > GFCI Personnel Protection Devices,no,no,none,top100,none,,weather|wr\b
 "Wire, Cable & Cord > Building Wire",Fittings > NM Cable Fittings,no,no,none,top100,none,nm-b|sheathed|romex,romex|nm|non-metallic|cable|connector

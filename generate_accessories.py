@@ -871,6 +871,24 @@ NO_NODE_FALLBACK = (
     "Lighting Fixtures, Control > Occupancy Sensors",
 )
 ONLY_WITH = {
+    "Lighting Fixtures, Control > Outdoor Lighting": (
+        "Lighting Fixtures, Control > Outdoor Lighting",
+        "Lighting Fixtures, Control > Photocells",
+        "Lighting Fixtures, Control > Timer Controls",
+        "Lighting Fixtures, Control > Occupancy Sensors",
+        "Lamps, Bulbs & Ballast > Bulbs - LED",
+        "Connectors & Crimps > Wire Connectors",
+        "Wire, Cable & Cord > Armored Cable",
+        "Boxes & Enclosures > Boxes - Weatherproof",
+    ),
+    "Lighting Fixtures, Control > Emergency Lighting & Signs": (
+        "Lighting Fixtures, Control > Emergency Lighting & Signs",
+        "Lamps, Bulbs & Ballast > Drivers - LED",
+        "Lamps, Bulbs & Ballast > Bulbs - LED",
+        "Connectors & Crimps > Wire Connectors",
+        "Boxes & Enclosures > Boxes - Metallic",
+        "Boxes & Enclosures > Boxes - Non-Metallic",
+    ),
     "Boxes & Enclosures > Boxes - Explosionproof": (
         "Fittings > Explosionproof Fittings",
         "Boxes & Enclosures > Boxes - Explosionproof",
@@ -1031,12 +1049,20 @@ _MATERIAL_NODES = (
 )
 
 
+_REDUCER = re.compile(r"reducing|offset nipple", re.I)
 _BODY_PART = re.compile(r"\b(?:cover|cvr|gasket|gask\w*|gk\w*)\b", re.I)
 
 
 def conduit_materials(row: dict[str, str]) -> set[str]:
     text = _text(row)
-    return {name for name, pattern in _MATERIALS if pattern.search(text)}
+    found = {name for name, pattern in _MATERIALS if pattern.search(text)}
+    if not found:
+        node = _path_parts(row)[1:2]
+        if node and node[0] == "EMT Fittings":
+            found = {"emt"}
+        elif node and node[0] == "Rigid Fittings":
+            found = {"rigid"}
+    return found
 
 
 _GAUGE_MAINS = frozenset({"Wire, Cable & Cord", "Connectors & Crimps"})
@@ -1065,6 +1091,8 @@ def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
         if tparts[1].startswith("Conduit - ") and cparts[1] == "Conduit Bodies" and _BODY_PART.search(
             str(cand.get("PRODUCT", ""))
         ):
+            return "part"
+        if tparts[1].startswith("Conduit - ") and _REDUCER.search(str(cand.get("PRODUCT", ""))):
             return "part"
         tmat, cmat = conduit_materials(target), conduit_materials(cand)
         if len(tmat) == 1 and cmat and not tmat & cmat:

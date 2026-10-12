@@ -102,8 +102,8 @@ Control & Automation > Drives,Control & Automation > Pilot Devices,no,no,none,,n
 Control & Automation > Drives,Control & Automation > Relays,no,no,none,,none,,
 Control & Automation > Drives,Control & Automation > Terminal Blocks,no,no,none,,none,,
 "Lighting Fixtures, Control > Photocells","Lighting Fixtures, Control > Outdoor Lighting",no,no,none,,none,,
-"Lighting Fixtures, Control > Outdoor Lighting","Lighting Fixtures, Control > Photocells",no,no,none,,none,,
-"Lighting Fixtures, Control > Outdoor Lighting","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,,none,,
+"Lighting Fixtures, Control > Outdoor Lighting","Lighting Fixtures, Control > Photocells",no,no,none,,none,,^(?!.*(rcpt|recp|receptacle|lkg))
+"Lighting Fixtures, Control > Outdoor Lighting","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,,none,,^(?!.*(jack|cat\d|tube|\bt8|\bt5|retrofit))
 "Lighting Fixtures, Control > Photocells","Lighting Fixtures, Control > Timer Controls",no,no,none,,none,,
 "Fans, Heaters > Fans & Fan Controls",Boxes & Enclosures > Boxes - Metallic,no,no,none,,none,^(?!.*(control|switch|remote|dimmer)),fan|ceiling
 "Fans, Heaters > Fans & Fan Controls",Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,,none,^(?!.*(control|switch|remote|dimmer)),fan|ceiling
@@ -131,7 +131,7 @@ Fittings > Straps,"Conduit, Strut & Raceways > Conduit - Flexible",no,no,strict,
 Fittings > Straps,Fittings > EMT Fittings,no,no,strict,,none,,
 Data & Telecom > Cross Connectors,Data & Telecom > Low Voltage Cable,no,no,none,,none,^(?!.*(patch cord|patch cable|patch cab)).*,
 Data & Telecom > Cross Connectors,Data & Telecom > Tools,no,no,none,,none,,crimp|punch|tester|stripper|termination|rj45|modular|scout
-Power Distribution > Metering & Temporary Power,"Wiring Devices > Extension Cords, Cord Reels & Portable Boxes",no,no,none,,none,,
+Power Distribution > Metering & Temporary Power,"Wiring Devices > Extension Cords, Cord Reels & Portable Boxes",no,no,none,,none,temporary|spider|pedestal|power outlet|cord,
 Power Distribution > Transformers,Power Distribution > Safety Switches / Disconnects,no,no,none,,none,,
 Tools & Meters > Storage,Tools & Meters > Hand Tools,no,no,none,,none,tool (bag|box|belt|pouch)|bucket|organizer,set|kit
 Tools & Meters > Hand Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,jab saw|hacksaw|keyhole,jab saw|hacksaw
@@ -182,10 +182,10 @@ Fasteners & Hardware > Tapes,Fasteners & Hardware > Cable Management,no,no,none,
 Fasteners & Hardware > Tapes,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,coverage,none,^(?!.*(duct|gaffer|masking|double|foam|carpet|painter)).*,cleaner|solvent|primer|spray|remover
 Fasteners & Hardware > Tapes,"Wire, Cable & Cord > Building Wire",no,no,none,coverage,none,splic|rubber|mastic|vinyl|electrical,thhn|mc|romex|nm-b
 Tools & Meters > Marking & Labeling,Tools & Meters > Marking & Labeling,yes,no,none,coverage,none,printer|label maker|marker|pen,tape|cartridge|ribbon|cassette|label|marker|sleeve
-Tools & Meters > Marking & Labeling,Tools & Meters > Hand Tools,no,no,none,coverage,none,,cutter|scissor|knife|strip
-Tools & Meters > Marking & Labeling,Fasteners & Hardware > Tapes,no,no,none,coverage,none,,electrical tape|vinyl
-Tools & Meters > Marking & Labeling,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
-Tools & Meters > Marking & Labeling,"Wire, Cable & Cord > Building Wire",no,no,none,coverage,none,,thhn|mc|romex|nm-b
+Tools & Meters > Marking & Labeling,Tools & Meters > Hand Tools,no,no,none,coverage,none,wire marker|cable marker|marker|printer|label maker|labeler|wire label|cable label|\btag,cutter|scissor|knife|strip
+Tools & Meters > Marking & Labeling,Fasteners & Hardware > Tapes,no,no,none,coverage,none,wire marker|cable marker|marker|printer|label maker|labeler|wire label|cable label|\btag,electrical tape|vinyl
+Tools & Meters > Marking & Labeling,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,wire marker|cable marker|marker|printer|label maker|labeler|wire label|cable label|\btag,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
+Tools & Meters > Marking & Labeling,"Wire, Cable & Cord > Building Wire",no,no,none,coverage,none,wire marker|cable marker|marker|printer|label maker|labeler|wire label|cable label|\btag,thhn|mc|romex|nm-b
 Fasteners & Hardware > Screws,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,coverage,none,^(?!.*(ground|grn|green|machine|\d+-32)).*,insert bit|driver bit|bit set|nut ?driver|phillips|hex|torx|square
 Fasteners & Hardware > Screws,Tools & Meters > Hand Tools,no,no,none,coverage,none,^(?!.*(ground|grn|green|machine|\d+-32)).*,screwdriver|nut driver
 Fasteners & Hardware > Screws,Fasteners & Hardware > Anchors,no,no,none,coverage,none,drywall|wood|lag|sheet metal|tek|self-drilling,anchor|toggle|wall|plug
@@ -342,6 +342,19 @@ Control & Automation > Drives,Control & Automation > Disconnect Switches,no,no,n
 Control & Automation > Drives,Power Distribution > Safety Switches / Disconnects,no,no,none,batch3,none,,
 Control & Automation > Drives,Fuses & Accessories > Power Fuses,no,no,none,batch3,none,,class (?:j|cc|t)|ultra|semiconductor|fast|rk1|time delay
 Control & Automation > Drives,Fuses & Accessories > General Purpose Fuses,no,no,none,batch3,none,,class (?:j|cc|t)|ultra|semiconductor|rk1|time delay
-"Lighting Fixtures, Control > Photocells","Lighting Fixtures, Control > Photocells",no,no,none,batch3,none,,mount|stem|swivel|adapter|bracket|arm|conduit|cell|control
+"Lighting Fixtures, Control > Photocells","Lighting Fixtures, Control > Photocells",no,no,none,batch3,none,,^(?!.*(rcpt|recp|receptacle|lkg)).*(mount|stem|swivel|adapter|bracket|arm|conduit|cell|control)
 "Lighting Fixtures, Control > Photocells",Connectors & Crimps > Wire Connectors,no,no,none,batch3,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gel))
 "Lighting Fixtures, Control > Photocells","Lighting Fixtures, Control > Outdoor Lighting",no,no,none,batch3,none,,
+Tools & Meters > Marking & Labeling,Tools & Meters > Marking & Labeling,no,no,none,batch4,none,arc flash|warning|danger|caution|label,label|tag|sign|lockout|arc flash|warning|danger
+Power Distribution > Metering & Temporary Power,Connectors & Crimps > Grounding Products,no,no,none,batch4,none,meter|socket,
+Power Distribution > Metering & Temporary Power,Data & Telecom > Grounding and Bonding,no,no,none,batch4,none,meter|socket,
+Power Distribution > Metering & Temporary Power,"Wire, Cable & Cord > Service Wire",no,no,none,batch4,none,meter|socket,
+Power Distribution > Metering & Temporary Power,Fittings > Conduit Hubs,no,no,none,batch4,none,meter|socket,
+Power Distribution > Metering & Temporary Power,Connectors & Crimps > Lugs & Split Bolts,no,no,none,batch4,gauge,meter|socket,
+Power Distribution > Metering & Temporary Power,"Fittings > Flashings, Weatherhead",no,no,none,batch4,none,meter|socket,weatherhead|mast|riser
+"Wire, Cable & Cord > Direct Burial",Connectors & Crimps > Lugs & Split Bolts,no,no,none,batch4,gauge,,
+"Wire, Cable & Cord > Direct Burial","Connectors & Crimps > Cold Shrink, Heat Shrink",no,no,none,batch4,gauge,,
+"Wire, Cable & Cord > Direct Burial",Connectors & Crimps > Wire Connectors,no,no,none,batch4,none,,underground|direct burial|waterproof|gel
+"Lighting Fixtures, Control > Outdoor Lighting",Connectors & Crimps > Wire Connectors,no,no,none,batch4,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gel))
+"Lighting Fixtures, Control > Emergency Lighting & Signs",Connectors & Crimps > Wire Connectors,no,no,none,batch4,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gel))
+"Lighting Fixtures, Control > Emergency Lighting & Signs","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,batch4,none,emergency|exit,

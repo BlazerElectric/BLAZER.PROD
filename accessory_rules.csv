@@ -24,9 +24,9 @@ Fittings > PVC Fittings,"Fittings > Clips, Clamps, Hangers",no,no,strict,,,,
 Boxes & Enclosures > Boxes - Metallic,Fittings > NM Cable Fittings,no,no,none,,,^(?!.*(?:cover|cvr|\bring\b)).*,"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:cord|cbl|l-t|\btom\b|3/8|0\.37|duplex|90 degree|\bUV\b|loosener|ground)).*(?:connector|romex|strap|conn\b)"
 "Wire, Cable & Cord > Armored Cable","Fittings > MC, NMB, Liquidtight, Flex Fittings",no,no,none,,,,^(?!.*(liquid|lqt|lqtght|sealtight|nmlt|\blt\b|pvc)).*
 Connectors & Crimps > Lugs & Split Bolts,"Connectors & Crimps > Cold Shrink, Heat Shrink",no,no,none,,gauge,,
-Data & Telecom > Low Voltage Cable,Data & Telecom > Workstation,no,no,none,,,,
-Data & Telecom > Low Voltage Cable,Data & Telecom > Cross Connectors,no,no,none,,,,
-Data & Telecom > Low Voltage Cable,Data & Telecom > Tools,no,no,none,,,,
+Data & Telecom > Low Voltage Cable,Data & Telecom > Workstation,no,no,none,,,cat ?[3-7]|utp|ethernet|rj ?45|coax|\brg ?(6|11|59)|network|data|fiber,
+Data & Telecom > Low Voltage Cable,Data & Telecom > Cross Connectors,no,no,none,,,cat ?[3-7]|utp|ethernet|rj ?45|coax|\brg ?(6|11|59)|network|data|fiber,
+Data & Telecom > Low Voltage Cable,Data & Telecom > Tools,no,no,none,,,,strip|cutter|crimp|punch|tester|snip|fish|ripper|tone
 Data & Telecom > Workstation,Data & Telecom > Low Voltage Cable,no,no,none,,,,
 Fuses & Accessories > General Purpose Fuses,"Fuses & Accessories > Fuse Blocks, Holders & Accessories",no,no,none,,,,
 Fuses & Accessories > Power Fuses,"Fuses & Accessories > Fuse Blocks, Holders & Accessories",no,no,none,,,,
@@ -362,3 +362,5 @@ Power Distribution > Metering & Temporary Power,"Fittings > Flashings, Weatherhe
 "Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Indoor Lighting",no,no,none,batch5,none,high bay|ufo|highbay,hook|chain|cable|mount|reflector|guard|lens|bracket
 "Lighting Fixtures, Control > Indoor Lighting",Fasteners & Hardware > Cable Management,no,no,none,batch5,none,high bay|undercabinet|under cabinet|strip|linear,tie|clip|staple|strap
 "Lighting Fixtures, Control > Indoor Lighting","Wiring Devices > Extension Cords, Cord Reels & Portable Boxes",no,no,none,batch5,none,undercabinet|under cabinet,cord|whip|plug|power
+Data & Telecom > Low Voltage Cable,Fasteners & Hardware > Cable Management,no,no,none,batch6,,^(?!.*(cat ?[3-7]|utp|ethernet|rj ?45|coax|fiber)),staple|clip|strap|tie
+Data & Telecom > Low Voltage Cable,Connectors & Crimps > Wire Connectors,no,no,none,batch6,,^(?!.*(cat ?[3-7]|utp|ethernet|rj ?45|coax|fiber)),^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gel))

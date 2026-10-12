@@ -21,7 +21,7 @@ Fittings > PVC Fittings,"Fittings > Clips, Clamps, Hangers",no,no,strict,,,,
 "Conduit, Strut & Raceways > Strut","Fasteners & Hardware > Nuts, Bolts, Washers",no,no,none,,,,^(?!.*(fender|toggle|reducing|square washer|cut washer|flat cut|kit)).*(hex head|hex bolt|hex nut|lock ?washer|lock nut|1/2-13|3/8-16|5/16-18)
 "Conduit, Strut & Raceways > Threaded Rod & Accessories","Fasteners & Hardware > Nuts, Bolts, Washers",no,no,none,,,,
 "Conduit, Strut & Raceways > Threaded Rod & Accessories","Conduit, Strut & Raceways > Strut",no,no,none,,,,
-Boxes & Enclosures > Boxes - Metallic,Fittings > NM Cable Fittings,no,no,none,,,,"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:cord|cbl|l-t|\btom\b|3/8|0\.37|duplex|90 degree|\bUV\b|loosener|ground)).*(?:connector|romex|strap|conn\b)"
+Boxes & Enclosures > Boxes - Metallic,Fittings > NM Cable Fittings,no,no,none,,,^(?!.*(?:cover|cvr|\bring\b)).*,"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:cord|cbl|l-t|\btom\b|3/8|0\.37|duplex|90 degree|\bUV\b|loosener|ground)).*(?:connector|romex|strap|conn\b)"
 "Wire, Cable & Cord > Armored Cable","Fittings > MC, NMB, Liquidtight, Flex Fittings",no,no,none,,,,^(?!.*(liquid|lqt|lqtght|sealtight|nmlt|\blt\b|pvc)).*
 Connectors & Crimps > Lugs & Split Bolts,"Connectors & Crimps > Cold Shrink, Heat Shrink",no,no,none,,gauge,,
 Data & Telecom > Low Voltage Cable,Data & Telecom > Workstation,no,no,none,,,,
@@ -39,7 +39,7 @@ Tools & Meters > Cable Pulling & Hoist,"Tools & Meters > Paint, Chemicals, Clean
 Fittings > Conduit Bodies,Fittings > EMT Fittings,no,no,strict,,,,
 Fittings > Conduit Bodies,Fittings > Rigid Fittings,no,no,strict,,,,
 Fittings > Conduit Bodies,Fittings > Conduit Hubs,no,no,strict,,,,
-Fittings > Bushing / K.O. Seal / Locknuts,Fittings > EMT Fittings,no,no,strict,,,^(?!.*(knock|k\\.?o\\.? seal|ko seal)).*,
+Fittings > Bushing / K.O. Seal / Locknuts,Fittings > EMT Fittings,no,no,strict,,,^(?!.*(knock|k\.?o\.? seal|ko seal)).*(locknut|emt),
 Fittings > Bushing / K.O. Seal / Locknuts,Fittings > Rigid Fittings,no,no,strict,,,^(?!.*(knock|k\\.?o\\.? seal|ko seal)).*,
 "Fittings > Clips, Clamps, Hangers","Conduit, Strut & Raceways > Conduit - Metallic",no,no,strict,,,,
 "Fittings > Clips, Clamps, Hangers","Conduit, Strut & Raceways > Strut",no,no,none,,,,
@@ -66,7 +66,6 @@ Data & Telecom > Tools,Data & Telecom > Workstation,no,no,none,,,,
 "Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Lampholders, Adapters & Extensions",no,no,none,,,,
 Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > General Purpose Fuses,no,no,none,,amps,,
 Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > Power Fuses,no,no,none,,amps,,
-"Conduit, Strut & Raceways > Raceway - Metallic",Fittings > Straps,no,no,none,,,,
 Power Distribution > Circuit Breakers,Power Distribution > Load Centers / Panelboards,no,no,none,,series,,
 Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,no,no,none,,series,,
 "Wire, Cable & Cord > Building Wire",Connectors & Crimps > Wire Connectors,no,no,none,,gauge,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
@@ -205,7 +204,7 @@ Wiring Devices > Switches,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,c
 Wiring Devices > Switches,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,switch|toggle|dimmer,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 Wiring Devices > Switches,Wiring Devices > Switches,yes,no,none,coverage,none,key|tripper|lock,switch
 Wiring Devices > Receptacles,Boxes & Enclosures > Boxes - Metallic,no,no,none,coverage,none,50 amp|30 amp|nema 14|nema 10|nema 6,square|4-11/16|raised|deep
-Wiring Devices > Receptacles,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,coverage,none,duplex|single|receptacle,^(?!.*(?:plate|ring|cover|alarm|\b2g\b|2-gang|two.gang|3g|\b3-gang|round|rnd|fan)).*(?:old work|new work|1-gang|single|1g|zip|1g\b|\bsw box|device)
+Wiring Devices > Receptacles,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,coverage,none,^(?!.*(?:\b(?:30|50|60)\s?a(?:mp)?\b|nema (?:14|10|6|15)|\b3p\b)).*(?:duplex|single|receptacle),^(?!.*(?:plate|ring|cover|alarm|\b2g\b|2-gang|two.gang|3g|\b3-gang|round|rnd|fan)).*(?:old work|new work|1-gang|single|1g|zip|1g\b|\bsw box|device)
 Wiring Devices > Receptacles,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,duplex|single|receptacle,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 Wiring Devices > Receptacles,Wiring Devices > Twistlock,yes,no,none,coverage,none,"locking|twist|turnlok|l\d{1,2}-\d{2}",plug|connector|receptacle|inlet
 Wiring Devices > Receptacles,Wiring Devices > Straight Blade 10-20 Amp,yes,no,none,coverage,amps,"^(?!.*(?:dup|duplex|decor|gfci|usb)).*(?:single|nema|\b\d{1,2}-\d{2}r\b)",plug|connector|cord
@@ -317,9 +316,9 @@ Wiring Devices > Wallplates,Wiring Devices > GFCI Personnel Protection Devices,n
 Wiring Devices > Wallplates,Wiring Devices > Receptacles,no,yes,none,top100,none,^(?=.*(?:\b2g\b|2-gang|2 gang))(?!.*(?:decora|decorator|toggle)).*(?:duplex|recp|outlet),^(?!.*(?:decora|decorator|single|sgl|\b6-|250v|usb)).*(?:receptacle|recp|duplex|dup\b|rcpt)
 Wiring Devices > Wallplates,Wiring Devices > Switches,no,yes,none,top100,none,^(?=.*(?:\b2g\b|2-gang|2 gang))(?!.*(?:decora|decorator|duplex|recp)).*toggle,^(?!.*(?:decora|deco ser|decorator|rocker)).*(?:switch|\bsw\b)
 Wiring Devices > Wallplates,Wiring Devices > Switches,no,yes,none,top100,none,^(?=.*(?:\b2g\b|2-gang|2 gang))(?=.*(?:decora|decorator)).*,decora|deco ser|decorator|rocker
-Boxes & Enclosures > Boxes - Metallic,Fittings > EMT Fittings,no,no,none,coverage,none,square|4sq|4-11/16|\bsq\b|handy|switch box|\b1g\b,"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:conduit|coupl|cplg|strap|grd|ground|cu\b)).*(?:connector|conn\b)"
-Boxes & Enclosures > Boxes - Metallic,"Fittings > MC, NMB, Liquidtight, Flex Fittings",no,no,none,coverage,none,square|4sq|4-11/16|\bsq\b|handy|switch box,^(?!.*(?:liquid|l-t|\bLT\b|90|1-1/|\b[1-4]IN\b)).*(?:\bMC\b|armored|flex|connector)
-Boxes & Enclosures > Boxes - Metallic,Fittings > Bushing / K.O. Seal / Locknuts,no,no,none,coverage,none,square|4sq|4-11/16|\bsq\b|handy|switch box,"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:ground|grnd|reducing|hub|knock out non)).*(?:locknut|bushing|k\.?o\.? seal)"
+Boxes & Enclosures > Boxes - Metallic,Fittings > EMT Fittings,no,no,none,coverage,none,^(?!.*(?:cover|cvr|\bring\b)).*(?:square|4sq|4-11/16|\bsq\b|handy|switch box|\b1g\b),"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:conduit|coupl|cplg|strap|grd|ground|cu\b)).*(?:connector|conn\b)"
+Boxes & Enclosures > Boxes - Metallic,"Fittings > MC, NMB, Liquidtight, Flex Fittings",no,no,none,coverage,none,^(?!.*(?:cover|cvr|\bring\b)).*(?:square|4sq|4-11/16|\bsq\b|handy|switch box),^(?!.*(?:liquid|l-t|\bLT\b|90|1-1/|\b[1-4]IN\b)).*(?:\bMC\b|armored|flex|connector)
+Boxes & Enclosures > Boxes - Metallic,Fittings > Bushing / K.O. Seal / Locknuts,no,no,none,coverage,none,^(?!.*(?:cover|cvr|\bring\b)).*(?:square|4sq|4-11/16|\bsq\b|handy|switch box),"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:ground|grnd|reducing|hub|knock out non)).*(?:locknut|bushing|k\.?o\.? seal)"
 "Tools & Meters > Paint, Chemicals, Cleaning Supplies","Conduit, Strut & Raceways > Conduit - Non-Metallic",no,no,none,pvc cement,,cement|primer|solvent weld,
 "Tools & Meters > Paint, Chemicals, Cleaning Supplies",Fittings > PVC Fittings,no,no,none,pvc cement,,cement|primer|solvent weld,
 Connectors & Crimps > Lugs & Split Bolts,"Wire, Cable & Cord > Building Wire",no,no,none,lug,gauge,,^(?!.*(nm-b|romex|sheathed|\bmc\b)).*(thhn|thwn|xhhw|use|ser\b|se[ru]?\b|\bcu\b|\bal\b)
@@ -358,3 +357,8 @@ Power Distribution > Metering & Temporary Power,"Fittings > Flashings, Weatherhe
 "Lighting Fixtures, Control > Outdoor Lighting",Connectors & Crimps > Wire Connectors,no,no,none,batch4,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gel))
 "Lighting Fixtures, Control > Emergency Lighting & Signs",Connectors & Crimps > Wire Connectors,no,no,none,batch4,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gel))
 "Lighting Fixtures, Control > Emergency Lighting & Signs","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,batch4,none,emergency|exit,
+"Lighting Fixtures, Control > Indoor Lighting - Recessed","Lighting Fixtures, Control > Indoor Lighting - Recessed",no,no,loose,batch5,none,housing,trim|baffle|reflector|eyeball
+"Lighting Fixtures, Control > Indoor Lighting - Recessed","Lighting Fixtures, Control > Indoor Lighting - Recessed",no,no,loose,batch5,none,trim|baffle|eyeball,housing|frame
+"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Indoor Lighting",no,no,none,batch5,none,high bay|ufo|highbay,hook|chain|cable|mount|reflector|guard|lens|bracket
+"Lighting Fixtures, Control > Indoor Lighting",Fasteners & Hardware > Cable Management,no,no,none,batch5,none,high bay|undercabinet|under cabinet|strip|linear,tie|clip|staple|strap
+"Lighting Fixtures, Control > Indoor Lighting","Wiring Devices > Extension Cords, Cord Reels & Portable Boxes",no,no,none,batch5,none,undercabinet|under cabinet,cord|whip|plug|power

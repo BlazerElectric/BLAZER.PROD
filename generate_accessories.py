@@ -351,55 +351,6 @@ GROUP_RULES: dict[
             }
         ),
     ),
-    "lighting": (
-        (),
-        frozenset(
-            {
-                "Area & Site Lighting",
-                "Closet & Utility Lighting",
-                "Emergency & Exit Lighting",
-                "Emergency Lighting",
-                "High Bay Lighting",
-                "Indoor LED Fixtures",
-                "Indoor Lighting",
-                "LED Strip Fixtures",
-                "LED Wraparound Fixtures",
-                "Outdoor Area & Security Lighting",
-                "Outdoor Area & Site Lighting",
-                "Outdoor Area Lighting",
-                "Outdoor Lighting",
-                "Outdoor Security Lighting",
-                "Outdoor Wall Lighting",
-                "Pendant Lighting",
-                "Recessed & Surface Mount Lighting",
-                "Recessed Lighting",
-                "Security & Flood Lighting",
-                "Step & Path Lighting",
-                "Strip Lighting Fixtures",
-                "Under Cabinet & Linear Lighting",
-                "Under Cabinet Lighting",
-                "Undercabinet Lighting",
-                "Vanity & Wall Lighting",
-                "Vapor Proof Lighting",
-                "Vaporproof Lighting",
-                "Wall & Ceiling Mount Lighting",
-            }
-        ),
-        frozenset(
-            {
-                "Emergency Lighting Drivers",
-                "Lighting Accessories",
-                "Lighting Accessories & Diffusers",
-                "Lighting Fixture Accessories",
-                "Lighting Hangers & Supports",
-                "Lighting Poles & Accessories",
-                "Recessed Lighting Accessories",
-                "Recessed Lighting Housings",
-                "Recessed Lighting Trims",
-                "Track Lighting Accessories",
-            }
-        ),
-    ),
 }
 
 SYSTEM_PROMPT = """You are an electrical wholesale cross-sell specialist.
@@ -488,6 +439,11 @@ TAXONOMY_OVERRIDES = (
         r"photocontrol|photo control|photocell",
         ("Caddy > Ceiling/Acoustical",),
         "Lighting Fixtures, Control > Photocells",
+    ),
+    (
+        r"\bpan\b|pancake",
+        ("Boxes & Enclosures > Boxes - Weatherproof",),
+        "Boxes & Enclosures > Boxes - Metallic",
     ),
     (r"outlet plate", ("Boxes & Enclosures > Boxes - Non-Metallic",), "Wiring Devices > Wallplates"),
     (r"rj45|rj-45|cat ?[56]e?\b", ("Connectors & Crimps > Wire Connectors",), "Data & Telecom > Low Voltage Cable"),

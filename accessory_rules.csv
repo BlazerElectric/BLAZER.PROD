@@ -8,7 +8,7 @@ Fittings > EMT Fittings,"Fittings > Clips, Clamps, Hangers",no,no,strict,,,,
 Fittings > Conduit Hubs,Fittings > Bushing / K.O. Seal / Locknuts,no,no,strict,,,,
 Fittings > Rigid Fittings,Fittings > Bushing / K.O. Seal / Locknuts,no,no,strict,,,,
 Fittings > PVC Fittings,"Fittings > Clips, Clamps, Hangers",no,no,strict,,,,
-"Fittings > MC, NMB, Liquidtight, Flex Fittings",Fittings > Bushing / K.O. Seal / Locknuts,no,no,strict,,,,
+"Fittings > MC, NMB, Liquidtight, Flex Fittings",Fittings > Bushing / K.O. Seal / Locknuts,no,no,strict,,,,locknut|bushing|ground|seal
 "Conduit, Strut & Raceways > Conduit - Metallic",Fittings > EMT Fittings,no,no,strict,,,,
 "Conduit, Strut & Raceways > Conduit - Metallic",Fittings > Rigid Fittings,no,no,strict,,,,
 "Conduit, Strut & Raceways > Conduit - Metallic","Fittings > Clips, Clamps, Hangers",no,no,strict,,,,
@@ -39,8 +39,8 @@ Tools & Meters > Cable Pulling & Hoist,"Tools & Meters > Paint, Chemicals, Clean
 Fittings > Conduit Bodies,Fittings > EMT Fittings,no,no,strict,,,,
 Fittings > Conduit Bodies,Fittings > Rigid Fittings,no,no,strict,,,,
 Fittings > Conduit Bodies,Fittings > Conduit Hubs,no,no,strict,,,,
-Fittings > Bushing / K.O. Seal / Locknuts,Fittings > EMT Fittings,no,no,strict,,,,
-Fittings > Bushing / K.O. Seal / Locknuts,Fittings > Rigid Fittings,no,no,strict,,,,
+Fittings > Bushing / K.O. Seal / Locknuts,Fittings > EMT Fittings,no,no,strict,,,^(?!.*(knock|k\\.?o\\.? seal|ko seal)).*,
+Fittings > Bushing / K.O. Seal / Locknuts,Fittings > Rigid Fittings,no,no,strict,,,^(?!.*(knock|k\\.?o\\.? seal|ko seal)).*,
 "Fittings > Clips, Clamps, Hangers","Conduit, Strut & Raceways > Conduit - Metallic",no,no,strict,,,,
 "Fittings > Clips, Clamps, Hangers","Conduit, Strut & Raceways > Strut",no,no,none,,,,
 Fittings > EMT Fittings,Fittings > Conduit Bodies,no,no,strict,,,,
@@ -179,7 +179,7 @@ Fasteners & Hardware > Cable Management,"Wire, Cable & Cord > Building Wire",no,
 Fasteners & Hardware > Tapes,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,^(?!.*(duct|gaffer|masking|double|foam|carpet|painter)).*,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 Fasteners & Hardware > Tapes,Fasteners & Hardware > Tapes,no,no,none,coverage,none,^(?!.*(primer|dispenser|mastic)),dispenser|primer|mastic|filler|sealing|putty|self-fusing|rubber|duct|friction
 Fasteners & Hardware > Tapes,Fasteners & Hardware > Cable Management,no,no,none,coverage,none,,tie|wrap|loom|sleeve|clip|strap
-Fasteners & Hardware > Tapes,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,coverage,none,,cleaner|solvent|primer|spray|remover
+Fasteners & Hardware > Tapes,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,coverage,none,^(?!.*(duct|gaffer|masking|double|foam|carpet|painter)).*,cleaner|solvent|primer|spray|remover
 Fasteners & Hardware > Tapes,"Wire, Cable & Cord > Building Wire",no,no,none,coverage,none,splic|rubber|mastic|vinyl|electrical,thhn|mc|romex|nm-b
 Tools & Meters > Marking & Labeling,Tools & Meters > Marking & Labeling,yes,no,none,coverage,none,printer|label maker|marker|pen,tape|cartridge|ribbon|cassette|label|marker|sleeve
 Tools & Meters > Marking & Labeling,Tools & Meters > Hand Tools,no,no,none,coverage,none,,cutter|scissor|knife|strip
@@ -325,3 +325,13 @@ Boxes & Enclosures > Boxes - Metallic,"Fittings > MC, NMB, Liquidtight, Flex Fit
 Boxes & Enclosures > Boxes - Metallic,Fittings > Bushing / K.O. Seal / Locknuts,no,no,none,coverage,none,square|4sq|4-11/16|\bsq\b|handy|switch box,"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:ground|grnd|reducing|hub|knock out non)).*(?:locknut|bushing|k\.?o\.? seal)"
 "Tools & Meters > Paint, Chemicals, Cleaning Supplies","Conduit, Strut & Raceways > Conduit - Non-Metallic",no,no,none,pvc cement,,cement|primer|solvent weld,
 "Tools & Meters > Paint, Chemicals, Cleaning Supplies",Fittings > PVC Fittings,no,no,none,pvc cement,,cement|primer|solvent weld,
+Connectors & Crimps > Lugs & Split Bolts,"Wire, Cable & Cord > Building Wire",no,no,none,lug,gauge,,^(?!.*(nm-b|romex|sheathed|\bmc\b)).*(thhn|thwn|xhhw|use|ser\b|se[ru]?\b|\bcu\b|\bal\b)
+Connectors & Crimps > Lugs & Split Bolts,Tools & Meters > Hand Tools,no,no,none,lug,none,,crimp|cutter|cable cutter|stripper|wrench|torque
+Connectors & Crimps > Lugs & Split Bolts,"Connectors & Crimps > Cold Shrink, Heat Shrink",no,no,none,lug,gauge,,
+Connectors & Crimps > Lugs & Split Bolts,Fasteners & Hardware > Tapes,no,no,none,lug,none,,vinyl|electrical tape|rubber|mastic
+Connectors & Crimps > Lugs & Split Bolts,Connectors & Crimps > Lugs & Split Bolts,no,no,none,lug,none,,boot|cover|anti|oxide|joint compound|insulat|cap
+Connectors & Crimps > Lugs & Split Bolts,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,lug,none,,oxide|joint compound|penetrox|noalox|cleaner
+Fittings > Bushing / K.O. Seal / Locknuts,Fittings > Bushing / K.O. Seal / Locknuts,no,no,strict,ko seal,none,knock|k\.?o\.? seal|ko seal,seal|plug|locknut|bushing
+Fittings > Bushing / K.O. Seal / Locknuts,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,loose,ko seal,none,knock|k\.?o\.? seal|ko seal,knock|punch|ko\b
+Fittings > Bushing / K.O. Seal / Locknuts,Boxes & Enclosures > Boxes - Metallic,no,no,none,ko seal,none,knock|k\.?o\.? seal|ko seal,
+Fittings > Bushing / K.O. Seal / Locknuts,Fittings > NM Cable Fittings,no,no,loose,ko seal,none,knock|k\.?o\.? seal|ko seal,

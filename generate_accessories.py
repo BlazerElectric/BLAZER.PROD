@@ -1006,10 +1006,9 @@ _MATERIAL_NODES = (
 _BODY_PART = re.compile(r"\b(?:cover|cvr|gasket|gask\w*|gk\w*)\b", re.I)
 
 
-def conduit_material(row: dict[str, str]) -> str:
+def conduit_materials(row: dict[str, str]) -> set[str]:
     text = _text(row)
-    found = [name for name, pattern in _MATERIALS if pattern.search(text)]
-    return found[0] if len(found) == 1 else ""
+    return {name for name, pattern in _MATERIALS if pattern.search(text)}
 
 
 _GAUGE_MAINS = frozenset({"Wire, Cable & Cord", "Connectors & Crimps"})
@@ -1036,8 +1035,8 @@ def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
             str(cand.get("PRODUCT", ""))
         ):
             return "part"
-        tmat, cmat = conduit_material(target), conduit_material(cand)
-        if tmat and cmat and tmat != cmat:
+        tmat, cmat = conduit_materials(target), conduit_materials(cand)
+        if len(tmat) == 1 and cmat and not tmat & cmat:
             return "material"
         tsizes, csizes = trade_sizes(target), trade_sizes(cand)
         if tsizes and csizes and not any(abs(tsizes[0] - x) < 1e-6 for x in csizes):

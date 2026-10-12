@@ -368,7 +368,6 @@ Data & Telecom > Low Voltage Cable,Connectors & Crimps > Wire Connectors,no,no,n
 "Fittings > Clips, Clamps, Hangers","Fittings > MC, NMB, Liquidtight, Flex Fittings",no,no,none,batch6b,none,\b(?:mc|mcac|ac|bx|cable|romex)\b,^(?!.*(liquid|lqt|sealtight|pvc))
 "Fittings > Clips, Clamps, Hangers",Fasteners & Hardware > Cable Management,no,no,none,batch6b,none,\b(?:mc|mcac|ac|bx|cable|romex)\b,staple|strap|clip
 Fittings > Bushing / K.O. Seal / Locknuts,Fittings > Bushing / K.O. Seal / Locknuts,no,no,strict,batch6b,none,,locknut|bushing
-Fittings > Bushing / K.O. Seal / Locknuts,"Conduit, Strut & Raceways > Conduit - Metallic",no,no,strict,batch6b,none,,
 Fittings > Bushing / K.O. Seal / Locknuts,Fittings > Conduit Hubs,no,no,strict,batch6b,none,,
 "Lamps, Bulbs & Ballast > Drivers - LED","Lighting Fixtures, Control > Indoor Lighting",no,no,none,batch6b,none,,
 "Lamps, Bulbs & Ballast > Drivers - LED","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,batch6b,none,,led|0-10|0 ?- ?10|elv
@@ -380,3 +379,16 @@ Fittings > Bushing / K.O. Seal / Locknuts,Fittings > Conduit Hubs,no,no,strict,b
 "Lamps, Bulbs & Ballast > Bulbs - LED","Lamps, Bulbs & Ballast > Bulbs - LED",yes,no,none,batch6b,none,,^(?!.*(jack|cat\d))
 Wiring Devices > GFCI Personnel Protection Devices,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,coverage,none,,^(?!.*(?:plate|ring|cover|alarm|\b2g\b|2-gang|two.gang|3g|\b3-gang|round|rnd|fan)).*(?:old work|new work|1-gang|single|1g|zip|1g\b|\bsw box|device)
 Wiring Devices > GFCI Personnel Protection Devices,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
+"Fittings > Clips, Clamps, Hangers",Boxes & Enclosures > Boxes - Metallic,no,no,none,batch7,none,t-?bar|box hanger,ceiling|octagon|\boct|round|old work|4.?sq
+"Fittings > Clips, Clamps, Hangers",Connectors & Crimps > Wire Connectors,no,no,none,batch7,none,t-?bar|box hanger,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|twister)
+"Fittings > Clips, Clamps, Hangers",Fasteners & Hardware > Screws,no,no,none,batch7,none,box hanger,"(?:pan|self|sheet|drill|tek).{0,20}screw|\bscrews?\b"
+"Fasteners & Hardware > Nuts, Bolts, Washers",Fittings > Bushing / K.O. Seal / Locknuts,no,no,none,batch7,none,reduc.*washer|washer.*reduc,locknut|lock nut|bushing
+"Fasteners & Hardware > Nuts, Bolts, Washers",Fittings > EMT Fittings,no,no,strict,batch7,none,reduc.*washer|washer.*reduc,connector|cplg|coupling
+"Fasteners & Hardware > Nuts, Bolts, Washers",Boxes & Enclosures > Boxes - Metallic,no,no,none,batch7,none,reduc.*washer|washer.*reduc,handy|square|4.?sq|octagon
+Power Distribution > Load Centers / Panelboards,Power Distribution > Load Centers / Panelboards,yes,no,none,batch7,none,ground bar|neutral bar|\bbar kit,^(?!.*(?:ground bar|neutral|\bbar\b)).*(?:load ?center|panel)
+Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,yes,no,none,batch7,series,ground bar|neutral bar|\bbar kit,
+Power Distribution > Load Centers / Panelboards,Fittings > Grounding and Bonding,no,no,none,batch7,none,ground bar|neutral bar|\bbar kit,
+Fittings > PVC Fittings,Fittings > PVC Fittings,no,no,strict,batch7,none,,
+Fittings > PVC Fittings,"Conduit, Strut & Raceways > Conduit - Non-Metallic",no,no,strict,batch7,none,,
+Fittings > PVC Fittings,Fittings > Straps,no,no,strict,batch7,none,,
+"Conduit, Strut & Raceways > Conduit - Non-Metallic","Fittings > Clips, Clamps, Hangers",no,no,strict,batch7,none,,

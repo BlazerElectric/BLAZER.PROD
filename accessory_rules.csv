@@ -378,3 +378,5 @@ Fittings > Bushing / K.O. Seal / Locknuts,Fittings > Conduit Hubs,no,no,strict,b
 "Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Indoor Lighting",no,no,none,batch6b,none,hid|high ?bay|retrofit|fan cooled,high ?bay|low ?bay|fixture|wrap|vapor|strip
 "Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,batch6b,none,dim,led
 "Lamps, Bulbs & Ballast > Bulbs - LED","Lamps, Bulbs & Ballast > Bulbs - LED",yes,no,none,batch6b,none,,^(?!.*(jack|cat\d))
+Wiring Devices > GFCI Personnel Protection Devices,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,coverage,none,,^(?!.*(?:plate|ring|cover|alarm|\b2g\b|2-gang|two.gang|3g|\b3-gang|round|rnd|fan)).*(?:old work|new work|1-gang|single|1g|zip|1g\b|\bsw box|device)
+Wiring Devices > GFCI Personnel Protection Devices,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)

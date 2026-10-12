@@ -1219,6 +1219,12 @@ def _kit_candidates(
         own = {slot.slot for slot in slots if _slot_matches(slot, target)}
         if not own:
             continue
+        # A broad main-category match (e.g. any Wiring Device) only says the
+        # target belongs to the job's trade, so stay in that category.
+        broad = {
+            slot.path for slot in slots
+            if slot.slot in own and slot.path and ">" not in slot.path
+        } or ({""} if any(slot.slot in own and not slot.path for slot in slots) else set())
         for slot in slots:
             if slot.slot in own:
                 continue
@@ -1233,6 +1239,10 @@ def _kit_candidates(
                 if candidate[ID_COL] in seen or candidate[ID_COL] == target[ID_COL]:
                     continue
                 if candidate.get(TAX_COL, "").endswith("Wallplates"):
+                    continue
+                if broad and len(seen) >= 8 and not any(
+                    candidate.get(TAX_COL, "").startswith(b) for b in broad if b
+                ):
                     continue
                 seen.add(candidate[ID_COL])
                 added.append(candidate)

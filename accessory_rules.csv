@@ -99,8 +99,8 @@ Tools & Meters > Marking & Labeling,Tools & Meters > Marking & Labeling,yes,no,n
 Control & Automation > Disconnect Switches,Fuses & Accessories > General Purpose Fuses,no,no,none,,amps,,
 Control & Automation > Disconnect Switches,Fuses & Accessories > Power Fuses,no,no,none,,amps,,
 Control & Automation > Drives,Control & Automation > Pilot Devices,no,no,none,,none,,
-Control & Automation > Drives,Control & Automation > Relays,yes,no,none,,none,,
-Control & Automation > Drives,Control & Automation > Terminal Blocks,yes,no,none,,none,,
+Control & Automation > Drives,Control & Automation > Relays,no,no,none,,none,,
+Control & Automation > Drives,Control & Automation > Terminal Blocks,no,no,none,,none,,
 "Lighting Fixtures, Control > Photocells","Lighting Fixtures, Control > Outdoor Lighting",no,no,none,,none,,
 "Lighting Fixtures, Control > Outdoor Lighting","Lighting Fixtures, Control > Photocells",no,no,none,,none,,
 "Lighting Fixtures, Control > Outdoor Lighting","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,,none,,
@@ -129,8 +129,8 @@ Connectors & Crimps > Grounding Products,Connectors & Crimps > Welded Connection
 Fittings > Straps,"Conduit, Strut & Raceways > Conduit - Metallic",no,no,strict,,none,,
 Fittings > Straps,"Conduit, Strut & Raceways > Conduit - Flexible",no,no,strict,,none,,
 Fittings > Straps,Fittings > EMT Fittings,no,no,strict,,none,,
-Data & Telecom > Cross Connectors,Data & Telecom > Low Voltage Cable,no,no,none,,none,,
-Data & Telecom > Cross Connectors,Data & Telecom > Tools,no,no,none,,none,,
+Data & Telecom > Cross Connectors,Data & Telecom > Low Voltage Cable,no,no,none,,none,^(?!.*(patch cord|patch cable|patch cab)).*,
+Data & Telecom > Cross Connectors,Data & Telecom > Tools,no,no,none,,none,,crimp|punch|tester|stripper|termination|rj45|modular|scout
 Power Distribution > Metering & Temporary Power,"Wiring Devices > Extension Cords, Cord Reels & Portable Boxes",no,no,none,,none,,
 Power Distribution > Transformers,Power Distribution > Safety Switches / Disconnects,no,no,none,,none,,
 Tools & Meters > Storage,Tools & Meters > Hand Tools,no,no,none,,none,tool (bag|box|belt|pouch)|bucket|organizer,set|kit
@@ -167,8 +167,8 @@ Fittings > NM Cable Fittings,Tools & Meters > Hand Tools,no,no,none,coverage,non
 Fittings > NM Cable Fittings,Fasteners & Hardware > Tapes,no,no,none,coverage,none,,electrical tape|vinyl
 Fasteners & Hardware > Cable Management,Tools & Meters > Hand Tools,no,no,none,coverage,none,,tie gun|tie tool|tensioning
 Fasteners & Hardware > Cable Management,Fasteners & Hardware > Cable Management,no,no,none,coverage,none,tie|strap|wrap,mount|base|adhesive|anchor|saddle|clip|loom|sleeve|spiral|tie|wrap
-Fasteners & Hardware > Cable Management,Fasteners & Hardware > Tapes,no,no,none,coverage,none,,electrical tape|vinyl|friction
-Fasteners & Hardware > Cable Management,"Wire, Cable & Cord > Building Wire",no,no,none,coverage,none,clip|staple|clamp|strap,nm-b|romex|\d+/\d+
+Fasteners & Hardware > Cable Management,Fasteners & Hardware > Tapes,no,no,none,coverage,none,tie|wrap|loom|sleeve|velcro|hook,electrical tape|vinyl|friction
+Fasteners & Hardware > Cable Management,"Wire, Cable & Cord > Building Wire",no,no,none,coverage,none,clip|staple|clamp|strap,nm-b|romex
 "Lighting Fixtures, Control > Occupancy Sensors",Wiring Devices > Wallplates,no,yes,none,coverage,none,,
 "Lighting Fixtures, Control > Occupancy Sensors",Control & Automation > Power Supply,no,no,none,coverage,none,,power|pack|relay|supply
 "Lighting Fixtures, Control > Occupancy Sensors","Lighting Fixtures, Control > Occupancy Sensors",yes,no,none,coverage,none,^(?!.*(power pack|bracket|lens|mount|cover)),power pack|bracket|lens|mount|cover|wiring|relay|remote
@@ -191,10 +191,9 @@ Fasteners & Hardware > Screws,Tools & Meters > Hand Tools,no,no,none,coverage,no
 Fasteners & Hardware > Screws,Fasteners & Hardware > Anchors,no,no,none,coverage,none,drywall|wood|lag|sheet metal|tek|self-drilling,anchor|toggle|wall|plug
 Fasteners & Hardware > Screws,Tools & Meters > Storage,no,no,none,coverage,none,,assortment|organizer|bin|kit
 Fasteners & Hardware > Screws,Fasteners & Hardware > Screws,yes,no,none,coverage,none,kit|assortment,assortment|kit|washer
-Power Distribution > Safety Switches / Disconnects,Power Distribution > Safety Switches / Disconnects,yes,no,none,coverage,none,,hub|interlock|neutral|ground|lug|handle|padlock|auxiliary|plate|kit|fuse
+Power Distribution > Safety Switches / Disconnects,Power Distribution > Safety Switches / Disconnects,yes,no,none,coverage,none,,^(?!.*(\bswitch\b|disconnect)).*(hub|interlock|neutral|ground|handle|padlock|auxiliary|lockout)
 Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > General Purpose Fuses,no,no,none,coverage,amps,fusible,
-Power Distribution > Safety Switches / Disconnects,Fittings > Conduit Hubs,no,no,none,coverage,none,switch|disconnect,
-Power Distribution > Safety Switches / Disconnects,Connectors & Crimps > Lugs & Split Bolts,no,no,none,coverage,none,switch|disconnect,
+Power Distribution > Safety Switches / Disconnects,Fittings > Conduit Hubs,no,no,none,coverage,none,3r|nema 3|raintight|rainproof|outdoor|weather,
 Data & Telecom > Non-Metallic Raceway,Data & Telecom > Non-Metallic Raceway,yes,no,none,coverage,none,,elbow|coupling|end|fitting|cover|box|tee|clip|adapter|base|bracket
 Data & Telecom > Non-Metallic Raceway,Wiring Devices > Wallplates,no,no,none,coverage,none,device box|raceway,
 Data & Telecom > Non-Metallic Raceway,"Conduit, Strut & Raceways > Raceway - Non-Metallic",no,no,none,coverage,none,,elbow|coupling|end|fitting|cover|tee|clip|adapter|base|bracket
@@ -214,9 +213,7 @@ Wiring Devices > Straight Blade 10-20 Amp,Wiring Devices > Receptacles,yes,no,no
 Wiring Devices > Twistlock,Wiring Devices > Twistlock,yes,no,none,coverage,amps,,plug|connector|receptacle|inlet|cover|boot
 Wiring Devices > Straight Blade 10-20 Amp,Wiring Devices > Straight Blade 10-20 Amp,yes,no,none,coverage,amps,,plug|connector|cord|boot|cover
 Boxes & Enclosures > Floor Boxes,Boxes & Enclosures > Floor Boxes,yes,no,none,coverage,none,,cover|plate|carpet|flange|extension|adapter|insert
-Boxes & Enclosures > Floor Boxes,Wiring Devices > Receptacles,yes,no,none,coverage,none,,
-Boxes & Enclosures > Floor Boxes,"Conduit, Strut & Raceways > Conduit - Flexible",no,no,none,coverage,none,floor box|poke|activation,
-Boxes & Enclosures > Floor Boxes,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,floor box,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
+Boxes & Enclosures > Floor Boxes,Wiring Devices > Receptacles,no,no,none,coverage,none,,duplex|gfci|tamper|floor|receptacle
 "Fire Alarm, Safety, Security > Fire Equipment","Fire Alarm, Safety, Security > Fire Equipment",yes,no,none,coverage,none,,mount|base|relay|adapter|bracket|harness|module
 "Fire Alarm, Safety, Security > Fire Equipment",Tools & Meters > Batteries,no,no,none,coverage,none,smoke|alarm|detector|co\b,^(?!.*(?:redlithium|m12|m18|milwaukee|usb|charger|forge)).*(?:\b9-?v(?:olt)?\b|\baa\b|\baaa\b)
 "Fire Alarm, Safety, Security > Fire Equipment",Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,coverage,none,^(?!.*(?:battery operated|battery only|dc only|10 year|\bdc\b)).*(?:hardwire|hard-wire|ac/dc|wire-?in|120v|\bac\b),round|ceiling|old work|fan
@@ -335,3 +332,16 @@ Fittings > Bushing / K.O. Seal / Locknuts,Fittings > Bushing / K.O. Seal / Lockn
 Fittings > Bushing / K.O. Seal / Locknuts,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,loose,ko seal,none,knock|k\.?o\.? seal|ko seal,knock|punch|ko\b
 Fittings > Bushing / K.O. Seal / Locknuts,Boxes & Enclosures > Boxes - Metallic,no,no,none,ko seal,none,knock|k\.?o\.? seal|ko seal,
 Fittings > Bushing / K.O. Seal / Locknuts,Fittings > NM Cable Fittings,no,no,loose,ko seal,none,knock|k\.?o\.? seal|ko seal,
+Data & Telecom > Cross Connectors,Data & Telecom > Workstation,no,no,none,batch3,none,patch cord|patch cable|patch cab,jack|keystone|faceplate|wall ?plate|insert
+Data & Telecom > Cross Connectors,"Data & Telecom > Cabinets, Racks & Wire Management",no,no,none,batch3,none,patch cord|patch cable|patch cab,patch panel|manag|velcro|organizer|rack|lacing
+Data & Telecom > Cross Connectors,Data & Telecom > Cross Connectors,no,no,none,batch3,none,patch cord|patch cable|patch cab,patch cord|patch cable|coupler|patch panel|jack
+Fasteners & Hardware > Cable Management,Tools & Meters > Hand Tools,no,no,none,batch3,none,staple,stapler|staple gun|hammer|tacker
+Fasteners & Hardware > Cable Management,Fittings > NM Cable Fittings,no,no,none,batch3,none,staple,
+Control & Automation > Drives,Control & Automation > Starters & Contactors,no,no,none,batch3,none,,overload|contactor|reactor|motor
+Control & Automation > Drives,Control & Automation > Disconnect Switches,no,no,none,batch3,none,,
+Control & Automation > Drives,Power Distribution > Safety Switches / Disconnects,no,no,none,batch3,none,,
+Control & Automation > Drives,Fuses & Accessories > Power Fuses,no,no,none,batch3,none,,class (?:j|cc|t)|ultra|semiconductor|fast|rk1|time delay
+Control & Automation > Drives,Fuses & Accessories > General Purpose Fuses,no,no,none,batch3,none,,class (?:j|cc|t)|ultra|semiconductor|rk1|time delay
+"Lighting Fixtures, Control > Photocells","Lighting Fixtures, Control > Photocells",no,no,none,batch3,none,,mount|stem|swivel|adapter|bracket|arm|conduit|cell|control
+"Lighting Fixtures, Control > Photocells",Connectors & Crimps > Wire Connectors,no,no,none,batch3,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gel))
+"Lighting Fixtures, Control > Photocells","Lighting Fixtures, Control > Outdoor Lighting",no,no,none,batch3,none,,

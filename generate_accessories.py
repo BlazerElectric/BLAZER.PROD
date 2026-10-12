@@ -484,6 +484,11 @@ TAXONOMY_OVERRIDES = (
         ("Connectors & Crimps > Wire Connectors",),
         "Wire, Cable & Cord > Direct Burial",
     ),
+    (
+        r"photocontrol|photo control|photocell",
+        ("Caddy > Ceiling/Acoustical",),
+        "Lighting Fixtures, Control > Photocells",
+    ),
     (r"outlet plate", ("Boxes & Enclosures > Boxes - Non-Metallic",), "Wiring Devices > Wallplates"),
     (r"rj45|rj-45|cat ?[56]e?\b", ("Connectors & Crimps > Wire Connectors",), "Data & Telecom > Low Voltage Cable"),
     (r"lkg conn|locking conn|twist.?lock", ("Connectors & Crimps > Wire Connectors",), "Wiring Devices > Pin & Sleeve"),
@@ -854,6 +859,27 @@ def _node_key(row: dict[str, str]) -> str:
     return "node:" + (row.get(TAX_COL, "").strip(" >") or row["sub_category"])
 
 
+# Same-node products here are substitutes, not complements.
+NO_NODE_FALLBACK = (
+    "Power Distribution > Safety Switches / Disconnects",
+    "Power Distribution > Circuit Breakers",
+    "Power Distribution > Load Centers / Panelboards",
+    "Boxes & Enclosures > Boxes - ",
+    "Control & Automation > Drives",
+    "Fuses & Accessories > ",
+    "Lighting Fixtures, Control > Photocells",
+    "Lighting Fixtures, Control > Occupancy Sensors",
+)
+ONLY_WITH = {
+    "Boxes & Enclosures > Boxes - Explosionproof": (
+        "Fittings > Explosionproof Fittings",
+        "Boxes & Enclosures > Boxes - Explosionproof",
+        "Fittings > Conduit Hubs",
+        "Fittings > Conduit Bodies",
+    ),
+}
+
+
 def _fallback_candidates(
     target: dict[str, str],
     by_group: dict[str, list[dict[str, str]]],
@@ -861,6 +887,8 @@ def _fallback_candidates(
     needed: int,
 ) -> list[dict[str, str]]:
     """Popular products from the target's own taxonomy node, size/diameter matches first."""
+    if _node_key(target)[5:].startswith(NO_NODE_FALLBACK):
+        return []
     target_title = _text(target)
     target_dia = fastener_diameter(target)
     pool = [
@@ -903,7 +931,7 @@ def _sibling_fallback_candidates(
     pool = [
         c
         for key, members in by_group.items()
-        if key.startswith(prefix) and key != own
+        if key.startswith(prefix) and key != own and not key.endswith("> Tools")
         for c in members
         if c[ID_COL] not in have
         and c[ID_COL] != target[ID_COL]
@@ -1017,6 +1045,9 @@ _GAUGE_MAINS = frozenset({"Wire, Cable & Cord", "Connectors & Crimps"})
 def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
     """Return 'gang', 'color', 'series', 'box', 'gauge', 'material', 'size' or 'part' when a pair can never go together, else ''."""
     tparts, cparts = _path_parts(target), _path_parts(cand)
+    allowed = ONLY_WITH.get(" > ".join(tparts[:2]))
+    if allowed and " > ".join(cparts[:2]) not in allowed:
+        return "unrelated"
     if tparts[0] == cparts[0] == "Power Distribution":
         tseries, cseries = breaker_series(target), breaker_series(cand)
         if tseries and cseries and tseries != cseries:

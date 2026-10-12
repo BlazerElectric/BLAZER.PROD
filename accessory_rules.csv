@@ -136,7 +136,7 @@ Tools & Meters > Storage,Tools & Meters > Hand Tools,no,no,none,,none,tool (bag|
 Tools & Meters > Hand Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,jab saw|hacksaw|keyhole,jab saw|hacksaw
 Tools & Meters > Hand Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,utility knife|knife,utility|knife
 Tools & Meters > Hand Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,screwdriver|nut driver|driver set|ratchet,insert bit|screwdriver bit|driver bit|bit set|hex bit|torx|phillips|slotted
-Fasteners & Hardware > Screws,"Fasteners & Hardware > Nuts, Bolts, Washers",no,no,none,,thread,,
+Fasteners & Hardware > Screws,"Fasteners & Hardware > Nuts, Bolts, Washers",no,no,none,,thread,,^(?!.*(toggle|fender|square washer|cut washer|flat washer|lag|carriage))
 "Fasteners & Hardware > Nuts, Bolts, Washers",Fasteners & Hardware > Screws,no,no,none,,thread,,
 Power Distribution > Circuit Breakers,Power Distribution > Load Centers / Panelboards,yes,no,none,coverage,none,,
 Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,yes,no,none,coverage,none,,

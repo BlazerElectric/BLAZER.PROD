@@ -1018,6 +1018,7 @@ _MATERIAL_NODES = (
 
 
 _PLASTIC = re.compile(r"plastic|pvc", re.I)
+_DEVICE_HUB = re.compile(r"plate type hub|\bDG, DH", re.I)
 _REDUCER = re.compile(r"reducing|offset nipple", re.I)
 _BODY_PART = re.compile(r"\b(?:cover|cvr|gasket|gask\w*|gk\w*)\b", re.I)
 
@@ -1060,6 +1061,8 @@ def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
         if tparts[1].startswith("Conduit - ") and cparts[1] == "Conduit Bodies" and _BODY_PART.search(
             str(cand.get("PRODUCT", ""))
         ):
+            return "part"
+        if _DEVICE_HUB.search(str(cand.get("PRODUCT", ""))):
             return "part"
         if tparts[1].startswith("Conduit - ") and _REDUCER.search(str(cand.get("PRODUCT", ""))):
             return "part"

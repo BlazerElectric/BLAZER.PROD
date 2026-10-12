@@ -42,7 +42,7 @@ Fittings > Conduit Bodies,Fittings > Conduit Hubs,no,no,strict,,,,
 Fittings > Bushing / K.O. Seal / Locknuts,Fittings > EMT Fittings,no,no,strict,,,^(?!.*(knock|k\.?o\.? seal|ko seal)).*(locknut|emt),
 Fittings > Bushing / K.O. Seal / Locknuts,Fittings > Rigid Fittings,no,no,strict,,,^(?!.*(knock|k\\.?o\\.? seal|ko seal)).*,
 "Fittings > Clips, Clamps, Hangers","Conduit, Strut & Raceways > Conduit - Metallic",no,no,strict,,,,
-"Fittings > Clips, Clamps, Hangers","Conduit, Strut & Raceways > Strut",no,no,none,,,^(?!.*\b(?:mc|mcac|ac|bx|cable|romex|nm)\b),
+"Fittings > Clips, Clamps, Hangers","Conduit, Strut & Raceways > Strut",no,no,none,,,^(?!.*(?:\b(?:mc|mcac|ac|bx|cable|romex|nm)\b|t-?bar|box hanger|elec box)).*,
 Fittings > EMT Fittings,Fittings > Conduit Bodies,no,no,strict,,,,
 Boxes & Enclosures > Boxes - Non-Metallic,Fittings > NM Cable Fittings,no,no,none,,,,
 Fittings > Cord/Cable Fittings,"Wire, Cable & Cord > Portable Cords & Cables",no,no,none,,,,
@@ -67,7 +67,7 @@ Data & Telecom > Tools,Data & Telecom > Workstation,no,no,none,,,,
 Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > General Purpose Fuses,no,no,none,,amps,,
 Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > Power Fuses,no,no,none,,amps,,
 Power Distribution > Circuit Breakers,Power Distribution > Load Centers / Panelboards,no,no,none,,series,,
-Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,no,no,none,,series,,
+Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,no,no,none,,series,^(?!.*(?:ground bar|neutral|\bbar\b|\bkit\b|cover|filler|bonding|lug)).*,
 "Wire, Cable & Cord > Building Wire",Connectors & Crimps > Wire Connectors,no,no,none,,gauge,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 "Wire, Cable & Cord > Building Wire",Connectors & Crimps > Lugs & Split Bolts,no,no,none,,gauge,^(?!.*(nm-b|romex|sheathed|\bmc\b|armored|\bua\b)).*,
 "Wire, Cable & Cord > Building Wire",Tools & Meters > Hand Tools,no,no,none,,gauge,,^(?!.*(plier|fish tape|puller)).*(strip|crimp)
@@ -131,15 +131,15 @@ Fittings > Straps,Fittings > EMT Fittings,no,no,strict,,none,,
 Data & Telecom > Cross Connectors,Data & Telecom > Low Voltage Cable,no,no,none,,none,^(?!.*(patch cord|patch cable|patch cab)).*,
 Data & Telecom > Cross Connectors,Data & Telecom > Tools,no,no,none,,none,,crimp|punch|tester|stripper|termination|rj45|modular|scout
 Power Distribution > Metering & Temporary Power,"Wiring Devices > Extension Cords, Cord Reels & Portable Boxes",no,no,none,,none,temporary|spider|pedestal|power outlet|cord,
-Power Distribution > Transformers,Power Distribution > Safety Switches / Disconnects,no,no,none,,none,,
+Power Distribution > Transformers,Power Distribution > Safety Switches / Disconnects,no,no,none,,none,^(?!.*(?:chime|doorbell|bell|button)).*,
 Tools & Meters > Storage,Tools & Meters > Hand Tools,no,no,none,,none,tool (bag|box|belt|pouch)|bucket|organizer,set|kit
 Tools & Meters > Hand Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,jab saw|hacksaw|keyhole,jab saw|hacksaw
 Tools & Meters > Hand Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,utility knife|knife,utility|knife
 Tools & Meters > Hand Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,screwdriver|nut driver|driver set|ratchet,insert bit|screwdriver bit|driver bit|bit set|hex bit|torx|phillips|slotted
 Fasteners & Hardware > Screws,"Fasteners & Hardware > Nuts, Bolts, Washers",no,no,none,,thread,,^(?!.*(toggle|fender|square washer|cut washer|flat washer|lag|carriage))
-"Fasteners & Hardware > Nuts, Bolts, Washers",Fasteners & Hardware > Screws,no,no,none,,thread,,
+"Fasteners & Hardware > Nuts, Bolts, Washers",Fasteners & Hardware > Screws,no,no,none,,thread,^(?!.*(?:reduc|bonding)).*,
 Power Distribution > Circuit Breakers,Power Distribution > Load Centers / Panelboards,yes,no,none,coverage,none,,
-Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,yes,no,none,coverage,none,,
+Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,yes,no,none,coverage,none,^(?!.*(?:ground bar|neutral|\bbar\b|\bkit\b|cover|filler|bonding|lug)).*,
 Power Distribution > Circuit Breakers,Power Distribution > Circuit Breakers,yes,no,none,coverage,none,^(?!.*(lock|handle|filler|accessor|bracket|padlock|kit)),lock|padlock|handle tie|filler|trip|shunt|auxiliary|bracket|neutral
 Power Distribution > Load Centers / Panelboards,Power Distribution > Load Centers / Panelboards,yes,no,none,coverage,none,^(?!.*(ground bar|filler|cover|kit|lug)),ground bar|filler|cover|lug kit|neutral|sub-feed|hold.?down|barrier
 Tools & Meters > Hand Tools,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,strip|crimp|cutter,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)

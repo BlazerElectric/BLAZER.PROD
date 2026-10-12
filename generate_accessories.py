@@ -848,6 +848,7 @@ NO_SIBLING_FALLBACK = (
     "Fittings > Bushing / K.O. Seal / Locknuts",
     "Lamps, Bulbs & Ballast > Drivers - LED",
     "Lamps, Bulbs & Ballast > Bulbs - ",
+    "Boxes & Enclosures > Boxes - ",
 )
 ONLY_WITH = {
     "Lighting Fixtures, Control > Outdoor Lighting": (

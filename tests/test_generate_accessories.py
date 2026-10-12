@@ -244,3 +244,24 @@ class JobKitTests(unittest.TestCase):
         self.assertTrue(_slot_matches(slots["breaker"], row))
         row["tax_path"] = "Tools & Meters > Hand Tools"
         self.assertFalse(_slot_matches(slots["breaker"], row))
+
+
+class HardConflictTests(unittest.TestCase):
+    def _row(self, product, path):
+        return {"PRODUCT": product, "clean_title": "", "normalized_specs": "", "tax_path": path}
+
+    def test_gang_mismatch_is_dropped(self):
+        from generate_accessories import hard_conflict
+
+        box = self._row("ALL P-240OW OLD WK 2G BOX", "Boxes & Enclosures > Boxes - Non-Metallic")
+        plate = self._row("PNS TP8-W 1 Gang WALLPLATE WHITE", "Wiring Devices > Wallplates")
+        self.assertEqual(hard_conflict(box, plate), "gang")
+
+    def test_color_mismatch_ignores_plugs(self):
+        from generate_accessories import hard_conflict
+
+        gfci = self._row("PNS GFCI IVORY", "Wiring Devices > GFCI Personnel Protection Devices")
+        switch = self._row("PNS SW WHITE", "Wiring Devices > Switches")
+        plug = self._row("HUB PLUG BLACK", "Wiring Devices > Straight Blade 10-20 Amp")
+        self.assertEqual(hard_conflict(gfci, switch), "color")
+        self.assertEqual(hard_conflict(gfci, plug), "")

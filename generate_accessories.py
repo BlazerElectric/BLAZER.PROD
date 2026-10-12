@@ -947,20 +947,70 @@ def _candidate_indexes(
     return by_group
 
 
+GANG_MAINS = frozenset({"Wiring Devices", "Boxes & Enclosures"})
+_COLOR_SKIP_NODES = ("Straight Blade", "Twistlock", "Locking")
+_GANG_WORDS = (("single", 1), ("two", 2), ("three", 3), ("four", 4))
+
+
+def gang_count(row: dict[str, str]) -> int:
+    text = _text(row).lower()
+    match = re.search(r"\b([1-9])[- ]?(?:g\b|gang)", text)
+    if match:
+        return int(match.group(1))
+    for word, number in _GANG_WORDS:
+        if re.search(rf"\b{word}[- ]gang", text):
+            return number
+    return 0
+
+
+def _path_parts(row: dict[str, str]) -> list[str]:
+    return [part.strip() for part in str(row.get(TAX_COL, "")).split(">")]
+
+
+def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
+    """Return 'gang' or 'color' when a pair can never go together, else ''."""
+    tparts, cparts = _path_parts(target), _path_parts(cand)
+    if tparts[0] not in GANG_MAINS or cparts[0] not in GANG_MAINS:
+        return ""
+    tgang, cgang = gang_count(target), gang_count(cand)
+    if tgang and cgang and tgang != cgang:
+        return "gang"
+    if tparts[0] == cparts[0] == "Wiring Devices" and not any(
+        node.startswith(_COLOR_SKIP_NODES)
+        for node in tparts[1:2] + cparts[1:2]
+    ):
+        tcolor, ccolor = _color(target), _color(cand)
+        if tcolor and ccolor and tcolor != ccolor:
+            return "color"
+    return ""
+
+
+def _drop_conflicts(
+    target: dict[str, str], candidates: list[dict[str, str]]
+) -> list[dict[str, str]]:
+    return [c for c in candidates if not hard_conflict(target, c)]
+
+
 def build_candidates(
     target: dict[str, str],
     by_group: dict[str, list[dict[str, str]]],
 ) -> list[dict[str, str]]:
-    candidates = _eligible_candidates(target, by_group)
+    candidates = _drop_conflicts(target, _eligible_candidates(target, by_group))
     if len(candidates) < MIN_SUGGESTIONS:
         have = {c[ID_COL] for c in candidates}
-        candidates = candidates + _fallback_candidates(
-            target, by_group, have, FALLBACK_FILL - len(candidates)
+        candidates = candidates + _drop_conflicts(
+            target,
+            _fallback_candidates(
+                target, by_group, have, FALLBACK_FILL - len(candidates)
+            ),
         )
         if len(candidates) < MIN_SUGGESTIONS:
             have = {c[ID_COL] for c in candidates}
-            candidates = candidates + _sibling_fallback_candidates(
-                target, by_group, have, FALLBACK_FILL - len(candidates)
+            candidates = candidates + _drop_conflicts(
+                target,
+                _sibling_fallback_candidates(
+                    target, by_group, have, FALLBACK_FILL - len(candidates)
+                ),
             )
     if len(candidates) <= MAX_CANDIDATES:
         return candidates

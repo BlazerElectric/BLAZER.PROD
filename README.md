@@ -77,3 +77,11 @@ Add jobs or slots by editing the CSV; no code changes are needed.
   categories that otherwise end up with very few (bits, hand tools, breakers).
 - Products still under 5 candidates are topped up from sibling subcategories of
   the same main category, but only with the same brand or a shared keyword.
+
+### Checking pools without Gemini
+
+`python check_pools.py [--csv issues.csv]` builds every pool and reports target/candidate
+pairs that conflict (gang count, colour, trade size), ranked by target and candidate node,
+plus candidates that appear in more than 5% of pools. Gang and colour conflicts between
+wiring devices and boxes are removed automatically (`hard_conflict` in
+`generate_accessories.py`), so those counts should stay at zero. Run it after editing rules.

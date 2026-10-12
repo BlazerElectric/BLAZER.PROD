@@ -445,6 +445,11 @@ TAXONOMY_OVERRIDES = (
         ("Boxes & Enclosures > Boxes - Weatherproof",),
         "Boxes & Enclosures > Boxes - Metallic",
     ),
+    (
+        r"\bhid\b|\bt[58]\b|\bpar\d+|\bmr16|\ba19\b",
+        ("Control & Automation > Pilot Devices",),
+        "Lamps, Bulbs & Ballast > Bulbs - LED",
+    ),
     (r"outlet plate", ("Boxes & Enclosures > Boxes - Non-Metallic",), "Wiring Devices > Wallplates"),
     (r"rj45|rj-45|cat ?[56]e?\b", ("Connectors & Crimps > Wire Connectors",), "Data & Telecom > Low Voltage Cable"),
     (r"lkg conn|locking conn|twist.?lock", ("Connectors & Crimps > Wire Connectors",), "Wiring Devices > Pin & Sleeve"),
@@ -826,6 +831,11 @@ NO_NODE_FALLBACK = (
     "Lighting Fixtures, Control > Photocells",
     "Lighting Fixtures, Control > Occupancy Sensors",
 )
+NO_SIBLING_FALLBACK = (
+    "Fittings > Bushing / K.O. Seal / Locknuts",
+    "Lamps, Bulbs & Ballast > Drivers - LED",
+    "Lamps, Bulbs & Ballast > Bulbs - ",
+)
 ONLY_WITH = {
     "Lighting Fixtures, Control > Outdoor Lighting": (
         "Lighting Fixtures, Control > Outdoor Lighting",
@@ -898,6 +908,8 @@ def _sibling_fallback_candidates(
     the model decides whether any of them are actually complementary.
     """
     own = _node_key(target)
+    if own[5:].startswith(NO_SIBLING_FALLBACK):
+        return []
     main = target.get(TAX_COL, "").split(">")[0].strip()
     if not main or needed <= 0:
         return []

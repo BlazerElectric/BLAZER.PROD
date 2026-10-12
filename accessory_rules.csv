@@ -198,8 +198,6 @@ Power Distribution > Safety Switches / Disconnects,Connectors & Crimps > Lugs & 
 Data & Telecom > Non-Metallic Raceway,Data & Telecom > Non-Metallic Raceway,yes,no,none,coverage,none,,elbow|coupling|end|fitting|cover|box|tee|clip|adapter|base|bracket
 Data & Telecom > Non-Metallic Raceway,Wiring Devices > Wallplates,no,no,none,coverage,none,device box|raceway,
 Data & Telecom > Non-Metallic Raceway,"Conduit, Strut & Raceways > Raceway - Non-Metallic",no,no,none,coverage,none,,elbow|coupling|end|fitting|cover|tee|clip|adapter|base|bracket
-Wiring Devices > Wallplates,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,coverage,none,,old work|new work|1-gang|single|1g
-Wiring Devices > Wallplates,Boxes & Enclosures > Boxes - Metallic,no,no,none,coverage,none,,square|device|gang|handy|switch box
 Control & Automation > Pilot Devices,Control & Automation > Pilot Devices,yes,no,none,coverage,none,,contact|lamp|indicator|operator|legend|enclosure|nameplate|button|block
 Control & Automation > Pilot Devices,Control & Automation > Relays,yes,no,none,coverage,none,,
 Control & Automation > Pilot Devices,Control & Automation > Terminal Blocks,yes,no,none,coverage,none,,
@@ -259,10 +257,6 @@ Wiring Devices > Receptacles,Wiring Devices > Wallplates,no,yes,none,top100,none
 Wiring Devices > Switches,Wiring Devices > Wallplates,no,yes,none,top100,none,^(?=.*(decora|decorator|rocker)).*,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo|blank|insert|toggle|tog\b|duplex|trademaster|coax|port|tele|cable|usb|hdmi)).*(?:decora|decorator|rocker)
 Wiring Devices > Switches,Wiring Devices > Wallplates,no,yes,none,top100,none,^(?!.*(decora|decorator|rocker)).*,^(?!.*(?:decorator|decora|receptacle|duplex|blank|\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo|insert|recp|trademaster|coax|port|tele|cable|usb|hdmi|plate\b.*decor)).*(?:toggle|switch|\b1g\b|1-gang|1 gang)
 Wiring Devices > GFCI Personnel Protection Devices,Wiring Devices > Wallplates,no,yes,none,top100,none,,decorator|decora
-Wiring Devices > Wallplates,Wiring Devices > Receptacles,no,yes,none,top100,none,receptacle|duplex|outlet,receptacle|duplex
-Wiring Devices > Wallplates,Wiring Devices > Switches,no,yes,none,top100,none,toggle|switch|decorator,switch
-Wiring Devices > Wallplates,Wiring Devices > GFCI Personnel Protection Devices,no,yes,none,top100,none,decorator|gfci|decora,gfci
-Wiring Devices > Wallplates,Boxes & Enclosures > Boxes - Metallic,no,no,none,top100,none,^(?!.*(box)),device|switch box|handy|square
 Boxes & Enclosures > Boxes - Metallic,Boxes & Enclosures > Boxes - Metallic,no,no,none,top100,box,box,cover|mud ring|plaster ring|extension ring|raised
 Boxes & Enclosures > Boxes - Metallic,Boxes & Enclosures > Boxes - Metallic,no,no,none,top100,box,cover|mud ring|plaster ring|extension ring|raised,^(?!.*(cover|ring|raised))
 Boxes & Enclosures > Boxes - Metallic,Wiring Devices > Wallplates,no,no,none,top100,none,gang|device|switch box|handy,wall plate|wallplate
@@ -316,3 +310,15 @@ Tools & Meters > Hand Tools,Tools & Meters > Hand Tools,no,no,none,thin,none,fis
 Power Distribution > Circuit Breakers,Tools & Meters > Safety Equipment,no,no,none,thin,none,,lock|tag
 Power Distribution > Circuit Breakers,Power Distribution > Load Centers / Panelboards,no,no,none,thin,none,,ground|neutral|bar|cover|filler|label
 Power Distribution > Circuit Breakers,Tools & Meters > Meters - Test Equipment - Calculators,no,no,none,thin,none,,breaker finder|tester|circuit
+Wiring Devices > Wallplates,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,coverage,none,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo)).*,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|\brnd\b|round|octag|\b4sq|4-11/16|ceiling|fan|alarm|exten|ext\b|cover|kit|filter|loadcenter|range|meter)).*(?:cu in|cu\.in|\b1g\b|1-?gang|switch box|sw box)
+Wiring Devices > Wallplates,Boxes & Enclosures > Boxes - Metallic,no,no,none,coverage,none,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo)).*,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|\brnd\b|round|octag|\b4sq|4-11/16|ceiling|fan|alarm|exten|ext\b|cover|kit|filter|loadcenter|range|meter)).*(?:handy|switch box|\b1g\b|1-gang|single)
+Wiring Devices > Wallplates,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,coverage,none,\b2g\b|2-gang|2 gang,\b2g\b|2-gang|2 gang
+Wiring Devices > Wallplates,Boxes & Enclosures > Boxes - Metallic,no,no,none,coverage,none,\b2g\b|2-gang|2 gang,\b2g\b|2-gang|2 gang
+Wiring Devices > Wallplates,Wiring Devices > Receptacles,no,yes,none,top100,none,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo)).*(?:decora|decorator|\bTP26|\bP26),decora|decorator
+Wiring Devices > Wallplates,Wiring Devices > Receptacles,no,yes,none,top100,none,^(?!.*(?:decora|decorator|\bTP26|\bP26|toggle|\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo)).*(?:duplex|recp|outlet),^(?!.*(?:decora|decorator|single|sgl|\b6-|250v|usb)).*(?:receptacle|recp|duplex|dup\b|rcpt)
+Wiring Devices > Wallplates,Wiring Devices > Switches,no,yes,none,top100,none,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo)).*(?:decora|decorator|\bTP26|\bP26),decora|deco ser|decorator|rocker
+Wiring Devices > Wallplates,Wiring Devices > Switches,no,yes,none,top100,none,^(?!.*(?:decora|decorator|\bTP26|\bP26|duplex|recp|blank|\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo)).*toggle,^(?!.*(?:decora|deco ser|decorator|rocker)).*(?:switch|\bsw\b)
+Wiring Devices > Wallplates,Wiring Devices > GFCI Personnel Protection Devices,no,yes,none,top100,none,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo)).*(?:decora|decorator|\bTP26|\bP26|gfci),gfci
+Wiring Devices > Wallplates,Wiring Devices > Receptacles,no,yes,none,top100,none,^(?=.*(?:\b2g\b|2-gang|2 gang))(?!.*(?:decora|decorator|toggle)).*(?:duplex|recp|outlet),^(?!.*(?:decora|decorator|single|sgl|\b6-|250v|usb)).*(?:receptacle|recp|duplex|dup\b|rcpt)
+Wiring Devices > Wallplates,Wiring Devices > Switches,no,yes,none,top100,none,^(?=.*(?:\b2g\b|2-gang|2 gang))(?!.*(?:decora|decorator|duplex|recp)).*toggle,^(?!.*(?:decora|deco ser|decorator|rocker)).*(?:switch|\bsw\b)
+Wiring Devices > Wallplates,Wiring Devices > Switches,no,yes,none,top100,none,^(?=.*(?:\b2g\b|2-gang|2 gang))(?=.*(?:decora|decorator)).*,decora|deco ser|decorator|rocker

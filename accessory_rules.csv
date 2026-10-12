@@ -253,7 +253,7 @@ Wiring Devices > GFCI Personnel Protection Devices,Wiring Devices > Wallplates,n
 Boxes & Enclosures > Boxes - Metallic,Boxes & Enclosures > Boxes - Metallic,no,no,none,top100,box,box,^(?!.*(?:concrete|cncrt|tile|lkg|\b50A\b|\bHUB\b)).*(?:cover|mud ring|plaster ring|extension ring|raised)
 Boxes & Enclosures > Boxes - Metallic,Boxes & Enclosures > Boxes - Metallic,no,no,none,top100,box,cover|mud ring|plaster ring|extension ring|raised,^(?!.*(cover|ring|raised))
 Boxes & Enclosures > Boxes - Metallic,Wiring Devices > Wallplates,no,no,none,top100,none,gang|device|switch box|handy,wall plate|wallplate
-Boxes & Enclosures > Boxes - Metallic,Connectors & Crimps > Wire Connectors,no,no,none,top100,none,box,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
+Boxes & Enclosures > Boxes - Metallic,Connectors & Crimps > Wire Connectors,no,no,none,top100,none,box|cover,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 Boxes & Enclosures > Boxes - Metallic,Wiring Devices > Receptacles,no,no,none,top100,none,gang|device|handy|switch,receptacle
 Boxes & Enclosures > Boxes - Non-Metallic,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,top100,box,box|cover|ring,cover|ring|extension
 Boxes & Enclosures > Boxes - Non-Metallic,Wiring Devices > Wallplates,no,no,none,top100,none,^(?!.*(round|octagon|ceiling|fan|pancake|fixture)).*(gang|device|old work|new work),wall plate|wallplate
@@ -455,3 +455,7 @@ Power Distribution > Transformers,Power Distribution > Circuit Breakers,no,no,no
 Power Distribution > Transformers,Connectors & Crimps > Grounding Products,no,no,none,batch10,none,^(?!.*(?:chime|doorbell|bell|button)),
 Power Distribution > Power Quality/Protection,Power Distribution > Power Quality/Protection,no,no,none,batch10,none,,
 Power Distribution > Power Quality/Protection,Power Distribution > Metering & Temporary Power,no,no,none,batch10,none,,cord|temporary|strip
+Boxes & Enclosures > Boxes - Metallic,Fasteners & Hardware > Screws,no,no,none,batch11,none,cover|mud ring|plaster ring,8-32|machine screw
+Caddy > Stud Wall,Fasteners & Hardware > Screws,no,no,none,batch11,none,,wafer|framing|drywall|wood screw|sheet metal
+Caddy > Stud Wall,"Wire, Cable & Cord > Building Wire",no,no,none,batch11,none,,romex|nm-b
+Caddy > Stud Wall,Fasteners & Hardware > Cable Management,no,no,none,batch11,none,,staple|stacker|cable support

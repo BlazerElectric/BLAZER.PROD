@@ -426,6 +426,41 @@ _TOOL_NODES = (
 # The mapper sometimes files blades, bits and punches under tool nodes.
 TAXONOMY_OVERRIDES = (
     (
+        r"\b(?:tp[1-4]|p[1-4])\b.*plate|wall plate|switch plate",
+        ("Lighting Fixtures, Control > Occupancy Sensors",),
+        "Wiring Devices > Wallplates",
+    ),
+    (
+        r"wall pack|open face.*housing|traditional.*wall|wpled",
+        ("Lighting Fixtures, Control > Occupancy Sensors",),
+        "Lighting Fixtures, Control > Outdoor Lighting",
+    ),
+    (
+        r"\brsc\d+|screw cvr wall mnt|n3r.*enclosure|nema 3r.*enclosure",
+        ("Data & Telecom > Audio Video Equipment",),
+        "Boxes & Enclosures > Enclosures - Commercial Type",
+    ),
+    (
+        r"k4221|swivel mount|photocontrol|photo control",
+        ("Data & Telecom > Cable Tray",),
+        "Lighting Fixtures, Control > Photocells",
+    ),
+    (
+        r"unitap|splice reducer|tap connector",
+        ("Fittings > PVC Fittings",),
+        "Connectors & Crimps > Lugs & Split Bolts",
+    ),
+    (
+        r"thermoplastic.*(?:sw|switch|outlet|device) box",
+        ("Boxes & Enclosures > Boxes - Metallic",),
+        "Boxes & Enclosures > Boxes - Non-Metallic",
+    ),
+    (
+        r"weatherhead|service entrance cap",
+        ("Wire, Cable & Cord > Service Wire",),
+        "Fittings > Flashings, Weatherhead",
+    ),
+    (
         r"surge arrest|surge protect",
         ("Control & Automation > Starters & Contactors",),
         "Power Distribution > Circuit Breakers",

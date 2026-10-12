@@ -426,6 +426,16 @@ _TOOL_NODES = (
 # The mapper sometimes files blades, bits and punches under tool nodes.
 TAXONOMY_OVERRIDES = (
     (
+        r"surge arrest|surge protect",
+        ("Control & Automation > Starters & Contactors",),
+        "Power Distribution > Circuit Breakers",
+    ),
+    (
+        r"mobile home feeder",
+        ("Caddy > Cable/Conduit",),
+        "Wire, Cable & Cord > Building Wire",
+    ),
+    (
         r"\b(?:jack|keystone|patch panel)\b",
         ("Lighting Fixtures, Control > Bulbs - LED",),
         "Data & Telecom > Workstation",
@@ -720,6 +730,9 @@ def _gauge_area(number: str, unit: str) -> float | None:
     return 25 * 92 ** ((36 - awg) / 19.5) / 1000
 
 
+_WIRE_TYPE_GAUGE = re.compile(
+    r"\b(?:thhn|thwn(?:-2)?|xhhw(?:-2)?|use-2|rhw(?:-2)?)\s+(\d{1,2}(?:/0)?)\b", re.I
+)
 _NM_GAUGE = re.compile(r"\b(\d{1,2})/[2-5]\b")
 _CABLE_WORDS = re.compile(r"sheathed|nm-b|romex|metal clad|\bmc\b|\buf\b|underground feeder", re.I)
 
@@ -736,6 +749,12 @@ def gauge_range(row: dict[str, str]) -> tuple[float, float] | None:
             pairs = [(match.group(5), match.group(6))]
         for number, unit in pairs:
             area = _gauge_area(number, unit)
+            if area is not None:
+                values.append(area)
+    if not values:
+        bare = _WIRE_TYPE_GAUGE.search(_text(row))
+        if bare:
+            area = _gauge_area(bare.group(1), "")
             if area is not None:
                 values.append(area)
     if not values:

@@ -63,7 +63,7 @@ Data & Telecom > Tools,Data & Telecom > Workstation,no,no,none,,,,
 "Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,,,^(?!.*(?:0-10|010 ?v)),
 "Lighting Fixtures, Control > Indoor Lighting - Recessed","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,,,,
 "Lighting Fixtures, Control > Indoor Lighting - Recessed","Lamps, Bulbs & Ballast > Drivers - LED",no,no,none,,,,
-"Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Lampholders, Adapters & Extensions",no,no,none,,,^(?!.*(\bhid\b|high ?bay|fan cooled|\btube|\bt[58]\b|jack)),
+"Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Lampholders, Adapters & Extensions",no,no,none,,,^(?!.*(\bhid\b|high ?bay|fan cooled|\btube|\bt[58]\b|jack|\ba\d{2}\b)),
 Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > General Purpose Fuses,no,no,none,,amps,,
 Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > Power Fuses,no,no,none,,amps,,
 Power Distribution > Circuit Breakers,Power Distribution > Load Centers / Panelboards,no,no,none,,series,,
@@ -438,3 +438,10 @@ Power Distribution > Load Centers / Panelboards,Power Distribution > Load Center
 Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,yes,no,none,batch8,series,lug|kit|sub feed|neutral,
 Power Distribution > Metering & Temporary Power,Power Distribution > Metering & Temporary Power,no,no,none,batch8,none,,
 Power Distribution > Metering & Temporary Power,Tools & Meters > Storage,no,no,none,batch8,none,,
+Fasteners & Hardware > Cable Management,"Wire, Cable & Cord > Building Wire",no,no,none,batch9,none,stack,nm-b|romex
+Fasteners & Hardware > Cable Management,Fittings > NM Cable Fittings,no,no,none,batch9,none,stack,
+Fasteners & Hardware > Cable Management,"Fittings > Clips, Clamps, Hangers",no,no,none,batch9,none,stack,staple|romex|nm
+Fasteners & Hardware > Cable Management,Tools & Meters > Hand Tools,no,no,none,batch9,none,stack,staple|hammer|tacker
+Wiring Devices > Receptacles,Wiring Devices > Wallplates,no,no,none,batch9,none,range|dryer|50 amp|30 amp|nema 14|nema 10|nema 6,range|dryer
+"Wire, Cable & Cord > Building Wire",Connectors & Crimps > Lugs & Split Bolts,no,no,none,batch9,none,mobile home|feeder,\bAL\b|alum|dual
+"Wire, Cable & Cord > Building Wire",Power Distribution > Load Centers / Panelboards,no,no,none,batch9,none,mobile home|feeder,main|loadcenter|load center

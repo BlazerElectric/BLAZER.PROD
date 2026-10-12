@@ -1358,6 +1358,28 @@ async def select_accessories(
     return list(dict.fromkeys(item for item in selection if item in allowed))[:10]
 
 
+def top_up_selection(
+    target: dict[str, str],
+    by_group: dict[str, list[dict[str, str]]],
+    selected: list[str],
+) -> list[str]:
+    """Fill a short model selection from rule-matched candidates only.
+
+    Fallback candidates are excluded: they are same-category filler, and the
+    model's rejection of them is usually correct.
+    """
+    if len(selected) >= MIN_SUGGESTIONS:
+        return selected
+    rule_based = _drop_conflicts(target, _eligible_candidates(target, by_group))
+    result = list(selected)
+    for candidate in rule_based:
+        if len(result) >= MIN_SUGGESTIONS:
+            break
+        if candidate[ID_COL] not in result and candidate[ID_COL] != target[ID_COL]:
+            result.append(candidate[ID_COL])
+    return result
+
+
 def load_checkpoint(path: str) -> pd.DataFrame:
     if not os.path.exists(path):
         return pd.DataFrame(columns=[OUTPUT_ID_COL, *RELATION_COLUMNS])
@@ -1418,6 +1440,7 @@ async def run(
                 failures += 1
                 logger.error("Failed %s (%r): %s", target[ID_COL], target["PRODUCT"], exc)
                 return None
+        selected = top_up_selection(target, by_group, selected)
         return {
             OUTPUT_ID_COL: target[ID_COL],
             **dict(zip(RELATION_COLUMNS, selected + [""] * (10 - len(selected)))),

@@ -6,6 +6,7 @@ from generate_accessories import (
     _candidate_indexes,
     _matching_groups,
     build_candidates,
+    top_up_selection,
     trade_sizes,
 )
 
@@ -276,3 +277,23 @@ class HardConflictTests(unittest.TestCase):
         plug = self._row("HUB PLUG BLACK", "Wiring Devices > Straight Blade 10-20 Amp")
         self.assertEqual(hard_conflict(gfci, switch), "color")
         self.assertEqual(hard_conflict(gfci, plug), "")
+
+
+class TopUpTests(unittest.TestCase):
+    def test_short_selection_is_filled_from_rule_candidates_only(self):
+        base = {
+            "PRODUCT": "x",
+            "normalized_specs": "",
+            "primary_category": "Tools",
+            "sub_category": "Pliers",
+            "orders_6m": 10,
+        }
+        rows = [
+            {**base, "BLAZER ID": str(i), "clean_title": f"Pliers {i}"}
+            for i in range(8)
+        ]
+        by_group = _candidate_indexes(pd.DataFrame(rows))
+        # Same-node products are fallback filler, not rule matches.
+        self.assertEqual(top_up_selection(rows[0], by_group, ["1"]), ["1"])
+        full = ["1", "2", "3", "4", "5"]
+        self.assertEqual(top_up_selection(rows[0], by_group, full), full)

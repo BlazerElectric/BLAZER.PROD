@@ -392,3 +392,49 @@ Fittings > PVC Fittings,Fittings > PVC Fittings,no,no,strict,batch7,none,,
 Fittings > PVC Fittings,"Conduit, Strut & Raceways > Conduit - Non-Metallic",no,no,strict,batch7,none,,
 Fittings > PVC Fittings,Fittings > Straps,no,no,strict,batch7,none,,
 "Conduit, Strut & Raceways > Conduit - Non-Metallic","Fittings > Clips, Clamps, Hangers",no,no,strict,batch7,none,,
+Connectors & Crimps > Wire Connectors,Tools & Meters > Hand Tools,no,no,none,batch8,none,,strip|crimp|cutter
+Connectors & Crimps > Wire Connectors,Fasteners & Hardware > Tapes,no,no,none,batch8,none,,electrical tape|vinyl
+Connectors & Crimps > Wire Connectors,Control & Automation > Terminal Blocks,no,no,none,batch8,none,wago|lever|compact trm,terminal block|terminal strip
+"Tools & Meters > Paint, Chemicals, Cleaning Supplies","Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,batch8,none,,
+"Tools & Meters > Paint, Chemicals, Cleaning Supplies",Tools & Meters > Hand Tools,no,no,none,batch8,none,,
+"Tools & Meters > Paint, Chemicals, Cleaning Supplies",Tools & Meters > Safety Equipment,no,no,none,batch8,none,,
+"Tools & Meters > Paint, Chemicals, Cleaning Supplies",Tools & Meters > Storage,no,no,none,batch8,none,,
+Tools & Meters > Storage,Tools & Meters > Storage,no,no,none,batch8,none,,
+Tools & Meters > Storage,Tools & Meters > Hand Tools,no,no,none,batch8,none,,
+Tools & Meters > Storage,Tools & Meters > Flashlights / Work Lights,no,no,none,batch8,none,,
+Tools & Meters > Storage,Tools & Meters > Apparel,no,no,none,batch8,none,,
+Tools & Meters > Storage,Tools & Meters > Safety Equipment,no,no,none,batch8,none,,
+Tools & Meters > Flashlights / Work Lights,Tools & Meters > Batteries,no,no,none,batch8,none,,
+Tools & Meters > Flashlights / Work Lights,Tools & Meters > Storage,no,no,none,batch8,none,,
+Tools & Meters > Flashlights / Work Lights,Tools & Meters > Safety Equipment,no,no,none,batch8,none,,
+Tools & Meters > Flashlights / Work Lights,Tools & Meters > Flashlights / Work Lights,no,no,none,batch8,none,,
+Tools & Meters > Marking & Labeling,Tools & Meters > Marking & Labeling,no,no,none,batch8,none,,
+Tools & Meters > Marking & Labeling,Fasteners & Hardware > Tapes,no,no,none,batch8,none,,electrical tape|vinyl
+Tools & Meters > Marking & Labeling,Fasteners & Hardware > Cable Management,no,no,none,batch8,none,,
+Tools & Meters > Marking & Labeling,"Connectors & Crimps > Cold Shrink, Heat Shrink",no,no,none,batch8,none,,
+"Fans, Heaters > Heaters & Thermostats","Fans, Heaters > Heaters & Thermostats",no,no,none,batch8,none,,thermostat|stat\b|kit|bracket|cover
+"Fans, Heaters > Heaters & Thermostats",Connectors & Crimps > Wire Connectors,no,no,none,batch8,none,,
+"Fans, Heaters > Heaters & Thermostats",Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,batch8,none,,old work|new work|1-gang|zip|\\bsw box
+"Fans, Heaters > Heaters & Thermostats","Wire, Cable & Cord > Building Wire",no,no,none,batch8,none,,nm-b|10/2|12/2|10-2|12-2
+"Fans, Heaters > Heat Cable","Fans, Heaters > Heat Cable",no,no,none,batch8,none,,
+"Fans, Heaters > Heat Cable",Fasteners & Hardware > Tapes,no,no,none,batch8,none,,
+"Fans, Heaters > Heat Cable",Connectors & Crimps > Wire Connectors,no,no,none,batch8,none,,
+"Fans, Heaters > Heat Cable","Fans, Heaters > Heaters & Thermostats",no,no,none,batch8,none,,thermostat|controller|sensor
+"Lighting Fixtures, Control > Lampholders, Adapters & Extensions","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,batch8,none,,
+"Lighting Fixtures, Control > Lampholders, Adapters & Extensions",Connectors & Crimps > Wire Connectors,no,no,none,batch8,none,,
+"Lighting Fixtures, Control > Lampholders, Adapters & Extensions",Boxes & Enclosures > Boxes - Metallic,no,no,none,batch8,none,,octagon|\\boct|4.?sq
+"Lighting Fixtures, Control > Lampholders, Adapters & Extensions","Lighting Fixtures, Control > Lampholders, Adapters & Extensions",no,no,none,batch8,none,,chain|pull|cord|socket|adapter
+"Wire, Cable & Cord > Direct Burial",Connectors & Crimps > Lugs & Split Bolts,no,no,none,batch8,none,,dual rated|al.?cu|split|mech
+"Wire, Cable & Cord > Direct Burial","Connectors & Crimps > Cold Shrink, Heat Shrink",no,no,none,batch8,none,,
+"Wire, Cable & Cord > Direct Burial","Conduit, Strut & Raceways > Conduit - Non-Metallic",no,no,none,batch8,none,,
+"Wire, Cable & Cord > Direct Burial",Fasteners & Hardware > Tapes,no,no,none,batch8,none,,
+"Wire, Cable & Cord > Direct Burial",Connectors & Crimps > Grounding Products,no,no,none,batch8,none,,
+Connectors & Crimps > Welded Connections,Connectors & Crimps > Welded Connections,no,no,none,batch8,none,,
+Connectors & Crimps > Welded Connections,Connectors & Crimps > Grounding Products,no,no,none,batch8,none,,
+Connectors & Crimps > Welded Connections,"Wire, Cable & Cord > Bare Copper",no,no,none,batch8,none,,
+Wiring Devices > Pin & Sleeve,Wiring Devices > Pin & Sleeve,yes,no,none,batch8,none,,plug|inlet|receptacle|connector|conn\\b|cord
+Control & Automation > Disconnect Switches,Control & Automation > Disconnect Switches,yes,no,none,batch8,none,shaft|handle|operating,disconnect|switch
+Power Distribution > Load Centers / Panelboards,Power Distribution > Load Centers / Panelboards,yes,no,none,batch8,none,,
+Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,yes,no,none,batch8,series,lug|kit|sub feed|neutral,
+Power Distribution > Metering & Temporary Power,Power Distribution > Metering & Temporary Power,no,no,none,batch8,none,,
+Power Distribution > Metering & Temporary Power,Tools & Meters > Storage,no,no,none,batch8,none,,

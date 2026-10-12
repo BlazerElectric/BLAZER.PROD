@@ -545,6 +545,16 @@ LOW_VALUE_NODES = (
     "Tools & Meters > Storage",
     "Tools & Meters > Safety Equipment",
     "Tools & Meters > Meters - Test",
+    "Fasteners & Hardware > Tapes",
+)
+# Small categories whose only sensible complements are other low-value items.
+SMALL_TOOL_NODES = (
+    "Tools & Meters > Apparel",
+    "Tools & Meters > Storage",
+    "Tools & Meters > Flashlights",
+    "Tools & Meters > Paint, Chemicals",
+    "Tools & Meters > Marking",
+    "Tools & Meters > Batteries",
 )
 TOP_ANCHORS = 1  # best sellers always offered; the rest rotate
 SPREAD_FACTOR = 10
@@ -815,7 +825,11 @@ def _spread(
     """Top sellers first, but rotate among the leading ones per target so the
     same few products are not suggested for every target of a large rule."""
     limit, anchor_count = MAX_PER_RULE, TOP_ANCHORS
-    if ranked and _node_key(ranked[0])[5:].startswith(LOW_VALUE_NODES):
+    if (
+        ranked
+        and _node_key(ranked[0])[5:].startswith(LOW_VALUE_NODES)
+        and not _node_key(target)[5:].startswith(SMALL_TOOL_NODES)
+    ):
         limit, anchor_count = MAX_PER_LOW_VALUE, 0
     if len(ranked) <= limit:
         return ranked

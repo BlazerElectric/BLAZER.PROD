@@ -2,3 +2,5 @@
 __pycache__/
 *.pyc
 enriched_products.checkpoint.csv
+product_accessories*.csv
+*.sample.csv

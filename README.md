@@ -70,3 +70,10 @@ Kits only top up products with fewer than 12 rule-based candidates, rotate
 the top 8 per slot by product ID so the same best sellers are not everywhere,
 and never add wallplates (colour matching stays with the device rules).
 Add jobs or slots by editing the CSV; no code changes are needed.
+
+### Fallbacks and thin pools
+
+- Rows tagged `thin` in `accessory_rules.csv` give extra, looser candidates for
+  categories that otherwise end up with very few (bits, hand tools, breakers).
+- Products still under 5 candidates are topped up from sibling subcategories of
+  the same main category, but only with the same brand or a shared keyword.

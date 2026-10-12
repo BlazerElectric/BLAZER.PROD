@@ -21,7 +21,7 @@ Fittings > PVC Fittings,"Fittings > Clips, Clamps, Hangers",no,no,strict,,,,
 "Conduit, Strut & Raceways > Strut","Fasteners & Hardware > Nuts, Bolts, Washers",no,no,none,,,,^(?!.*(fender|toggle|reducing|square washer|cut washer|flat cut|kit)).*(hex head|hex bolt|hex nut|lock ?washer|lock nut|1/2-13|3/8-16|5/16-18)
 "Conduit, Strut & Raceways > Threaded Rod & Accessories","Fasteners & Hardware > Nuts, Bolts, Washers",no,no,none,,,,
 "Conduit, Strut & Raceways > Threaded Rod & Accessories","Conduit, Strut & Raceways > Strut",no,no,none,,,,
-Boxes & Enclosures > Boxes - Metallic,Fittings > NM Cable Fittings,no,no,none,,,,
+Boxes & Enclosures > Boxes - Metallic,Fittings > NM Cable Fittings,no,no,none,,,,"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:cord|cbl|l-t|\btom\b|3/8|0\.37|duplex|90 degree|\bUV\b|loosener|ground)).*(?:connector|romex|strap|conn\b)"
 "Wire, Cable & Cord > Armored Cable","Fittings > MC, NMB, Liquidtight, Flex Fittings",no,no,none,,,,
 Connectors & Crimps > Lugs & Split Bolts,"Connectors & Crimps > Cold Shrink, Heat Shrink",no,no,none,,,,
 Data & Telecom > Low Voltage Cable,Data & Telecom > Workstation,no,no,none,,,,
@@ -257,7 +257,7 @@ Wiring Devices > Receptacles,Wiring Devices > Wallplates,no,yes,none,top100,none
 Wiring Devices > Switches,Wiring Devices > Wallplates,no,yes,none,top100,none,^(?=.*(decora|decorator|rocker)).*,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo|blank|insert|toggle|tog\b|duplex|trademaster|coax|port|tele|cable|usb|hdmi)).*(?:decora|decorator|rocker)
 Wiring Devices > Switches,Wiring Devices > Wallplates,no,yes,none,top100,none,^(?!.*(decora|decorator|rocker)).*,^(?!.*(?:decorator|decora|receptacle|duplex|blank|\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo|insert|recp|trademaster|coax|port|tele|cable|usb|hdmi|plate\b.*decor)).*(?:toggle|switch|\b1g\b|1-gang|1 gang)
 Wiring Devices > GFCI Personnel Protection Devices,Wiring Devices > Wallplates,no,yes,none,top100,none,,decorator|decora
-Boxes & Enclosures > Boxes - Metallic,Boxes & Enclosures > Boxes - Metallic,no,no,none,top100,box,box,cover|mud ring|plaster ring|extension ring|raised
+Boxes & Enclosures > Boxes - Metallic,Boxes & Enclosures > Boxes - Metallic,no,no,none,top100,box,box,^(?!.*(?:concrete|cncrt|tile|lkg|\b50A\b|\bHUB\b)).*(?:cover|mud ring|plaster ring|extension ring|raised)
 Boxes & Enclosures > Boxes - Metallic,Boxes & Enclosures > Boxes - Metallic,no,no,none,top100,box,cover|mud ring|plaster ring|extension ring|raised,^(?!.*(cover|ring|raised))
 Boxes & Enclosures > Boxes - Metallic,Wiring Devices > Wallplates,no,no,none,top100,none,gang|device|switch box|handy,wall plate|wallplate
 Boxes & Enclosures > Boxes - Metallic,Connectors & Crimps > Wire Connectors,no,no,none,top100,none,box,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
@@ -322,3 +322,6 @@ Wiring Devices > Wallplates,Wiring Devices > GFCI Personnel Protection Devices,n
 Wiring Devices > Wallplates,Wiring Devices > Receptacles,no,yes,none,top100,none,^(?=.*(?:\b2g\b|2-gang|2 gang))(?!.*(?:decora|decorator|toggle)).*(?:duplex|recp|outlet),^(?!.*(?:decora|decorator|single|sgl|\b6-|250v|usb)).*(?:receptacle|recp|duplex|dup\b|rcpt)
 Wiring Devices > Wallplates,Wiring Devices > Switches,no,yes,none,top100,none,^(?=.*(?:\b2g\b|2-gang|2 gang))(?!.*(?:decora|decorator|duplex|recp)).*toggle,^(?!.*(?:decora|deco ser|decorator|rocker)).*(?:switch|\bsw\b)
 Wiring Devices > Wallplates,Wiring Devices > Switches,no,yes,none,top100,none,^(?=.*(?:\b2g\b|2-gang|2 gang))(?=.*(?:decora|decorator)).*,decora|deco ser|decorator|rocker
+Boxes & Enclosures > Boxes - Metallic,Fittings > EMT Fittings,no,no,none,coverage,none,square|4sq|4-11/16|\bsq\b|handy|switch box|\b1g\b,"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:conduit|coupl|cplg|strap|grd|ground|cu\b)).*(?:connector|conn\b)"
+Boxes & Enclosures > Boxes - Metallic,"Fittings > MC, NMB, Liquidtight, Flex Fittings",no,no,none,coverage,none,square|4sq|4-11/16|\bsq\b|handy|switch box,^(?!.*(?:liquid|l-t|\bLT\b|90|1-1/|\b[1-4]IN\b)).*(?:\bMC\b|armored|flex|connector)
+Boxes & Enclosures > Boxes - Metallic,Fittings > Bushing / K.O. Seal / Locknuts,no,no,none,coverage,none,square|4sq|4-11/16|\bsq\b|handy|switch box,"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:ground|grnd|reducing|hub|knock out non)).*(?:locknut|bushing|k\.?o\.? seal)"

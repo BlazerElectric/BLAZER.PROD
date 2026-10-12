@@ -536,6 +536,16 @@ RANK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "BLAZER.RAN
 ORDERS_COL = "orders_6m"
 MIN_CANDIDATE_ORDERS = 2
 MAX_PER_RULE = 12
+MAX_PER_LOW_VALUE = 3
+# Consumables and tools that fit almost anything; a few per pool is enough.
+LOW_VALUE_NODES = (
+    "Connectors & Crimps > Wire Connectors",
+    "Tools & Meters > Hand Tools",
+    "Tools & Meters > Paint, Chemicals",
+    "Tools & Meters > Storage",
+    "Tools & Meters > Safety Equipment",
+    "Tools & Meters > Meters - Test",
+)
 TOP_ANCHORS = 1  # best sellers always offered; the rest rotate
 SPREAD_FACTOR = 10
 MIN_SUGGESTIONS = 5
@@ -804,15 +814,18 @@ def _spread(
 ) -> list[dict[str, str]]:
     """Top sellers first, but rotate among the leading ones per target so the
     same few products are not suggested for every target of a large rule."""
-    if len(ranked) <= MAX_PER_RULE:
+    limit, anchor_count = MAX_PER_RULE, TOP_ANCHORS
+    if ranked and _node_key(ranked[0])[5:].startswith(LOW_VALUE_NODES):
+        limit, anchor_count = MAX_PER_LOW_VALUE, 0
+    if len(ranked) <= limit:
         return ranked
-    anchors = ranked[:TOP_ANCHORS]
-    pool = ranked[TOP_ANCHORS : MAX_PER_RULE * SPREAD_FACTOR]
+    anchors = ranked[:anchor_count]
+    pool = ranked[anchor_count : limit * SPREAD_FACTOR]
     pool.sort(
         key=lambda c: zlib.crc32(f"{target[ID_COL]}|{c[ID_COL]}".encode())
     )
     return sorted(
-        anchors + pool[: MAX_PER_RULE - TOP_ANCHORS], key=lambda c: (-c.get(ORDERS_COL, 0), c[ID_COL])
+        anchors + pool[: limit - anchor_count], key=lambda c: (-c.get(ORDERS_COL, 0), c[ID_COL])
     )
 
 

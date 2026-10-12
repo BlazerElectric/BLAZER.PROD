@@ -301,9 +301,9 @@ Tools & Meters > Hand Tools,Tools & Meters > Flashlights / Work Lights,no,no,non
 Tools & Meters > Hand Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,thin,none,band ?saw|reamer,band ?saw|reamer|blade
 Tools & Meters > Hand Tools,Tools & Meters > Cordless Tools,yes,no,none,thin,none,band ?saw,band ?saw
 Tools & Meters > Hand Tools,Tools & Meters > Hand Tools,no,no,none,thin,none,fish tape,fish|glow|rod|leader|pull|string
-Power Distribution > Circuit Breakers,Tools & Meters > Safety Equipment,no,no,none,thin,none,,lock|tag
+Power Distribution > Circuit Breakers,Tools & Meters > Safety Equipment,no,no,none,thin,none,2 ?p(?:ole)?\b|3 ?p(?:ole)?\b|\b[23]p\b|/2p|/3p|main,lock|tag
 Power Distribution > Circuit Breakers,Power Distribution > Load Centers / Panelboards,no,no,none,thin,none,,ground|neutral|bar|cover|filler|label
-Power Distribution > Circuit Breakers,Tools & Meters > Meters - Test Equipment - Calculators,no,no,none,thin,none,,breaker finder|tester|circuit
+Power Distribution > Circuit Breakers,Tools & Meters > Meters - Test Equipment - Calculators,no,no,none,thin,none,gfci|gfi|afci|gfep|dual function|combo,breaker finder|tester|circuit
 Wiring Devices > Wallplates,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,coverage,none,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo)).*,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|\brnd\b|round|octag|\b4sq|4-11/16|ceiling|fan|alarm|exten|ext\b|cover|kit|filter|loadcenter|range|meter)).*(?:cu in|cu\.in|\b1g\b|1-?gang|switch box|sw box)
 Wiring Devices > Wallplates,Boxes & Enclosures > Boxes - Metallic,no,no,none,coverage,none,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo)).*,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|\brnd\b|round|octag|\b4sq|4-11/16|ceiling|fan|alarm|exten|ext\b|cover|kit|filter|loadcenter|range|meter)).*(?:handy|switch box|\b1g\b|1-gang|single)
 Wiring Devices > Wallplates,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,coverage,none,\b2g\b|2-gang|2 gang,\b2g\b|2-gang|2 gang

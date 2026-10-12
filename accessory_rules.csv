@@ -22,7 +22,7 @@ Fittings > PVC Fittings,"Fittings > Clips, Clamps, Hangers",no,no,strict,,,,
 "Conduit, Strut & Raceways > Threaded Rod & Accessories","Fasteners & Hardware > Nuts, Bolts, Washers",no,no,none,,,,
 "Conduit, Strut & Raceways > Threaded Rod & Accessories","Conduit, Strut & Raceways > Strut",no,no,none,,,,
 Boxes & Enclosures > Boxes - Metallic,Fittings > NM Cable Fittings,no,no,none,,,,"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:cord|cbl|l-t|\btom\b|3/8|0\.37|duplex|90 degree|\bUV\b|loosener|ground)).*(?:connector|romex|strap|conn\b)"
-"Wire, Cable & Cord > Armored Cable","Fittings > MC, NMB, Liquidtight, Flex Fittings",no,no,none,,,,
+"Wire, Cable & Cord > Armored Cable","Fittings > MC, NMB, Liquidtight, Flex Fittings",no,no,none,,,,^(?!.*(liquid|lqt|lqtght|sealtight|nmlt|\blt\b|pvc)).*
 Connectors & Crimps > Lugs & Split Bolts,"Connectors & Crimps > Cold Shrink, Heat Shrink",no,no,none,,gauge,,
 Data & Telecom > Low Voltage Cable,Data & Telecom > Workstation,no,no,none,,,,
 Data & Telecom > Low Voltage Cable,Data & Telecom > Cross Connectors,no,no,none,,,,
@@ -35,7 +35,7 @@ Tools & Meters > Safety Equipment,Tools & Meters > Apparel,no,no,none,,,,
 Tools & Meters > Apparel,Tools & Meters > Safety Equipment,no,no,none,,,,
 Tools & Meters > Meters - Test Equipment - Calculators,Tools & Meters > Batteries,no,no,none,,,,
 Tools & Meters > Cable Pulling & Hoist,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,,,,
-"Tools & Meters > Paint, Chemicals, Cleaning Supplies",Tools & Meters > Cable Pulling & Hoist,no,no,none,,,,
+"Tools & Meters > Paint, Chemicals, Cleaning Supplies",Tools & Meters > Cable Pulling & Hoist,no,no,none,,,lubricant|lube|pulling|wire.?lube|gel,
 Fittings > Conduit Bodies,Fittings > EMT Fittings,no,no,strict,,,,
 Fittings > Conduit Bodies,Fittings > Rigid Fittings,no,no,strict,,,,
 Fittings > Conduit Bodies,Fittings > Conduit Hubs,no,no,strict,,,,
@@ -70,7 +70,7 @@ Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > Power F
 Power Distribution > Circuit Breakers,Power Distribution > Load Centers / Panelboards,no,no,none,,series,,
 Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,no,no,none,,series,,
 "Wire, Cable & Cord > Building Wire",Connectors & Crimps > Wire Connectors,no,no,none,,gauge,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
-"Wire, Cable & Cord > Building Wire",Connectors & Crimps > Lugs & Split Bolts,no,no,none,,gauge,,
+"Wire, Cable & Cord > Building Wire",Connectors & Crimps > Lugs & Split Bolts,no,no,none,,gauge,^(?!.*(nm-b|romex|sheathed|\bmc\b|armored|\bua\b)).*,
 "Wire, Cable & Cord > Building Wire",Tools & Meters > Hand Tools,no,no,none,,gauge,,^(?!.*(plier|fish tape|puller)).*(strip|crimp)
 Connectors & Crimps > Wire Connectors,Tools & Meters > Hand Tools,no,no,none,,gauge,,^(?!.*(plier|fish tape|puller)).*(strip|crimp)
 Tools & Meters > Cordless Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,^(?!.*\b(blade|blades|bit|bits|wheel|wheels|jaw|replacement|holder|teeth|screw unit)\b).*(band saw),band saw
@@ -176,7 +176,7 @@ Fasteners & Hardware > Cable Management,"Wire, Cable & Cord > Building Wire",no,
 "Lighting Fixtures, Control > Occupancy Sensors","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,yes,none,coverage,none,,
 "Lighting Fixtures, Control > Occupancy Sensors",Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 "Lighting Fixtures, Control > Occupancy Sensors",Tools & Meters > Hand Tools,no,no,none,coverage,none,,screwdriver|strip|pliers
-Fasteners & Hardware > Tapes,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
+Fasteners & Hardware > Tapes,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,^(?!.*(duct|gaffer|masking|double|foam|carpet|painter)).*,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 Fasteners & Hardware > Tapes,Fasteners & Hardware > Tapes,no,no,none,coverage,none,^(?!.*(primer|dispenser|mastic)),dispenser|primer|mastic|filler|sealing|putty|self-fusing|rubber|duct|friction
 Fasteners & Hardware > Tapes,Fasteners & Hardware > Cable Management,no,no,none,coverage,none,,tie|wrap|loom|sleeve|clip|strap
 Fasteners & Hardware > Tapes,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,coverage,none,,cleaner|solvent|primer|spray|remover
@@ -186,8 +186,8 @@ Tools & Meters > Marking & Labeling,Tools & Meters > Hand Tools,no,no,none,cover
 Tools & Meters > Marking & Labeling,Fasteners & Hardware > Tapes,no,no,none,coverage,none,,electrical tape|vinyl
 Tools & Meters > Marking & Labeling,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 Tools & Meters > Marking & Labeling,"Wire, Cable & Cord > Building Wire",no,no,none,coverage,none,,thhn|mc|romex|nm-b
-Fasteners & Hardware > Screws,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,coverage,none,,insert bit|driver bit|bit set|nut ?driver|phillips|hex|torx|square
-Fasteners & Hardware > Screws,Tools & Meters > Hand Tools,no,no,none,coverage,none,,screwdriver|nut driver
+Fasteners & Hardware > Screws,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,coverage,none,^(?!.*(ground|grn|green|machine|\d+-32)).*,insert bit|driver bit|bit set|nut ?driver|phillips|hex|torx|square
+Fasteners & Hardware > Screws,Tools & Meters > Hand Tools,no,no,none,coverage,none,^(?!.*(ground|grn|green|machine|\d+-32)).*,screwdriver|nut driver
 Fasteners & Hardware > Screws,Fasteners & Hardware > Anchors,no,no,none,coverage,none,drywall|wood|lag|sheet metal|tek|self-drilling,anchor|toggle|wall|plug
 Fasteners & Hardware > Screws,Tools & Meters > Storage,no,no,none,coverage,none,,assortment|organizer|bin|kit
 Fasteners & Hardware > Screws,Fasteners & Hardware > Screws,yes,no,none,coverage,none,kit|assortment,assortment|kit|washer
@@ -236,7 +236,7 @@ Data & Telecom > Distribution Devices,"Data & Telecom > Cabinets, Racks & Wire M
 Data & Telecom > Distribution Devices,Data & Telecom > Tools,no,no,none,coverage,none,,punch|termination|impact|tester|cable|strip
 Data & Telecom > Distribution Devices,Data & Telecom > Distribution Devices,yes,no,none,coverage,none,,patch|block|panel|distribution|jumper|connector|bracket|mount
 "Wire, Cable & Cord > Service Wire",Connectors & Crimps > Lugs & Split Bolts,no,no,none,coverage,gauge,,
-"Wire, Cable & Cord > Service Wire","Fittings > Clips, Clamps, Hangers",no,no,none,coverage,none,,clamp|strap|hanger|insulator|spool|clevis
+"Wire, Cable & Cord > Service Wire","Fittings > Clips, Clamps, Hangers",no,no,none,coverage,none,,^(?!.*(beam|emt|grc|flange|conduit)).*(clamp|strap|hanger|insulator|spool|clevis)
 "Wire, Cable & Cord > Service Wire","Fittings > Flashings, Weatherhead",no,no,none,coverage,none,,weatherhead|mast|riser
 "Wire, Cable & Cord > Service Wire",Power Distribution > Metering & Temporary Power,no,no,none,coverage,none,,meter|socket|base
 "Wire, Cable & Cord > Service Wire",Connectors & Crimps > Grounding Products,no,no,none,coverage,none,,ground|rod|clamp|bonding|electrode
@@ -261,7 +261,7 @@ Boxes & Enclosures > Boxes - Metallic,Wiring Devices > Wallplates,no,no,none,top
 Boxes & Enclosures > Boxes - Metallic,Connectors & Crimps > Wire Connectors,no,no,none,top100,none,box,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 Boxes & Enclosures > Boxes - Metallic,Wiring Devices > Receptacles,no,no,none,top100,none,gang|device|handy|switch,receptacle
 Boxes & Enclosures > Boxes - Non-Metallic,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,top100,box,box|cover|ring,cover|ring|extension
-Boxes & Enclosures > Boxes - Non-Metallic,Wiring Devices > Wallplates,no,no,none,top100,none,gang|device|old work|new work,wall plate|wallplate
+Boxes & Enclosures > Boxes - Non-Metallic,Wiring Devices > Wallplates,no,no,none,top100,none,^(?!.*(round|octagon|ceiling|fan|pancake|fixture)).*(gang|device|old work|new work),wall plate|wallplate
 Boxes & Enclosures > Boxes - Non-Metallic,Connectors & Crimps > Wire Connectors,no,no,none,top100,none,box,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 Boxes & Enclosures > Boxes - Weatherproof,Boxes & Enclosures > Boxes - Weatherproof,no,no,none,top100,box,box,cover|gasket|plug|extension|in-use
 Boxes & Enclosures > Boxes - Weatherproof,Boxes & Enclosures > Boxes - Weatherproof,no,no,none,top100,box,cover,box|gasket|extension
@@ -271,7 +271,7 @@ Boxes & Enclosures > Boxes - Weatherproof,Wiring Devices > GFCI Personnel Protec
 "Wire, Cable & Cord > Building Wire",Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,top100,none,nm-b|sheathed|romex,old work|new work|box|gang
 "Wire, Cable & Cord > Building Wire",Connectors & Crimps > Wire Connectors,no,no,none,top100,gauge,nm-b|sheathed|romex,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 "Wire, Cable & Cord > Building Wire","Fittings > Clips, Clamps, Hangers",no,no,none,top100,none,nm-b|sheathed|romex,staple|romex|nm|strap|cable
-"Wire, Cable & Cord > Armored Cable",Boxes & Enclosures > Boxes - Metallic,no,no,none,top100,none,,box|ring
+"Wire, Cable & Cord > Armored Cable",Boxes & Enclosures > Boxes - Metallic,no,no,none,top100,none,,^(?!.*(extender|stabilizer|clip|flashing)).*(box|ring)
 "Wire, Cable & Cord > Armored Cable",Connectors & Crimps > Wire Connectors,no,no,none,top100,gauge,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 "Wire, Cable & Cord > Armored Cable","Fittings > Clips, Clamps, Hangers",no,no,none,top100,none,,mc|cable|strap|staple|clamp
 "Wire, Cable & Cord > Armored Cable",Tools & Meters > Hand Tools,no,no,none,top100,none,,cutter|ripper|stripper|bit|shear
@@ -323,3 +323,5 @@ Wiring Devices > Wallplates,Wiring Devices > Switches,no,yes,none,top100,none,^(
 Boxes & Enclosures > Boxes - Metallic,Fittings > EMT Fittings,no,no,none,coverage,none,square|4sq|4-11/16|\bsq\b|handy|switch box|\b1g\b,"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:conduit|coupl|cplg|strap|grd|ground|cu\b)).*(?:connector|conn\b)"
 Boxes & Enclosures > Boxes - Metallic,"Fittings > MC, NMB, Liquidtight, Flex Fittings",no,no,none,coverage,none,square|4sq|4-11/16|\bsq\b|handy|switch box,^(?!.*(?:liquid|l-t|\bLT\b|90|1-1/|\b[1-4]IN\b)).*(?:\bMC\b|armored|flex|connector)
 Boxes & Enclosures > Boxes - Metallic,Fittings > Bushing / K.O. Seal / Locknuts,no,no,none,coverage,none,square|4sq|4-11/16|\bsq\b|handy|switch box,"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:ground|grnd|reducing|hub|knock out non)).*(?:locknut|bushing|k\.?o\.? seal)"
+"Tools & Meters > Paint, Chemicals, Cleaning Supplies","Conduit, Strut & Raceways > Conduit - Non-Metallic",no,no,none,pvc cement,,cement|primer|solvent weld,
+"Tools & Meters > Paint, Chemicals, Cleaning Supplies",Fittings > PVC Fittings,no,no,none,pvc cement,,cement|primer|solvent weld,

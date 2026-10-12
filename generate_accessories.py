@@ -436,8 +436,23 @@ def _parse_size(token: str) -> float:
     return float(token)
 
 
+_CODE_SIZE = re.compile(
+    r"(?<![\w/.-])(\d+-\d+/\d+|\d+/\d+|\d+)(?:\s*(?:in\b|\"))?[\s-]*"
+    r"(?:emt|rgd|rmc|grc|imc|pvc|ts\b|flex|lt\b|lqt|ent\b)|\bnip\s+(\d+-\d+/\d+|\d+/\d+|\d+)x",
+    re.I,
+)
+
+
 def trade_sizes(row: dict[str, str]) -> list[float]:
     """Inch sizes in the order they appear; the first is the trade size."""
+    coded = []
+    for a, b in _CODE_SIZE.findall(str(row.get("PRODUCT", ""))):
+        try:
+            coded.append(_parse_size(a or b))
+        except (ValueError, ZeroDivisionError):
+            continue
+    if coded:
+        return coded
     text = f"{row.get('normalized_specs', '')} {row.get('clean_title', '')}"
     return [_parse_size(token) for token in _SIZE_PATTERN.findall(text)]
 
@@ -967,11 +982,41 @@ def _path_parts(row: dict[str, str]) -> list[str]:
     return [part.strip() for part in str(row.get(TAX_COL, "")).split(">")]
 
 
+_CONDUIT_MAINS = frozenset({"Conduit, Strut & Raceways", "Fittings"})
+_MATERIALS = (
+    ("pvc", re.compile(r"\bpvc\b|sch(?:edule)? ?(?:40|80)|kraloy", re.I)),
+    ("flex", re.compile(r"liquid|lqt|sealtight|\blt\b|\bnmlt|\bflex|\bfmc\b|greenfield", re.I)),
+    ("emt", re.compile(r"\bemt\b", re.I)),
+    ("rigid", re.compile(r"\brgd\b|rigid|\bgrc\b|\brmc\b|\bimc\b|\brgs\d", re.I)),
+)
+_MATERIAL_NODES = (
+    "Conduit - ",
+    "EMT Fittings",
+    "Rigid Fittings",
+    "PVC Fittings",
+    "Conduit Bodies",
+    "Conduit Hubs",
+    "MC, NMB, Liquidtight, Flex Fittings",
+    "Bushing / K.O. Seal / Locknuts",
+    "Straps",
+    "Clips, Clamps, Hangers",
+)
+
+
+_BODY_PART = re.compile(r"\b(?:cover|cvr|gasket|gask\w*|gk\w*)\b", re.I)
+
+
+def conduit_material(row: dict[str, str]) -> str:
+    text = _text(row)
+    found = [name for name, pattern in _MATERIALS if pattern.search(text)]
+    return found[0] if len(found) == 1 else ""
+
+
 _GAUGE_MAINS = frozenset({"Wire, Cable & Cord", "Connectors & Crimps"})
 
 
 def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
-    """Return 'gang', 'color', 'series', 'box' or 'gauge' when a pair can never go together, else ''."""
+    """Return 'gang', 'color', 'series', 'box', 'gauge', 'material', 'size' or 'part' when a pair can never go together, else ''."""
     tparts, cparts = _path_parts(target), _path_parts(cand)
     if tparts[0] == cparts[0] == "Power Distribution":
         tseries, cseries = breaker_series(target), breaker_series(cand)
@@ -981,6 +1026,22 @@ def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
         tkind, ckind = box_kind(target), box_kind(cand)
         if tkind and ckind and tkind != ckind:
             return "box"
+    if (
+        tparts[0] in _CONDUIT_MAINS
+        and cparts[0] in _CONDUIT_MAINS
+        and tparts[1:2][0].startswith(_MATERIAL_NODES)
+        and cparts[1:2][0].startswith(_MATERIAL_NODES)
+    ):
+        if tparts[1].startswith("Conduit - ") and cparts[1] == "Conduit Bodies" and _BODY_PART.search(
+            str(cand.get("PRODUCT", ""))
+        ):
+            return "part"
+        tmat, cmat = conduit_material(target), conduit_material(cand)
+        if tmat and cmat and tmat != cmat:
+            return "material"
+        tsizes, csizes = trade_sizes(target), trade_sizes(cand)
+        if tsizes and csizes and not any(abs(tsizes[0] - x) < 1e-6 for x in csizes):
+            return "size"
     if (
         tparts[0] in _GAUGE_MAINS
         and cparts[0] in _GAUGE_MAINS

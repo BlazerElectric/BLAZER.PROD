@@ -257,6 +257,17 @@ class HardConflictTests(unittest.TestCase):
         plate = self._row("PNS TP8-W 1 Gang WALLPLATE WHITE", "Wiring Devices > Wallplates")
         self.assertEqual(hard_conflict(box, plate), "gang")
 
+    def test_conduit_material_and_size_conflicts(self):
+        from generate_accessories import hard_conflict
+
+        emt = self._row("CON EMT 3/4-EMT * CONDUIT", "Conduit, Strut & Raceways > Conduit - Metallic")
+        pvc_fit = self._row("TB 3/4 PVC COUPLING", "Fittings > PVC Fittings")
+        emt_fit = self._row("AMF 3/4 EMT COMP CONN", "Fittings > EMT Fittings")
+        big_fit = self._row("AMF EC752US USA 1 EMT COMP CONN", "Fittings > EMT Fittings")
+        self.assertEqual(hard_conflict(emt, pvc_fit), "material")
+        self.assertEqual(hard_conflict(emt, big_fit), "size")
+        self.assertEqual(hard_conflict(emt, emt_fit), "")
+
     def test_color_mismatch_ignores_plugs(self):
         from generate_accessories import hard_conflict
 

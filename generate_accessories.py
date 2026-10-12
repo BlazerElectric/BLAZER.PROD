@@ -968,8 +968,12 @@ def _path_parts(row: dict[str, str]) -> list[str]:
 
 
 def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
-    """Return 'gang' or 'color' when a pair can never go together, else ''."""
+    """Return 'gang', 'color' or 'series' when a pair can never go together, else ''."""
     tparts, cparts = _path_parts(target), _path_parts(cand)
+    if tparts[0] == cparts[0] == "Power Distribution":
+        tseries, cseries = breaker_series(target), breaker_series(cand)
+        if tseries and cseries and tseries != cseries:
+            return "series"
     if tparts[0] not in GANG_MAINS or cparts[0] not in GANG_MAINS:
         return ""
     tgang, cgang = gang_count(target), gang_count(cand)

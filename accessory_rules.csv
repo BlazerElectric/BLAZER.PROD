@@ -23,7 +23,7 @@ Fittings > PVC Fittings,"Fittings > Clips, Clamps, Hangers",no,no,strict,,,,
 "Conduit, Strut & Raceways > Threaded Rod & Accessories","Conduit, Strut & Raceways > Strut",no,no,none,,,,
 Boxes & Enclosures > Boxes - Metallic,Fittings > NM Cable Fittings,no,no,none,,,,"^(?=.*(?:\b1/2|\b3/4|0\.50|0\.75))(?!.*(?:\b1-1/|\b1 1/|\b2IN|\b2-1/|\b[1-4]IN\b|\b[1-4] IN\b|\b[1-4]\""))(?!.*(?:cord|cbl|l-t|\btom\b|3/8|0\.37|duplex|90 degree|\bUV\b|loosener|ground)).*(?:connector|romex|strap|conn\b)"
 "Wire, Cable & Cord > Armored Cable","Fittings > MC, NMB, Liquidtight, Flex Fittings",no,no,none,,,,
-Connectors & Crimps > Lugs & Split Bolts,"Connectors & Crimps > Cold Shrink, Heat Shrink",no,no,none,,,,
+Connectors & Crimps > Lugs & Split Bolts,"Connectors & Crimps > Cold Shrink, Heat Shrink",no,no,none,,gauge,,
 Data & Telecom > Low Voltage Cable,Data & Telecom > Workstation,no,no,none,,,,
 Data & Telecom > Low Voltage Cable,Data & Telecom > Cross Connectors,no,no,none,,,,
 Data & Telecom > Low Voltage Cable,Data & Telecom > Tools,no,no,none,,,,
@@ -115,7 +115,7 @@ Boxes & Enclosures > Boxes - Explosionproof,Fittings > Explosionproof Fittings,n
 Data & Telecom > Audio Video Equipment,Data & Telecom > Workstation,no,no,none,,none,,
 Boxes & Enclosures > Enclosures - Commercial Type,Boxes & Enclosures > Enclosure Accessories,no,no,none,,none,,
 Boxes & Enclosures > Enclosure Accessories,Boxes & Enclosures > Enclosures - Commercial Type,no,no,none,,none,,
-Connectors & Crimps > Grounding Products,"Wire, Cable & Cord > Bare Copper",no,no,none,,none,,
+Connectors & Crimps > Grounding Products,"Wire, Cable & Cord > Bare Copper",no,no,none,,gauge,,
 Connectors & Crimps > Grounding Products,Connectors & Crimps > Welded Connections,no,no,none,,none,,
 "Wire, Cable & Cord > Bare Copper",Connectors & Crimps > Grounding Products,no,no,none,,none,,
 "Conduit, Strut & Raceways > Raceway Boxes - Metallic","Conduit, Strut & Raceways > Raceway - Metallic",no,no,none,,none,,
@@ -156,7 +156,7 @@ Tools & Meters > Hand Tools,Power Distribution > Circuit Breakers,no,no,none,cov
 "Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Hand Tools,no,no,none,coverage,none,knockout|punch|chassis,ratchet|wrench|driver|knockout|punch
 Connectors & Crimps > Wire Connectors,"Wire, Cable & Cord > Building Wire",no,no,none,coverage,gauge,wire|splic|lever|twist|push-in|nut|connector|wago|ideal,thhn|romex|nm-b|mc|building|copper|solid|stranded
 Connectors & Crimps > Wire Connectors,Tools & Meters > Hand Tools,no,no,none,coverage,none,,strip|crimp
-Connectors & Crimps > Wire Connectors,Connectors & Crimps > Lugs & Split Bolts,no,no,none,coverage,none,split|lug|connector,lug|split bolt|terminal
+Connectors & Crimps > Wire Connectors,Connectors & Crimps > Lugs & Split Bolts,no,no,none,coverage,gauge,split|lug|connector,lug|split bolt|terminal
 Tools & Meters > Cordless Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,coverage,none,drill|driver|impact|wrench|rotary|hammer,bit|driver|socket|hole|saw|blade|chuck|arbor
 Tools & Meters > Cordless Tools,Tools & Meters > Storage,no,no,none,coverage,none,,case|bag|bucket|packout|tool box|organizer
 Tools & Meters > Cordless Tools,Tools & Meters > Cordless Tools,yes,no,none,coverage,platform,^(?!.*(battery|charger)),battery|charger|bit|case|bag
@@ -210,11 +210,9 @@ Wiring Devices > Receptacles,Boxes & Enclosures > Boxes - Non-Metallic,no,no,non
 Wiring Devices > Receptacles,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,duplex|single|receptacle,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 Wiring Devices > Receptacles,Wiring Devices > Twistlock,yes,no,none,coverage,none,"locking|twist|turnlok|l\d{1,2}-\d{2}",plug|connector|receptacle|inlet
 Wiring Devices > Receptacles,Wiring Devices > Straight Blade 10-20 Amp,yes,no,none,coverage,amps,"^(?!.*(?:dup|duplex|decor|gfci|usb)).*(?:single|nema|\b\d{1,2}-\d{2}r\b)",plug|connector|cord
-Wiring Devices > Straight Blade 10-20 Amp,Wiring Devices > Receptacles,yes,no,none,coverage,none,plug,receptacle|outlet|inlet
-Wiring Devices > Straight Blade 10-20 Amp,Wiring Devices > Twistlock,yes,no,none,coverage,none,"plug|locking|twist|l\d{1,2}-\d{2}",receptacle|connector|inlet
-Wiring Devices > Twistlock,Wiring Devices > Twistlock,yes,no,none,coverage,none,,plug|connector|receptacle|inlet|cover|boot
-Wiring Devices > Twistlock,Wiring Devices > Receptacles,yes,no,none,coverage,none,,receptacle|plug
-Wiring Devices > Straight Blade 10-20 Amp,Wiring Devices > Straight Blade 10-20 Amp,yes,no,none,coverage,none,,plug|connector|cord|boot|cover
+Wiring Devices > Straight Blade 10-20 Amp,Wiring Devices > Receptacles,yes,no,none,coverage,amps,plug,receptacle|outlet|inlet
+Wiring Devices > Twistlock,Wiring Devices > Twistlock,yes,no,none,coverage,amps,,plug|connector|receptacle|inlet|cover|boot
+Wiring Devices > Straight Blade 10-20 Amp,Wiring Devices > Straight Blade 10-20 Amp,yes,no,none,coverage,amps,,plug|connector|cord|boot|cover
 Boxes & Enclosures > Floor Boxes,Boxes & Enclosures > Floor Boxes,yes,no,none,coverage,none,,cover|plate|carpet|flange|extension|adapter|insert
 Boxes & Enclosures > Floor Boxes,Wiring Devices > Receptacles,yes,no,none,coverage,none,,
 Boxes & Enclosures > Floor Boxes,"Conduit, Strut & Raceways > Conduit - Flexible",no,no,none,coverage,none,floor box|poke|activation,

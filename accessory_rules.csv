@@ -1,4 +1,5 @@
 target_path,accessory_path,same_brand,same_color,size_match,notes,match,target_keywords,accessory_keywords
+Wiring Devices > Receptacles,Wiring Devices > Wallplates,no,yes,none,device to plate,,,
 Wiring Devices > Specialty Switches,Wiring Devices > Wallplates,no,yes,none,device to plate,,,
 Wiring Devices > Combination Devices,Wiring Devices > Wallplates,no,yes,none,device to plate,,,
 Wiring Devices > Straight Blade 10-20 Amp,Wiring Devices > Wallplates,no,yes,none,device to plate,,,
@@ -34,7 +35,7 @@ Fuses & Accessories > Power Fuses,"Fuses & Accessories > Fuse Blocks, Holders & 
 Tools & Meters > Safety Equipment,Tools & Meters > Apparel,no,no,none,,,,
 Tools & Meters > Apparel,Tools & Meters > Safety Equipment,no,no,none,,,,
 Tools & Meters > Meters - Test Equipment - Calculators,Tools & Meters > Batteries,no,no,none,,,,
-Tools & Meters > Cable Pulling & Hoist,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,,,,
+Tools & Meters > Cable Pulling & Hoist,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,,,^(?!.*(?:grip|sheave|roller)).*,lubricant|lube|pulling|wire.?lube|gel|clearglide|polywater
 "Tools & Meters > Paint, Chemicals, Cleaning Supplies",Tools & Meters > Cable Pulling & Hoist,no,no,none,,,lubricant|lube|pulling|wire.?lube|gel,
 Fittings > Conduit Bodies,Fittings > EMT Fittings,no,no,strict,,,,
 Fittings > Conduit Bodies,Fittings > Rigid Fittings,no,no,strict,,,,
@@ -62,11 +63,12 @@ Data & Telecom > Tools,Data & Telecom > Workstation,no,no,none,,,,
 "Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,,,^(?!.*(?:0-10|010 ?v|\btube|\bt[5-8]\b|\bt12\b|hybrid)),
 "Lighting Fixtures, Control > Indoor Lighting - Recessed","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,,,,
 "Lighting Fixtures, Control > Indoor Lighting - Recessed","Lamps, Bulbs & Ballast > Drivers - LED",no,no,none,,,,
-"Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Lampholders, Adapters & Extensions",no,no,none,,,^(?!.*(\bhid\b|high ?bay|fan cooled|\btube|\bt[58]\b|jack|\ba\d{2}\b)),
-Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > General Purpose Fuses,no,no,none,,amps,,
-Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > Power Fuses,no,no,none,,amps,,
+"Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Lampholders, Adapters & Extensions",no,no,none,,,^(?!.*(\bhid\b|high ?bay|fan cooled|\btube|\bt[58]\b|jack|\ba\d{2}\b)),keyless|porcelain|cleat|pigtail|socket
+Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > General Purpose Fuses,no,no,none,,amps,^(?!.*(?:non[- ]fusible|non[- ]fused|not fusible)).*(?:fusible|fused).*(?:240v|250v),
+Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > Power Fuses,no,no,none,,amps,^(?!.*(?:non[- ]fusible|non[- ]fused|not fusible)).*(?:fusible|fused).*(?:600v|\bhd\b|heavy duty),600v|rk5|class j|ajt|trs
+
 Power Distribution > Circuit Breakers,Power Distribution > Load Centers / Panelboards,no,no,none,,series,,
-Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,no,no,none,,series,^(?!.*(?:ground bar|neutral|\bbar\b|\bkit\b|cover|filler|bonding|lug)).*,
+Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,no,no,none,,series,^(?!.*(?:ground bar|neutral bar|filler plate|\bcover screws?\b|\blug kit\b|\bneutral lug\b|sub.?feed lug)).*,
 "Wire, Cable & Cord > Building Wire",Connectors & Crimps > Wire Connectors,no,no,none,,gauge,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 "Wire, Cable & Cord > Building Wire",Connectors & Crimps > Lugs & Split Bolts,no,no,none,,gauge,^(?!.*(nm-b|romex|sheathed|\bmc\b|armored|\bua\b)).*,
 "Wire, Cable & Cord > Building Wire",Tools & Meters > Hand Tools,no,no,none,,gauge,,^(?!.*(plier|fish tape|puller)).*(strip|crimp)
@@ -75,7 +77,7 @@ Tools & Meters > Cordless Tools,"Tools & Meters > Bits, Blades, Punches, Holesaw
 "Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Corded Tools,no,no,none,,none,band saw,^(?!.*\b(blade|blades|bit|bits|wheel|wheels|jaw|replacement|holder|teeth|screw unit)\b).*(band saw)
 Tools & Meters > Corded Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,^(?!.*\b(blade|blades|bit|bits|wheel|wheels|jaw|replacement|holder|teeth|screw unit)\b).*(band saw),band saw
 Tools & Meters > Cordless Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,^(?!.*\b(blade|blades|bit|bits|wheel|wheels|jaw|replacement|holder|teeth|screw unit)\b).*(drill|driver|rotary hammer),hole saw|holesaw|step drill|drill bit|spade bit|auger|SDS|core bit
-"Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Corded Tools,no,no,none,,none,hole saw|holesaw|step drill|drill bit|spade bit|auger|SDS|core bit,^(?!.*\b(blade|blades|bit|bits|wheel|wheels|jaw|replacement|holder|teeth|screw unit)\b).*(drill|driver|rotary hammer)
+"Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Corded Tools,no,no,none,,none,ship auger|selfeed|self-feed|large hole saw,^(?!.*\b(blade|blades|bit|bits|wheel|wheels|jaw|replacement|holder|teeth|screw unit)\b).*(drill|rotary hammer)
 Tools & Meters > Corded Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,^(?!.*\b(blade|blades|bit|bits|wheel|wheels|jaw|replacement|holder|teeth|screw unit)\b).*(drill|driver|rotary hammer),hole saw|holesaw|step drill|drill bit|spade bit|auger|SDS|core bit
 Tools & Meters > Cordless Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,^(?!.*\b(blade|blades|bit|bits|wheel|wheels|jaw|replacement|holder|teeth|screw unit)\b).*(hackzall|sawzall|reciprocating|recip),reciprocating|hackzall|sawzall|recip
 "Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Corded Tools,no,no,none,,none,reciprocating|hackzall|sawzall|recip,^(?!.*\b(blade|blades|bit|bits|wheel|wheels|jaw|replacement|holder|teeth|screw unit)\b).*(hackzall|sawzall|reciprocating|recip)
@@ -94,14 +96,14 @@ Tools & Meters > Batteries,Tools & Meters > Cordless Tools,yes,no,none,,platform
 Tools & Meters > Hand Tools,Tools & Meters > Batteries,no,no,none,,none,laser|level|tester|light,alkaline|AA|AAA|9-volt|coin
 Tools & Meters > Hand Tools,Tools & Meters > Marking & Labeling,no,no,none,,none,marker|pencil|scribe|layout,marker|pencil
 Tools & Meters > Marking & Labeling,Tools & Meters > Marking & Labeling,yes,no,none,,none,printer|label maker|labeler,tape|cartridge|ribbon|cassette|label
-Control & Automation > Disconnect Switches,Fuses & Accessories > General Purpose Fuses,no,no,none,,amps,,
-Control & Automation > Disconnect Switches,Fuses & Accessories > Power Fuses,no,no,none,,amps,,
+Control & Automation > Disconnect Switches,Fuses & Accessories > General Purpose Fuses,no,no,none,,amps,^(?!.*(?:non-fus|nonfus|unfused|pullout)),
+Control & Automation > Disconnect Switches,Fuses & Accessories > Power Fuses,no,no,none,,amps,^(?!.*(?:non-fus|nonfus|unfused|pullout)),
 Control & Automation > Drives,Control & Automation > Pilot Devices,no,no,none,,none,,
 Control & Automation > Drives,Control & Automation > Relays,no,no,none,,none,,
 Control & Automation > Drives,Control & Automation > Terminal Blocks,no,no,none,,none,,
 "Lighting Fixtures, Control > Photocells","Lighting Fixtures, Control > Outdoor Lighting",no,no,none,,none,,
 "Lighting Fixtures, Control > Outdoor Lighting","Lighting Fixtures, Control > Photocells",no,no,none,,none,,^(?!.*(rcpt|recp|receptacle|lkg))
-"Lighting Fixtures, Control > Outdoor Lighting","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,,none,,^(?!.*(jack|cat\d|tube|\bt8|\bt5|retrofit))
+"Lighting Fixtures, Control > Outdoor Lighting","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,,none,^(?!.*(?:\bled\b|integrated|wallpack|flood|step light)),^(?!.*(jack|cat\d|tube|\bt8|\bt5|retrofit))
 "Lighting Fixtures, Control > Photocells","Lighting Fixtures, Control > Timer Controls",no,no,none,,none,,
 "Fans, Heaters > Fans & Fan Controls",Boxes & Enclosures > Boxes - Metallic,no,no,none,,none,^(?!.*(control|switch|remote|dimmer)),fan|ceiling
 "Fans, Heaters > Fans & Fan Controls",Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,,none,^(?!.*(control|switch|remote|dimmer)),fan|ceiling
@@ -113,8 +115,8 @@ Boxes & Enclosures > Boxes - Explosionproof,Fittings > Explosionproof Fittings,n
 Data & Telecom > Audio Video Equipment,Data & Telecom > Workstation,no,no,none,,none,,
 Boxes & Enclosures > Enclosures - Commercial Type,Boxes & Enclosures > Enclosure Accessories,no,no,none,,none,,
 Boxes & Enclosures > Enclosure Accessories,Boxes & Enclosures > Enclosures - Commercial Type,no,no,none,,none,,
-Connectors & Crimps > Grounding Products,"Wire, Cable & Cord > Bare Copper",no,no,none,,gauge,,
-Connectors & Crimps > Grounding Products,Connectors & Crimps > Welded Connections,no,no,none,,none,,
+Connectors & Crimps > Grounding Products,"Wire, Cable & Cord > Bare Copper",no,no,none,,none,,^(?!.*(?:rg6|cat\d)).*(?:bare|solid|stranded)
+Connectors & Crimps > Grounding Products,Connectors & Crimps > Welded Connections,no,no,none,,none,cadweld|exothermic,
 "Wire, Cable & Cord > Bare Copper",Connectors & Crimps > Grounding Products,no,no,none,,none,,
 "Conduit, Strut & Raceways > Raceway Boxes - Metallic","Conduit, Strut & Raceways > Raceway - Metallic",yes,no,none,,none,,
 "Conduit, Strut & Raceways > Raceway - Metallic","Conduit, Strut & Raceways > Raceway Boxes - Metallic",yes,no,none,,none,,
@@ -135,21 +137,21 @@ Tools & Meters > Storage,Tools & Meters > Hand Tools,no,no,none,,none,tool (bag|
 Tools & Meters > Hand Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,jab saw|hacksaw|keyhole,jab saw|hacksaw
 Tools & Meters > Hand Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,utility knife|knife,utility|knife
 Tools & Meters > Hand Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,,none,screwdriver|nut driver|driver set|ratchet,insert bit|screwdriver bit|driver bit|bit set|hex bit|torx|phillips|slotted
-Fasteners & Hardware > Screws,"Fasteners & Hardware > Nuts, Bolts, Washers",no,no,none,,thread,,^(?!.*(toggle|fender|square washer|cut washer|flat washer|lag|carriage))
-"Fasteners & Hardware > Nuts, Bolts, Washers",Fasteners & Hardware > Screws,no,no,none,,thread,^(?!.*(?:reduc|bonding)).*,
-Power Distribution > Circuit Breakers,Power Distribution > Load Centers / Panelboards,yes,no,none,coverage,none,,
-Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,yes,no,none,coverage,none,^(?!.*(?:ground bar|neutral|\bbar\b|\bkit\b|cover|filler|bonding|lug)).*,
+Fasteners & Hardware > Screws,"Fasteners & Hardware > Nuts, Bolts, Washers",no,no,none,,thread,,^(?!.*(toggle|fender|square washer|reducing|lag|carriage)).*(?:hex nut|lock nut|lockwasher|lock washer|split lw|washers?|flat washer)
+"Fasteners & Hardware > Nuts, Bolts, Washers",Fasteners & Hardware > Screws,no,no,none,,thread,^(?!.*(?:reduc|bonding)).*,^(?!.*(?:drywall|sheetrock|tek|lath|self-drill)).*(?:rhms|fhms|cap screw|hex head|machine screw|bolt)
+Power Distribution > Circuit Breakers,Power Distribution > Load Centers / Panelboards,yes,no,none,coverage,series,^(?!.*(?:din rail|minicb|mini cb|l9-\d)),
+Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,yes,no,none,coverage,series,^(?!.*(?:din rail|minicb|mini cb|l9-\d)),^(?!.*(?:ground bar|neutral bar|filler plate|\bcover screws?\b|\blug kit\b|\bneutral lug\b|sub.?feed lug)).*,
 Power Distribution > Circuit Breakers,Power Distribution > Circuit Breakers,yes,no,none,coverage,none,^(?!.*(lock|handle|filler|accessor|bracket|padlock|kit)),lock|padlock|handle tie|filler|trip|shunt|auxiliary|bracket|neutral
 Power Distribution > Load Centers / Panelboards,Power Distribution > Load Centers / Panelboards,yes,no,none,coverage,none,^(?!.*(ground bar|filler|cover|kit|lug)),ground bar|filler|cover|lug kit|neutral|sub-feed|hold.?down|barrier
 Tools & Meters > Hand Tools,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,strip|crimp|cutter,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 Tools & Meters > Hand Tools,Fasteners & Hardware > Tapes,no,no,none,coverage,none,strip|cutter|knife|scissor,electrical tape|vinyl
 Tools & Meters > Hand Tools,Tools & Meters > Cable Pulling & Hoist,no,no,none,coverage,none,fish tape|fish rod|glow rod|pulling,fish tape|fish rod|glow|leader|mule
-Tools & Meters > Hand Tools,Tools & Meters > Hand Tools,yes,no,none,coverage,none,screwdriver|nut driver|ratchet|socket,socket|ratchet|extension|adapter|bit holder|screwdriver|nut driver
+Tools & Meters > Hand Tools,Tools & Meters > Hand Tools,yes,no,none,coverage,none,ratchet|socket,socket|ratchet|extension|adapter|bit holder
 Tools & Meters > Hand Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,coverage,none,ratchet|socket|screwdriver|driver|wrench|drill|chuck,insert bit|driver bit|bit set|socket adapter|hex bit|torx|phillips|slotted
 Tools & Meters > Hand Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,coverage,none,knockout|punch|hole,knockout|punch|hole saw|step bit
 Tools & Meters > Hand Tools,Power Distribution > Circuit Breakers,no,no,none,coverage,none,tester|finder|meter,breaker
-"Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Corded Tools,no,no,none,coverage,none,bit|driver|auger|bellhanger|spade|forstner|tap|hole,drill|driver|impact|rotary hammer
-"Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Corded Tools,no,no,none,coverage,none,saw blade|blade,saw|oscillating|multi-tool|multitool
+"Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Corded Tools,no,no,none,coverage,none,heavy duty auger|large selfeed,drill|rotary hammer
+"Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Corded Tools,no,no,none,coverage,none,^(?!.*(?:omt|oscillat|multi-tool|starlock)).*(?:saw blade|blade),saw|oscillating|multi-tool|multitool
 "Tools & Meters > Bits, Blades, Punches, Holesaws","Tools & Meters > Bits, Blades, Punches, Holesaws",yes,no,none,coverage,none,bit|hole saw|holesaw|auger|spade,arbor|pilot|adapter|extension|chuck|bit holder|magnetic|bit set|case
 "Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Hand Tools,no,no,none,coverage,none,knockout|punch|chassis,ratchet|wrench|driver|knockout|punch
 Connectors & Crimps > Wire Connectors,"Wire, Cable & Cord > Building Wire",no,no,none,coverage,gauge,wire|splic|lever|twist|push-in|nut|connector|wago|ideal,thhn|romex|nm-b|mc|building|copper|solid|stranded
@@ -190,7 +192,7 @@ Fasteners & Hardware > Screws,Fasteners & Hardware > Anchors,no,no,none,coverage
 Fasteners & Hardware > Screws,Tools & Meters > Storage,no,no,none,coverage,none,,assortment|organizer|bin|kit
 Fasteners & Hardware > Screws,Fasteners & Hardware > Screws,yes,no,none,coverage,none,kit|assortment,assortment|kit|washer
 Power Distribution > Safety Switches / Disconnects,Power Distribution > Safety Switches / Disconnects,yes,no,none,coverage,none,,^(?!.*(\bswitch\b|disconnect)).*(hub|interlock|neutral|ground|handle|padlock|auxiliary|lockout)
-Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > General Purpose Fuses,no,no,none,coverage,amps,fusible,
+Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > General Purpose Fuses,no,no,none,coverage,amps,^(?!.*(?:non[- ]fusible|non[- ]fused|not fusible)).*(?:fusible|fused).*(?:240v|250v),
 Power Distribution > Safety Switches / Disconnects,Fittings > Conduit Hubs,no,no,none,coverage,none,3r|nema 3|raintight|rainproof|outdoor|weather,
 Data & Telecom > Non-Metallic Raceway,Data & Telecom > Non-Metallic Raceway,yes,no,none,coverage,none,,elbow|coupling|end|fitting|cover|box|tee|clip|adapter|base|bracket
 Data & Telecom > Non-Metallic Raceway,Wiring Devices > Wallplates,no,no,none,coverage,none,device box|raceway,
@@ -290,7 +292,7 @@ Data & Telecom > Grounding and Bonding,Tools & Meters > Hand Tools,no,no,none,to
 "Lighting Fixtures, Control > Indoor Lighting",Connectors & Crimps > Wire Connectors,no,no,none,fixture,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 "Lighting Fixtures, Control > Indoor Lighting",Wiring Devices > Switches,no,no,none,fixture,none,0-10|010 ?v,0-10|dvstv
 "Fire Alarm, Safety, Security > Fire Equipment","Fire Alarm, Safety, Security > Fire Equipment",no,no,none,coverage,none,smoke|alarm|detector,test spray|tester|cleaner
-"Tools & Meters > Bits, Blades, Punches, Holesaws","Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,thin,none,^(?!.*(?:knife|skinning)),cutting|lubricant|paste|oil|fluid|wax
+"Tools & Meters > Bits, Blades, Punches, Holesaws","Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,thin,none,^(?!.*(?:knife|skinning|omt|oscillat|multi-tool|starlock|sawzall|recip|torch|nitrus|\bax\b)),cutting|lubricant|paste|oil|fluid|wax
 "Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Cordless Tools,yes,no,none,thin,none,reciproc|torch|recip|sawzall|\bax\b,reciproc|sawzall
 "Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Cordless Tools,yes,no,none,thin,none,band ?saw,band ?saw
 "Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Cordless Tools,yes,no,none,thin,none,hole ?saw|arbor|drill bit|step bit|spade|auger|carbide bit|hex bit|jobber|kit,drill|driver|hammer
@@ -300,8 +302,8 @@ Tools & Meters > Hand Tools,Tools & Meters > Flashlights / Work Lights,no,no,non
 Tools & Meters > Hand Tools,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,thin,none,band ?saw|reamer,band ?saw|reamer|blade
 Tools & Meters > Hand Tools,Tools & Meters > Cordless Tools,yes,no,none,thin,none,band ?saw,band ?saw
 Tools & Meters > Hand Tools,Tools & Meters > Hand Tools,no,no,none,thin,none,fish tape,fish|glow|rod|leader|pull|string
-Power Distribution > Circuit Breakers,Tools & Meters > Safety Equipment,no,no,none,thin,none,2 ?p(?:ole)?\b|3 ?p(?:ole)?\b|\b[23]p\b|/2p|/3p|main,lock|tag
-Power Distribution > Circuit Breakers,Power Distribution > Load Centers / Panelboards,no,no,none,thin,none,,ground|neutral|bar|cover|filler|label
+Power Distribution > Circuit Breakers,Tools & Meters > Safety Equipment,no,no,none,thin,none,\b[23] ?[- ]?pole\b|\b[23]p\b|/2p|/3p|\bmain\b|100a|200a|225a|mccb,lock|tag
+Power Distribution > Circuit Breakers,Power Distribution > Load Centers / Panelboards,no,no,none,thin,none,^(?!.*(?:din rail|minicb|mini cb|l9-\d)).*,ground|neutral|bar|cover|filler|label
 Power Distribution > Circuit Breakers,Tools & Meters > Meters - Test Equipment - Calculators,no,no,none,thin,none,gfci|gfi|afci|gfep|dual function|combo,breaker finder|tester|circuit
 Wiring Devices > Wallplates,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,coverage,none,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo)).*,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|\brnd\b|round|octag|\b4sq|4-11/16|ceiling|fan|alarm|exten|ext\b|cover|kit|filter|loadcenter|range|meter)).*(?:cu in|cu\.in|\b1g\b|1-?gang|switch box|sw box)
 Wiring Devices > Wallplates,Boxes & Enclosures > Boxes - Metallic,no,no,none,coverage,none,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo)).*,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|\brnd\b|round|octag|\b4sq|4-11/16|ceiling|fan|alarm|exten|ext\b|cover|kit|filter|loadcenter|range|meter)).*(?:handy|switch box|\b1g\b|1-gang|single)
@@ -321,7 +323,7 @@ Boxes & Enclosures > Boxes - Metallic,Fittings > Bushing / K.O. Seal / Locknuts,
 "Tools & Meters > Paint, Chemicals, Cleaning Supplies","Conduit, Strut & Raceways > Conduit - Non-Metallic",no,no,none,pvc cement,,cement|primer|solvent weld,
 "Tools & Meters > Paint, Chemicals, Cleaning Supplies",Fittings > PVC Fittings,no,no,none,pvc cement,,cement|primer|solvent weld,
 Connectors & Crimps > Lugs & Split Bolts,"Wire, Cable & Cord > Building Wire",no,no,none,lug,gauge,,^(?!.*(nm-b|romex|sheathed|\bmc\b)).*(thhn|thwn|xhhw|use|ser\b|se[ru]?\b|\bcu\b|\bal\b)
-Connectors & Crimps > Lugs & Split Bolts,Tools & Meters > Hand Tools,no,no,none,lug,none,,crimp|cutter|cable cutter|stripper|wrench|torque
+Connectors & Crimps > Lugs & Split Bolts,Tools & Meters > Hand Tools,no,no,none,lug,none,,^(?!.*(?:mc cutter|bx & flex|conduit)).*(?:crimp|cable cutter|stripper|wrench|torque)
 Connectors & Crimps > Lugs & Split Bolts,"Connectors & Crimps > Cold Shrink, Heat Shrink",no,no,none,lug,gauge,,
 Connectors & Crimps > Lugs & Split Bolts,Fasteners & Hardware > Tapes,no,no,none,lug,none,,vinyl|electrical tape|rubber|mastic
 Connectors & Crimps > Lugs & Split Bolts,Connectors & Crimps > Lugs & Split Bolts,no,no,none,lug,none,,boot|cover|anti|oxide|joint compound|insulat|cap
@@ -343,7 +345,7 @@ Control & Automation > Drives,Fuses & Accessories > General Purpose Fuses,no,no,
 "Lighting Fixtures, Control > Photocells","Lighting Fixtures, Control > Photocells",no,no,none,batch3,none,,^(?!.*(rcpt|recp|receptacle|lkg)).*(mount|stem|swivel|adapter|bracket|arm|conduit|cell|control)
 "Lighting Fixtures, Control > Photocells",Connectors & Crimps > Wire Connectors,no,no,none,batch3,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gel))
 "Lighting Fixtures, Control > Photocells","Lighting Fixtures, Control > Outdoor Lighting",no,no,none,batch3,none,,
-Tools & Meters > Marking & Labeling,Tools & Meters > Marking & Labeling,no,no,none,batch4,none,arc flash|warning|danger|caution|label,label|tag|sign|lockout|arc flash|warning|danger
+Tools & Meters > Marking & Labeling,Tools & Meters > Marking & Labeling,no,no,none,batch4,none,arc flash|warning|danger|caution|label,^(?!.*(?:dymo|rhino|cartridge|ribbon|vinyl tape)).*(?:label|tag|sign|lockout|placard|arc flash|warning|danger)
 Power Distribution > Metering & Temporary Power,Connectors & Crimps > Grounding Products,no,no,none,batch4,none,meter|socket,
 Power Distribution > Metering & Temporary Power,Data & Telecom > Grounding and Bonding,no,no,none,batch4,none,meter|socket,
 Power Distribution > Metering & Temporary Power,"Wire, Cable & Cord > Service Wire",no,no,none,batch4,none,meter|socket,
@@ -368,13 +370,16 @@ Data & Telecom > Low Voltage Cable,Connectors & Crimps > Wire Connectors,no,no,n
 Fittings > Bushing / K.O. Seal / Locknuts,Fittings > Bushing / K.O. Seal / Locknuts,no,no,strict,batch6b,none,,locknut|bushing
 Fittings > Bushing / K.O. Seal / Locknuts,Fittings > Conduit Hubs,no,no,strict,batch6b,none,,
 "Lamps, Bulbs & Ballast > Drivers - LED","Lighting Fixtures, Control > Indoor Lighting",no,no,none,batch6b,none,,
-"Lamps, Bulbs & Ballast > Drivers - LED","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,batch6b,none,,led|0-10|0 ?- ?10|elv
+"Lamps, Bulbs & Ballast > Drivers - LED","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,batch6b,none,0-10|dimmable|dim,0-10|dvstv|rh4fbl|mrf2s|powpak|rmjs
+"Lamps, Bulbs & Ballast > Drivers - LED","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,triac_drivers,none,^(?!.*(?:0-10|010)).*(?:triac|phase|elv),^(?!.*(?:0-10|010)).*(?:aycl|ctcl|dvcl|radiant)
 "Lamps, Bulbs & Ballast > Drivers - LED",Connectors & Crimps > Wire Connectors,no,no,none,batch6b,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 "Lamps, Bulbs & Ballast > Drivers - LED","Lamps, Bulbs & Ballast > Drivers - LED",yes,no,none,batch6b,none,,
 "Lamps, Bulbs & Ballast > Drivers - LED","Lighting Fixtures, Control > Lampholders, Adapters & Extensions",no,no,none,batch6b,none,,
 "Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Indoor Lighting",no,no,none,batch6b,none,hid|high ?bay|retrofit|fan cooled,high ?bay|low ?bay|fixture|wrap|vapor|strip
 "Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,batch6b,none,dim,led
-"Lamps, Bulbs & Ballast > Bulbs - LED","Lamps, Bulbs & Ballast > Bulbs - LED",yes,no,none,batch6b,none,,^(?!.*(jack|cat\d))
+"Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Lampholders, Adapters & Extensions",no,no,none,t8_tube,none,\bt[58]\b|\bt12\b|tube|linear|u-bend,tombstone|bipin|bi-pin|socket|retro
+"Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Indoor Lighting",no,no,none,t8_fixture,none,\bt[58]\b|\bt12\b|tube|linear|u-bend,strip|directdrive|channel
+"Lamps, Bulbs & Ballast > Bulbs - LED",Connectors & Crimps > Wire Connectors,no,no,none,t8_wires,none,\bt[58]\b|\bt12\b|tube|linear|u-bend,wire.?nut|wing.?nut|twister
 Wiring Devices > GFCI Personnel Protection Devices,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,coverage,none,,^(?!.*(?:plate|ring|cover|alarm|\b2g\b|2-gang|two.gang|3g|\b3-gang|round|rnd|fan)).*(?:old work|new work|1-gang|single|1g|zip|1g\b|\bsw box|device)
 Wiring Devices > GFCI Personnel Protection Devices,Connectors & Crimps > Wire Connectors,no,no,none,coverage,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 "Fittings > Clips, Clamps, Hangers",Boxes & Enclosures > Boxes - Metallic,no,no,none,batch7,none,t-?bar|box hanger,ceiling|octagon|\boct|round|old work|4.?sq
@@ -406,7 +411,7 @@ Tools & Meters > Flashlights / Work Lights,Tools & Meters > Batteries,no,no,none
 Tools & Meters > Flashlights / Work Lights,Tools & Meters > Storage,no,no,none,batch8,none,,
 Tools & Meters > Flashlights / Work Lights,Tools & Meters > Safety Equipment,no,no,none,batch8,none,,
 Tools & Meters > Flashlights / Work Lights,Tools & Meters > Flashlights / Work Lights,no,no,none,batch8,none,,
-Tools & Meters > Marking & Labeling,Tools & Meters > Marking & Labeling,no,no,none,batch8,none,,
+Tools & Meters > Marking & Labeling,Tools & Meters > Marking & Labeling,no,no,none,batch8,none,^(?!.*(?:disconnect|wop label|warning)).*,
 Tools & Meters > Marking & Labeling,Fasteners & Hardware > Tapes,no,no,none,batch8,none,,electrical tape|vinyl
 Tools & Meters > Marking & Labeling,Fasteners & Hardware > Cable Management,no,no,none,batch8,none,,
 Tools & Meters > Marking & Labeling,"Connectors & Crimps > Cold Shrink, Heat Shrink",no,no,none,batch8,none,,
@@ -418,7 +423,7 @@ Tools & Meters > Marking & Labeling,"Connectors & Crimps > Cold Shrink, Heat Shr
 "Fans, Heaters > Heat Cable",Fasteners & Hardware > Tapes,no,no,none,batch8,none,,
 "Fans, Heaters > Heat Cable",Connectors & Crimps > Wire Connectors,no,no,none,batch8,none,,
 "Fans, Heaters > Heat Cable","Fans, Heaters > Heaters & Thermostats",no,no,none,batch8,none,,thermostat|controller|sensor
-"Lighting Fixtures, Control > Lampholders, Adapters & Extensions","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,batch8,none,,
+"Lighting Fixtures, Control > Lampholders, Adapters & Extensions","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,batch8,none,keyless|porcelain|cleat|pigtail|socket,^(?!.*(?:tube|linear|t[58]|u-bend|panel|troffer|high ?bay)).*(?:a19|a21|medium base|e26|omni|standard|bulb|lamp)
 "Lighting Fixtures, Control > Lampholders, Adapters & Extensions",Connectors & Crimps > Wire Connectors,no,no,none,batch8,none,,
 "Lighting Fixtures, Control > Lampholders, Adapters & Extensions",Boxes & Enclosures > Boxes - Metallic,no,no,none,batch8,none,,octagon|\\boct|4.?sq
 "Lighting Fixtures, Control > Lampholders, Adapters & Extensions","Lighting Fixtures, Control > Lampholders, Adapters & Extensions",no,no,none,batch8,none,,chain|pull|cord|socket|adapter
@@ -440,7 +445,7 @@ Fasteners & Hardware > Cable Management,"Wire, Cable & Cord > Building Wire",no,
 Fasteners & Hardware > Cable Management,Fittings > NM Cable Fittings,no,no,none,batch9,none,stack,
 Fasteners & Hardware > Cable Management,"Fittings > Clips, Clamps, Hangers",no,no,none,batch9,none,stack,staple|romex|nm
 Fasteners & Hardware > Cable Management,Tools & Meters > Hand Tools,no,no,none,batch9,none,stack,staple|hammer|tacker
-Wiring Devices > Receptacles,Wiring Devices > Wallplates,no,no,none,batch9,none,range|dryer|50 amp|30 amp|nema 14|nema 10|nema 6,range|dryer
+Wiring Devices > Receptacles,Wiring Devices > Wallplates,no,no,none,batch9,none,range|dryer|50 amp|30 amp|nema 14|nema 10|nema 6,range|dryer|power outlet|2\.15|703
 "Wire, Cable & Cord > Building Wire",Connectors & Crimps > Lugs & Split Bolts,no,no,none,batch9,none,mobile home|feeder,\bAL\b|alum|dual
 "Wire, Cable & Cord > Building Wire",Power Distribution > Load Centers / Panelboards,no,no,none,batch9,none,mobile home|feeder,main|loadcenter|load center
 "Connectors & Crimps > Small Terminals, Forks, Rings",Tools & Meters > Hand Tools,no,no,none,batch10,none,,crimp
@@ -459,3 +464,320 @@ Boxes & Enclosures > Boxes - Metallic,Fasteners & Hardware > Screws,no,no,none,b
 Caddy > Stud Wall,Fasteners & Hardware > Screws,no,no,none,batch11,none,,wafer|framing|drywall|wood screw|sheet metal
 Caddy > Stud Wall,"Wire, Cable & Cord > Building Wire",no,no,none,batch11,none,,romex|nm-b
 Caddy > Stud Wall,Fasteners & Hardware > Cable Management,no,no,none,batch11,none,,staple|stacker|cable support
+"Fire Alarm, Safety, Security > Doorbell Camera",Power Distribution > Transformers,no,no,none,batch12,none,,^(?!.*(?:pad|current|csuct|cntl|480v|240x)).*(?:chime|doorbell|bell transformer|16v|24v|ta59)
+"Fire Alarm, Safety, Security > Doorbell Camera","Wire, Cable & Cord > Low Voltage",no,no,none,batch12,none,,18/2|bell|thermostat
+"Fire Alarm, Safety, Security > Doorbell Camera",Fasteners & Hardware > Anchors,no,no,none,batch12,none,,anchor|screw
+Boxes & Enclosures > Enclosures - Commercial Type,Boxes & Enclosures > Enclosures - Commercial Type,no,no,none,batch12,none,,screw cover|hinged|pull box|nema|n1|n3r
+"Conduit, Strut & Raceways > Wire Duct, Wire Trough, Wireway","Conduit, Strut & Raceways > Wire Duct, Wire Trough, Wireway",no,no,none,batch12,none,,gutter|wireway|trough|fitting|connector|end|elbow|tee
+"Fittings > MC, NMB, Liquidtight, Flex Fittings","Wire, Cable & Cord > Armored Cable",no,no,none,batch12,none,^(?!.*(?:liquid|lqt|lqtght|sealtight|nmlt|\blt\b|pvc)).*,mc|armored|bx
+"Fittings > MC, NMB, Liquidtight, Flex Fittings",Tools & Meters > Hand Tools,no,no,none,batch12,none,^(?!.*(?:liquid|lqt|lqtght|sealtight|nmlt|\blt\b|pvc)).*,cutter|stripper|pliers
+"Fittings > MC, NMB, Liquidtight, Flex Fittings",Fasteners & Hardware > Cable Management,no,no,none,batch12,none,^(?!.*(?:liquid|lqt|lqtght|sealtight|nmlt|\blt\b|pvc)).*,staple|strap|clip|tie
+Data & Telecom > Workstation,Data & Telecom > Workstation,no,no,none,batch12,none,^(?!.*(?:faceplate|wall ?plate)).*,faceplate|wall ?plate
+Data & Telecom > Workstation,Data & Telecom > Workstation,no,no,none,batch12,none,faceplate|wall ?plate,^(?!.*(?:faceplate|wall ?plate)).*(?:jack|keystone|insert|connector)
+Data & Telecom > Workstation,Wiring Devices > Wallplates,no,no,none,batch12,none,,keystone|strap|insert|frame|faceplate
+Data & Telecom > Workstation,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,batch12,none,,low voltage|mounting bracket
+Power Distribution > Safety Switches / Disconnects,Connectors & Crimps > Grounding Products,no,no,none,batch12,none,,ground lug|grounding|ground bar
+Power Distribution > Safety Switches / Disconnects,Tools & Meters > Safety Equipment,no,no,none,batch12,none,,lockout|padlock|tagout
+"Fire Alarm, Safety, Security > Audible Signals",Power Distribution > Transformers,no,no,none,batch13,none,,transformer|chime|doorbell
+"Fire Alarm, Safety, Security > Audible Signals","Wire, Cable & Cord > Low Voltage",no,no,none,batch13,none,,18/2|bell|thermostat
+Renewable Energy > Photovoltaic Wire,Connectors & Crimps > Solar Connectors & Tools,no,no,none,batch13,none,,mc4|solar|crimp|disconnect tool
+Renewable Energy > Photovoltaic Wire,Fasteners & Hardware > Cable Management,no,no,none,batch13,none,,solar clip|cable clip|wire clip|cable tie
+"Wire, Cable & Cord > Busbar",Data & Telecom > Grounding and Bonding,no,no,none,batch13,none,,bus bar|busbar|ground bar|grounding
+"Wire, Cable & Cord > Busbar",Connectors & Crimps > Grounding Products,no,no,none,batch13,none,,ground lug|bonding|ground clamp
+"Lamps, Bulbs & Ballast > Bulbs - Halogen","Lighting Fixtures, Control > Lampholders, Adapters & Extensions",no,no,none,batch13,none,,socket|base|adapter|gu5.3|mr16
+"Lamps, Bulbs & Ballast > Bulbs - Halogen","Lamps, Bulbs & Ballast > Drivers - LED",no,no,none,batch13,none,,transformer|electronic transformer|driver|12v
+Fittings > Conduit Bodies,Fittings > PVC Fittings,no,no,strict,pvc_body,,,
+Fittings > Conduit Bodies,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,pvc_body,none,pvc|kraloy|cantex,cement|glue|primer
+Fasteners & Hardware > Anchors,"Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,drywall_anchor,none,drywall|ez|e-z|zip,screwdriver|insert bit|power bit|#2 phillips|magnetic
+Fasteners & Hardware > Anchors,Fasteners & Hardware > Screws,no,no,none,drywall_anchor,none,drywall|ez|e-z|zip,drywall|sheetrock|wafer|framing
+"Wire, Cable & Cord > Direct Burial",Connectors & Crimps > Splicing & Terminating Kits,no,no,none,uf_splice,none,^(?!.*(?:urd|use|triplex)).*(?:uf-b|uf|direct burial),splice|direct bury|underground|heat shrink
+"Fans, Heaters > Fans & Fan Controls",Wiring Devices > Wallplates,no,yes,none,fan_control,none,control|switch|remote|dimmer,^(?!.*(?:\b[2-9]g\b|[2-9]-gang|[2-9] gang|jumbo|blank|insert|coax|tele)).*(?:toggle|decora|switch|wallplate|wall plate)
+"Fans, Heaters > Fans & Fan Controls",Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,fan_control,none,control|switch|remote|dimmer,old work|new work|1-gang|single|1g\b|sw box
+Connectors & Crimps > Grounding Products,Fittings > Bushing / K.O. Seal / Locknuts,no,no,none,ground_bushing,none,clamp|pipe|rod,grounding|ground bushing|lay-in|lay in
+Connectors & Crimps > Grounding Products,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,deox,none,clamp|pipe|rod|lug,anti-oxidant|noalox|penetrox|deox
+Connectors & Crimps > Grounding Products,Data & Telecom > Grounding and Bonding,no,no,none,bridge,none,,intersystem|bonding bridge|bridge
+Wiring Devices > Twistlock,Boxes & Enclosures > Boxes - Metallic,no,no,none,twist_box,none,^(?!.*(?:plug|plg|flange|inlet)).*,^(?!.*(?:oct|round|ceiling|fan|pancake|ring)).*(?:square|4sq|4 sq|4-11/16|handy|2-1/8|bell box)
+Wiring Devices > Twistlock,Wiring Devices > Wallplates,no,no,none,twist_plate,none,^(?!.*(?:plug|plg)).*,single|sgl|1.406|1.60|1.62|wallplate|wall plate|plate
+"Conduit, Strut & Raceways > Wire Duct, Wire Trough, Wireway",Fittings > Conduit Hubs,no,no,none,wireway_hub,none,gutter|trough|wireway,hub|watertight
+"Conduit, Strut & Raceways > Wire Duct, Wire Trough, Wireway",Connectors & Crimps > Grounding Products,no,no,none,wireway_ground,none,gutter|trough|wireway,^(?!.*(?:rod|pipe|rebar|c-tap|weld)).*(?:lug|lay-in|lay in|grounding bar|ground bar|bonding)
+"Conduit, Strut & Raceways > Wire Duct, Wire Trough, Wireway",Data & Telecom > Grounding and Bonding,no,no,none,wireway_bar,none,gutter|trough|wireway,ground bar|grounding bar
+"Fittings > Clips, Clamps, Hangers",Fittings > EMT Fittings,no,no,strict,jiffy_emt,none,jiffy|clip|strap|clamp,connector|coupling|cplg
+"Fittings > Clips, Clamps, Hangers",Fasteners & Hardware > Screws,no,no,none,jiffy_fasten,none,jiffy|clip|strap,tapcon|tek|sheet metal|pan head|hex washer|self-drill
+Tools & Meters > Hand Tools,Tools & Meters > Storage,no,no,none,tool_bag,none,screwdriver|plier|cutter|stripper|crimper,tool bag|tool pouch|backpack|tote|belt
+Tools & Meters > Hand Tools,Fasteners & Hardware > Tapes,no,no,none,tool_tape,none,screwdriver|plier|cutter|stripper|crimper,super 33|33\+|vinyl tape|electrical tape
+Tools & Meters > Hand Tools,Tools & Meters > Meters - Test Equipment - Calculators,no,no,none,tool_tester,none,screwdriver|plier|cutter|stripper|crimper,ncvt|voltage tester|non-contact
+Control & Automation > Relays,Control & Automation > Relays,no,no,none,relay_socket,none,^(?!.*(?:base\b|for \d+ pole)).*,\bsocket\b|\bbase\b
+"Tools & Meters > Bits, Blades, Punches, Holesaws",Fasteners & Hardware > Anchors,no,no,none,sds_anchor,none,sds|masonry|concrete|hammer drill,anchor|drop-in|wedge|sleeve|concrete|tapcon
+"Fasteners & Hardware > Nuts, Bolts, Washers","Fasteners & Hardware > Nuts, Bolts, Washers",no,no,none,fastener_match,thread,washer,^(?!.*(?:fender|reducing|washer)).*(?:hex nut|hex bolt|bolt|cap screw)
+"Fasteners & Hardware > Nuts, Bolts, Washers","Fasteners & Hardware > Nuts, Bolts, Washers",no,no,none,fastener_match,thread,hex nut,^(?!.*(?:reducing)).*(?:lockwasher|flat washer|split lw|hex bolt|bolt)
+"Conduit, Strut & Raceways > Plugmold","Conduit, Strut & Raceways > Plugmold",no,no,none,plugmold_acc,none,,fitting|end cap|coupling|elbow|box|connector|starter
+"Wire, Cable & Cord > Instrumentation Cable",Data & Telecom > Tools,no,no,none,inst_cable,none,,stripper|crimp|cutter|cable cutter|tester
+"Wire, Cable & Cord > Instrumentation Cable",Fasteners & Hardware > Cable Management,no,no,none,inst_cable,none,,cable tie|tie|strap|staple
+"Lighting Fixtures, Control > Temporary Lighting","Wire, Cable & Cord > Portable Cords & Cables",no,no,none,temp_light,none,,extension cord|triple tap|12/3|lighted|50'|100'|stringlight
+"Lighting Fixtures, Control > Temporary Lighting",Fasteners & Hardware > Fixture Hardware,no,no,none,temp_light,none,,hook|clamp|chain|hanger|bracket
+Control & Automation > Disconnect Switches,Fittings > Conduit Hubs,no,no,none,disc_hub,none,^(?!.*(?:non-fus|nonfus|air condition|\bac\b|u065|u3822)),hub|watertight
+Control & Automation > Disconnect Switches,Fuses & Accessories > General Purpose Fuses,no,no,none,disc_fuses,none,^(?!.*(?:non-fus|nonfus|unfused|pullout)),class cc|rk5|time delay
+Control & Automation > Disconnect Switches,"Wire, Cable & Cord > Armored Cable",no,no,none,ac_disc_whip,none,non-fus|nonfus|\bac\b|air condition|gfci|pullout|u065|u38,ac whip|whip
+Control & Automation > Disconnect Switches,"Conduit, Strut & Raceways > Conduit - Flexible",no,no,none,ac_disc_carflex,none,non-fus|nonfus|\bac\b|air condition|gfci|pullout|u065|u38,carflex|liquidtight
+Control & Automation > Disconnect Switches,"Fittings > MC, NMB, Liquidtight, Flex Fittings",no,no,none,ac_disc_lt_fittings,none,non-fus|nonfus|\bac\b|air condition|gfci|pullout|u065|u38,liquidtight|straight flex|90 deg.*flex|nmlt|lt connector
+
+
+Control & Automation > Disconnect Switches,Connectors & Crimps > Grounding Products,no,no,none,disc_ground,none,,ground lug|grounding|ground bar
+Control & Automation > Disconnect Switches,Tools & Meters > Safety Equipment,no,no,none,disc_loto,none,,lockout|padlock|tagout
+Boxes & Enclosures > Underground Pull Boxes,Boxes & Enclosures > Underground Pull Boxes,no,no,none,ug_cover,none,^(?!.*(?:cvr|cover|lid)).*,cover|cvr|lid
+Boxes & Enclosures > Underground Pull Boxes,Boxes & Enclosures > Underground Pull Boxes,no,no,none,ug_box,none,cvr|cover|lid,^(?!.*(?:cvr|cover|lid)).*
+Boxes & Enclosures > Underground Pull Boxes,Tools & Meters > Marking & Labeling,no,no,none,ug_tape,none,,buried|caution.*tape
+Boxes & Enclosures > Underground Pull Boxes,Connectors & Crimps > Grounding Products,no,no,none,ug_ground,none,,ground rod|ground clamp|rod clamp
+Boxes & Enclosures > Underground Pull Boxes,"Conduit, Strut & Raceways > Conduit - Non-Metallic",no,no,none,ug_pvc,none,,pvc|elbow|coupling|conduit
+"Wiring Devices > Extension Cords, Cord Reels & Portable Boxes",Wiring Devices > Receptacles,no,no,none,appliance_cord,none,dryer|range,dryer|range|14-30|14-50|10-30|10-50|\b30\s?a\b|\b50\s?a\b
+"Wiring Devices > Extension Cords, Cord Reels & Portable Boxes",Wiring Devices > Wallplates,no,no,none,appliance_cord,none,dryer|range,power outlet|2\.15|703|dryer|range
+"Wiring Devices > Extension Cords, Cord Reels & Portable Boxes",Boxes & Enclosures > Boxes - Metallic,no,no,none,appliance_cord,none,dryer|range,4-11/16|4sq|square box
+"Wiring Devices > Extension Cords, Cord Reels & Portable Boxes",Fittings > NM Cable Fittings,no,no,none,appliance_cord,none,dryer|range,romex|nm
+"Lighting Fixtures, Control > Timer Controls","Lighting Fixtures, Control > Timer Controls",no,no,none,timer_tripper,none,t10[0-9]|t17[0-9]|mechanical|switch,tripper|dog|pin|dial
+"Lighting Fixtures, Control > Timer Controls",Fittings > Conduit Hubs,no,no,none,timer_hub,none,,hub|watertight
+"Lighting Fixtures, Control > Timer Controls",Fittings > Bushing / K.O. Seal / Locknuts,no,no,none,timer_bush,none,,locknut|bushing
+"Lighting Fixtures, Control > Timer Controls",Connectors & Crimps > Wire Connectors,no,no,none,timer_nut,none,,wire.?nut|wing.?nut|twister
+"Lighting Fixtures, Control > Timer Controls",Fasteners & Hardware > Anchors,no,no,none,timer_anchor,none,,anchor|screw
+Control & Automation > Starters & Contactors,Fuses & Accessories > Power Fuses,no,no,none,pump_panel,amps,pump panel,
+Control & Automation > Starters & Contactors,Fuses & Accessories > General Purpose Fuses,no,no,none,pump_panel,amps,pump panel,
+Control & Automation > Starters & Contactors,Fittings > Conduit Hubs,yes,no,none,pump_panel,none,pump panel,hub|plate type
+Control & Automation > Starters & Contactors,Control & Automation > Pilot Devices,yes,no,none,pump_panel,none,pump panel,10250t|pilot|indicator|selector|pushbutton
+Tools & Meters > Marking & Labeling,Power Distribution > Safety Switches / Disconnects,no,no,none,disc_label,none,emergency|disconnect label,disconnect|switch|nema 3r
+Tools & Meters > Marking & Labeling,Power Distribution > Metering & Temporary Power,no,no,none,disc_label,none,emergency|disconnect label,meter|socket
+Tools & Meters > Marking & Labeling,Tools & Meters > Safety Equipment,no,no,none,disc_label,none,emergency|disconnect label,lockout|padlock|tagout
+Power Distribution > Safety Switches / Disconnects,Tools & Meters > Marking & Labeling,no,no,none,safety_sw_label,none,^(?!.*(?:auxiliary|interlock|handle|bracket)).*,emergency|disconnect|wop label
+Control & Automation > Disconnect Switches,Tools & Meters > Marking & Labeling,no,no,none,disc_sw_label,none,^(?!.*(?:auxiliary|shaft|handle)).*,emergency|disconnect|wop label
+Power Distribution > Metering & Temporary Power,Tools & Meters > Marking & Labeling,no,no,none,meter_main_label,none,meter|socket|main,emergency|disconnect|wop label
+Power Distribution > Load Centers / Panelboards,Tools & Meters > Marking & Labeling,no,no,none,outdoor_panel_label,none,n3r|nema 3r|main breaker|outdoor|metered main|meter main,emergency|disconnect|wop label
+Fittings > EMT Fittings,"Conduit, Strut & Raceways > Conduit - Metallic",no,no,strict,bidi_conduit,none,"^(?!.*(?:reducing|offset)).*(?:connector|conn\b|coupling|cplg)",emt|conduit
+Fittings > Rigid Fittings,"Conduit, Strut & Raceways > Conduit - Metallic",no,no,strict,bidi_conduit,none,"^(?!.*(?:reducing|offset)).*(?:connector|conn\b|coupling|cplg)",grc|rgd|rigid|imc|conduit
+Fittings > PVC Fittings,"Conduit, Strut & Raceways > Conduit - Non-Metallic",no,no,strict,bidi_conduit,none,adapter|male|female|coupling|elbow,pvc|conduit
+"Fittings > MC, NMB, Liquidtight, Flex Fittings","Conduit, Strut & Raceways > Conduit - Flexible",no,no,strict,bidi_conduit,none,liquid|lqt|sealtight|flex|fmc,liquid|flex|carflex|conduit
+Boxes & Enclosures > Boxes - Non-Metallic,Wiring Devices > Receptacles,no,no,none,bidi_boxes,none,1-gang|single|1g\b|old work|new work|zip,duplex|tamper|15a|20a
+Boxes & Enclosures > Boxes - Non-Metallic,Wiring Devices > Switches,no,no,none,bidi_boxes,none,1-gang|single|1g\b|old work|new work|zip,toggle|switch|single pole|3-way|1p|3w
+Boxes & Enclosures > Boxes - Metallic,Wiring Devices > Receptacles,no,no,none,bidi_boxes,none,handy|switch box,duplex|commercial|specgrade|20a|15a
+Fuses & Accessories > Power Fuses,Power Distribution > Safety Switches / Disconnects,no,no,none,bidi_fuses,amps,^(?!.*(?:reducer|puller|600v|trs|frsr|flsr)).*,^(?!.*(?:non[- ]fusible|non[- ]fused|not fusible)).*(?:fusible)
+Fuses & Accessories > General Purpose Fuses,Power Distribution > Safety Switches / Disconnects,no,no,none,bidi_fuses,amps,^(?!.*(?:reducer|puller|600v|trs|frsr|flsr)).*,^(?!.*(?:non[- ]fusible|non[- ]fused|not fusible)).*(?:fusible)
+"Conduit, Strut & Raceways > Threaded Rod & Accessories","Conduit, Strut & Raceways > Strut",no,no,none,bidi_strut,none,threaded rod|\btr\b,channel|slotted|spring nut|cone nut|end cap
+"Conduit, Strut & Raceways > Threaded Rod & Accessories","Fittings > Clips, Clamps, Hangers",no,no,none,bidi_strut,none,threaded rod|\btr\b,beam clamp|rod hanger|j-hook
+Connectors & Crimps > Solar Connectors & Tools,Renewable Energy > Photovoltaic Wire,no,no,none,bidi_solar,none,,photovoltaic|pv|solar wire
+Tools & Meters > Cable Pulling & Hoist,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,bidi_lube,none,fish tape|pulling rope|rope in|fish rod,clearglide|dyna-blue|polywater|pulling lubricant|wire lube|gel
+Tools & Meters > Hand Tools,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,bidi_fishtape_lube,none,fish tape|fish rod|glow rod|pull line|pulling rope,clearglide|dyna-blue|polywater|pulling lubricant|wire lube|gel
+"Fittings > Flashings, Weatherhead","Wire, Cable & Cord > Service Wire",no,no,none,bidi_service,none,weatherhead|flashing|entrance cap|mast,ser\b|seu\b|service entrance|aluminum
+"Fittings > Flashings, Weatherhead","Conduit, Strut & Raceways > Conduit - Metallic",no,no,strict,bidi_service,none,weatherhead|flashing|mast,grc|rigid|imc|conduit
+"Fittings > Flashings, Weatherhead","Fittings > Flashings, Weatherhead",no,no,strict,weatherhead_flashing,none,weatherhead|entrance cap,roof flashing|flashing
+"Fittings > Flashings, Weatherhead",Fasteners & Hardware > Guy Wire Hardware,no,no,strict,weatherhead_guymast,none,weatherhead|entrance cap,guying kit|mast
+"Fittings > Flashings, Weatherhead",Fittings > Conduit Hubs,no,no,strict,weatherhead_hub,none,weatherhead|entrance cap,hub|water tight
+
+Data & Telecom > Workstation,Data & Telecom > Low Voltage Cable,no,no,none,bidi_data,none,keystone|rj45|patch panel|jack,cat.?6|cat.?5e|utp|pull box|riser|plenum
+"Connectors & Crimps > Small Terminals, Forks, Rings",Control & Automation > Terminal Blocks,no,no,none,bidi_term,none,ferrule|fork|spade|ring,feed through|terminal block|end barrier|din rail
+"Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Cordless Tools,no,no,none,omt_tool,none,omt|oscillat|multi-tool blade|starlock|open-lok|dou125|dos125|dou200|dou275|dou5s|dou9s,oscillating multi-tool|multi-tool
+"Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Storage,no,no,none,omt_storage,none,omt|oscillat|multi-tool blade|starlock|open-lok|dou125|dos125|dou200|dou275|dou5s|dou9s,packout|organizer|tool box|tool bag
+"Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Apparel,no,no,none,omt_ppe_gloves,none,omt|oscillat|multi-tool blade|starlock|open-lok|dou125|dos125|dou200|dou275|dou5s|dou9s,glove
+"Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Safety Equipment,no,no,none,omt_ppe_safety,none,omt|oscillat|multi-tool blade|starlock|open-lok|dou125|dos125|dou200|dou275|dou5s|dou9s,safety glasses|glasses|earplug
+"Lighting Fixtures, Control > Indoor Lighting","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,indoor_bulbs,none,vanity|flush mount|flush with alabaster|2 light|4 light|medium base,a19|g25|decorative|edison|led bulb
+"Lighting Fixtures, Control > Outdoor Lighting",Boxes & Enclosures > Boxes - Weatherproof,no,no,none,outdoor_boxes,none,floodlight|flood light|\bflood\b|wallpack|step light,bell|weatherproof|1-gang|round|outlet box
+"Lighting Fixtures, Control > Outdoor Lighting","Lighting Fixtures, Control > Photocells",no,no,none,outdoor_photocells,none,floodlight|flood light|\bflood\b|wallpack|step light,photocell|photo control|dusk to dawn|button style
+"Lighting Fixtures, Control > Outdoor Lighting",Connectors & Crimps > Wire Connectors,no,no,none,outdoor_nuts,none,floodlight|flood light|\bflood\b|wallpack|step light,wire.?nut|wing.?nut|twister|silicone|waterproof
+"Lighting Fixtures, Control > Indoor Lighting - Recessed","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,recessed_dimmers,none,,dimmer|aycl|ctcl|dvcl|skylark|radiant
+"Lighting Fixtures, Control > Indoor Lighting - Recessed",Connectors & Crimps > Wire Connectors,no,no,none,recessed_wire_nuts,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
+"Lighting Fixtures, Control > Indoor Lighting - Recessed",Fasteners & Hardware > Hole Saws,no,no,none,recessed_holesaw,none,,hole saw|holesaw|pilot
+"Lighting Fixtures, Control > Indoor Lighting - Recessed",Boxes & Enclosures > Boxes - Metallic,no,no,none,recessed_boxes,none,,pan|round|octagon|junction box
+Connectors & Crimps > Lugs & Split Bolts,Tools & Meters > Hand Tools,no,no,none,unitap_tools,none,unitap|uni-tap|splice reducer,^(?!.*(?:mc|flex|bx)).*(?:hex key|allen|torque|cable stripper|stripper|cable cutter)
+"Wire, Cable & Cord > Building Wire",Fasteners & Hardware > Cable Management,no,no,none,romex_staples,none,nm-b|romex,staple|stacker|cable clip
+"Wire, Cable & Cord > Building Wire",Fittings > NM Cable Fittings,no,no,none,romex_connectors,none,nm-b|romex,connector|conn|rcr|nm9|650-dc
+"Wire, Cable & Cord > Building Wire",Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,romex_boxes,none,nm-b|romex,old work|switch box|outlet box|b12|vapor
+"Wire, Cable & Cord > Building Wire",Tools & Meters > Hand Tools,no,no,none,romex_stripper,none,nm-b|romex,wire stripper|romex tool|stripper
+Boxes & Enclosures > Boxes - Metallic,Connectors & Crimps > Grounding Products,no,no,none,4sq_grounding,none,square|4sq|4-11/16,pigtail|ground clip|grounding pigtail
+Boxes & Enclosures > Boxes - Metallic,Fasteners & Hardware > Screws,no,no,none,4sq_ground_screw,none,square|4sq|4-11/16,ground screw
+"Wire, Cable & Cord > Armored Cable",Fittings > NM Cable Fittings,no,no,none,mc_connectors,none,,^(?!.*(?:romex|nm|pvc)).*(?:mc|cable connector|snap lock|cut-in|565-dc|560-dc|82199)
+"Wire, Cable & Cord > Armored Cable","Fittings > MC, NMB, Liquidtight, Flex Fittings",no,no,none,mc_armored_fittings,none,,\b(?:mc|ac connector|565-dc|560-dc)\b
+"Wire, Cable & Cord > Armored Cable","Fittings > Clips, Clamps, Hangers",no,no,none,mc_clips,none,,jiffy|cable clip|beam clamp|support|j-hook
+Power Distribution > Load Centers / Panelboards,Power Distribution > Load Centers / Panelboards,yes,no,none,prl_box_trim,none,prl1|prl2|pow-r-xpress,ezb|ezt|gwpbq|lugkit
+Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,yes,no,none,prl_bab_breakers,none,prl1|pow-r-xpress,bab\d{4}|bab\d{3}
+Power Distribution > Safety Switches / Disconnects,Fuses & Accessories > Power Fuses,no,no,none,safety_sw_fuses,amps,^(?!.*(?:non[- ]fusible|non[- ]fused|not fusible)).*(?:fusible|fused),600v|rk5|class j|class r|ajt|trs
+Power Distribution > Circuit Breakers,Power Distribution > Circuit Breakers,no,no,none,din_rail_mount,none,l9-\d|minicb|mini cb|st20\d|din rail,din rail
+Power Distribution > Circuit Breakers,Power Distribution > Circuit Breakers,yes,no,none,din_feed_lug,none,l9-\d|minicb|mini cb,power feed lug|amclt
+Power Distribution > Circuit Breakers,Tools & Meters > Safety Equipment,no,no,none,mcb_lockout,none,l9-\d|minicb|mini cb|st20\d|din rail,lockout|padlock
+Power Distribution > Circuit Breakers,Control & Automation > Terminal Blocks,no,no,none,din_terminal_blocks,none,l9-\d|minicb|mini cb|st20\d|din rail,terminal block|feed through|end barrier|ground terminal|end stop
+Power Distribution > Circuit Breakers,Boxes & Enclosures > Enclosures - Commercial Type,no,no,none,din_enclosures,none,l9-\d|minicb|mini cb|st20\d|din rail,enclosure|box|nema
+Power Distribution > Circuit Breakers,Tools & Meters > Hand Tools,no,no,none,din_tools,none,l9-\d|minicb|mini cb|st20\d|din rail,screwdriver|terminal|stripper
+Data & Telecom > Workstation,Wiring Devices > Wallplates,yes,no,none,data_plates,none,cat ?[56]|rj ?45|keystone jack|wp3450,^(?!.*(?:duplex|toggle|blank|receptacle|outlet|dplx|decora|decorator|ss26)).*(?:wall ?plate|wallplate|faceplate|keystone|\b[1-6]\s*port\b)
+Data & Telecom > Workstation,Tools & Meters > Hand Tools,no,no,none,data_punch_tools,none,cat ?[56]|rj ?45|keystone jack|wp3450,punchdown|punch down|crimper|vdv
+Data & Telecom > Workstation,Tools & Meters > Datacomm Tools,no,no,none,data_punch_datacomm,none,cat ?[56]|rj ?45|keystone jack|wp3450,punchdown|punch down|crimper|vdv
+Data & Telecom > Workstation,Data & Telecom > Tools,no,no,none,data_punch_tool,none,cat ?[56]|rj ?45|keystone jack|wp3450,punchdown|punch down|crimper|cable stripper|vdv
+Data & Telecom > Workstation,Data & Telecom > Low Voltage Cable,no,no,none,data_cat_cable,none,cat ?5e?|wp3450,cat ?5e?|riser|plenum
+Data & Telecom > Workstation,Data & Telecom > Distribution Devices,no,no,none,data_patch_panel,none,cat ?[56]|rj ?45|keystone jack|wp3450,patch panel|unloaded
+"Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Safety Equipment,no,no,none,sawzall_safety,none,sawzall|recip.*blade|the torch|the ax|\bax\b.*blade|torch.*nitrus|nitrus.*carbide|demo demon.*blade,safety glasses|glasses|earplug
+"Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Apparel,no,no,none,sawzall_gloves,none,sawzall|recip.*blade|the torch|the ax|\bax\b.*blade|torch.*nitrus|nitrus.*carbide|demo demon.*blade,glove
+"Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Storage,no,no,none,sawzall_storage,none,sawzall|recip.*blade|the torch|the ax|\bax\b.*blade|torch.*nitrus|nitrus.*carbide|demo demon.*blade,packout|organizer|tool bag
+"Tools & Meters > Bits, Blades, Punches, Holesaws",Tools & Meters > Cordless Tools,no,no,none,sawzall_cordless,none,sawzall|recip.*blade|the torch|the ax|\bax\b.*blade|torch.*nitrus|nitrus.*carbide|demo demon.*blade,sawzall|hackzall|recip
+Connectors & Crimps > Grounding Products,Fittings > Rigid Fittings,no,no,strict,choke_rigid,none,pipe choke|grounding hub|hub\d+l,conduit|nipple|coupling
+Connectors & Crimps > Grounding Products,"Conduit, Strut & Raceways > Conduit - Metallic",no,no,strict,choke_conduit,none,pipe choke|grounding hub|hub\d+l,conduit|grc|rigid
+Connectors & Crimps > Grounding Products,Connectors & Crimps > Grounding Products,no,no,none,choke_ground_clamp,none,pipe choke|grounding hub|hub\d+l,ground clamp|water pipe|bronze ground
+Boxes & Enclosures > Enclosure Accessories,Boxes & Enclosures > Enclosure Accessories,no,no,none,fan_exhaust,none,filterfan|filter fan,exhaust filter|filter vent|thermostat|flz-\d|hygrostat
+Boxes & Enclosures > Enclosure Accessories,Boxes & Enclosures > Enclosures - Commercial Type,no,no,none,fan_nema_enclosure,none,filterfan|filter fan|nema3r,rsc|nema 3r|n3r|rainproof|wall mnt
+Boxes & Enclosures > Enclosure Accessories,Boxes & Enclosures > Enclosure Accessories,no,no,none,fan_thermostat,none,filterfan|filter fan,thermostat|flz|stat
+Boxes & Enclosures > Boxes - Non-Metallic,"Fans, Heaters > Fans & Fan Controls",no,no,none,fan_box_controls,none,fan (?:and )?fixture|fan box|saddle box|fb4\d\d|fbrs,fan control|paddle fan|dehummer
+Boxes & Enclosures > Boxes - Non-Metallic,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,fan_box_covers,none,fan (?:and )?fixture|fan box|saddle box|fb4\d\d|fbrs,cp3540|ceiling box cover|blank box cover
+Boxes & Enclosures > Boxes - Non-Metallic,Fittings > NM Cable Fittings,no,no,none,fan_box_nm,none,fan (?:and )?fixture|fan box|saddle box|fb4\d\d|fbrs,nm94|nm95|rcr|push in|connector
+Boxes & Enclosures > Boxes - Non-Metallic,"Wire, Cable & Cord > Building Wire",no,no,none,fan_box_wire,none,fan (?:and )?fixture|fan box|saddle box|fb4\d\d|fbrs,14/2|14/3|12/2|12/3
+Control & Automation > Pilot Devices,Control & Automation > Pilot Devices,no,no,none,pb_contact_blocks,none,pushbutton|push-button|\bpb0[1-5]c\b|22\.5mm,contact block|collar with|shroud|legend plate|ct0[1-3]c|pb06c
+Control & Automation > Pilot Devices,Control & Automation > Pilot Devices,no,no,none,pb_operators,none,pushbutton|push-button|\bpb0[1-5]c\b|22\.5mm,rotary switch|selector|emergency stop|indicator
+Control & Automation > Pilot Devices,Control & Automation > Starters & Contactors,no,no,none,pb_contactors,none,pushbutton|push-button|\bpb0[1-5]c\b|22\.5mm,contactor|starter
+Control & Automation > Pilot Devices,Boxes & Enclosures > Enclosures - Commercial Type,no,no,none,pb_enclosures,none,pushbutton|push-button|\bpb0[1-5]c\b|22\.5mm,enclosure|pushbutton enclosure|control station
+Control & Automation > Starters & Contactors,Control & Automation > Pilot Devices,yes,no,none,ss_pilot,none,softstart|soft start|pcs-\d{3},selector switch|pushbutton|contact block|legend plate|d7p|ss2-d7p
+Control & Automation > Starters & Contactors,Control & Automation > Starters & Contactors,yes,no,none,ss_contactors,none,softstart|soft start|pcs-\d{3},ca7|contactor|bypass
+Control & Automation > Starters & Contactors,Control & Automation > Terminal Blocks,no,no,none,ss_terminals,none,softstart|soft start|pcs-\d{3},terminal block|ground|end section
+Control & Automation > Starters & Contactors,Boxes & Enclosures > Enclosures - Commercial Type,no,no,none,ss_enclosures,none,softstart|soft start|pcs-\d{3},enclosure|rsc|m1-
+Tools & Meters > Safety Equipment,Tools & Meters > Safety Equipment,no,no,none,loto_tags_kits,none,lock ?out|lockout|padlock|\bubl1\b|44-810,tagout|tag|kit|hasp|padlock|do not operate|44-97
+Tools & Meters > Safety Equipment,Tools & Meters > Meters - Test Equipment - Calculators,no,no,none,loto_testers,none,lock ?out|lockout|padlock|\bubl1\b|44-810,ncvt|voltage tester|outlet tester|circuit breaker finder|et310|rt210
+Tools & Meters > Safety Equipment,Power Distribution > Circuit Breakers,no,no,none,loto_breakers,none,lock ?out|lockout|padlock|\bubl1\b|44-810,breaker|br120|ch120|q120
+Tools & Meters > Safety Equipment,Tools & Meters > Safety Equipment,no,no,none,loto_ppe,none,lock ?out|lockout|padlock|\bubl1\b|44-810,safety glasses|hard hat
+"Lighting Fixtures, Control > Indoor Lighting",Fasteners & Hardware > Fixture Hardware,no,no,none,hb_chain,none,high ?bay|highbay|ufo|uhb,jack chain|chain|s-hook|fixture hook
+"Lighting Fixtures, Control > Indoor Lighting","Wire, Cable & Cord > Armored Cable",no,no,none,hb_whip,none,high ?bay|highbay|ufo|uhb,whip|18/5|18/3|18/4
+"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Occupancy Sensors",no,no,none,hb_sensor,none,high ?bay|highbay|ufo|uhb,sensor|occupancy|motion|dt-355|dt-305
+"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,hb_dimmer,none,high ?bay|highbay|ufo|uhb,0-10v|dvstv|rh4fbl3|rmjs-8tn
+"Lighting Fixtures, Control > Indoor Lighting","Wire, Cable & Cord > Building Wire",no,no,none,hb_wire,none,high ?bay|highbay|ufo|uhb,12/2|14/2|mc-al|thhn
+"Lighting Fixtures, Control > Indoor Lighting",Boxes & Enclosures > Boxes - Metallic,no,no,none,hb_box,none,high ?bay|highbay|ufo|uhb,4sq|square box|232|tbar
+"Lighting Fixtures, Control > Indoor Lighting","Wire, Cable & Cord > Armored Cable",no,no,none,panel_whip,none,flat panel|troffer|\bcpx\b|\bcbt\b|backlit|fpl-\d{2},whip|18/5|18/3|18/4|bfw
+"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,panel_dimmer,none,flat panel|troffer|\bcpx\b|\bcbt\b|backlit|fpl-\d{2},0-10v|dvstv|rh4fbl3|rmjs-8tn
+"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Occupancy Sensors",no,no,none,panel_sensor,none,flat panel|troffer|\bcpx\b|\bcbt\b|backlit|fpl-\d{2},dt-355|dt-305|pw-301|dsw-301|occupancy
+"Lighting Fixtures, Control > Indoor Lighting","Fittings > Clips, Clamps, Hangers",no,no,none,panel_grid_hangers,none,flat panel|troffer|\bcpx\b|\bcbt\b|backlit|fpl-\d{2},tbar|hanger wire|drop wire|grid clip
+"Lighting Fixtures, Control > Indoor Lighting",Boxes & Enclosures > Boxes - Metallic,no,no,none,panel_jbox,none,flat panel|troffer|\bcpx\b|\bcbt\b|backlit|fpl-\d{2},4sq|square box|232|mud ring
+Boxes & Enclosures > Enclosures - Commercial Type,Power Distribution > Metering & Temporary Power,no,no,none,ct_closing_plate,none,ct can|trans encl|ct cabinet|current transformer cabinet|csuct|u4468,closing plate|clsg plate|a7551
+Boxes & Enclosures > Enclosures - Commercial Type,Power Distribution > Metering & Temporary Power Hubs,no,no,none,ct_hubs,none,ct can|trans encl|ct cabinet|current transformer cabinet|csuct|u4468,hub kit|hub|a751
+Boxes & Enclosures > Enclosures - Commercial Type,Connectors & Crimps > Lugs & Split Bolts,no,no,none,ct_mech_lugs,none,ct can|trans encl|ct cabinet|current transformer cabinet|csuct|u4468,k4a|k2a|k3a|dual rated|mechanical lug|600 mcm|500 mcm|350 mcm|250 mcm
+Boxes & Enclosures > Enclosures - Commercial Type,Fittings > Bushing / K.O. Seal / Locknuts,no,no,none,ct_grd_bushing,none,ct can|trans encl|ct cabinet|current transformer cabinet|csuct|u4468,grounding bushing|split grounding|sgb-
+Boxes & Enclosures > Enclosures - Commercial Type,Connectors & Crimps > Grounding Products,no,no,none,ct_grounding,none,ct can|trans encl|ct cabinet|current transformer cabinet|csuct|u4468,ground clamp|c11b|c11d|gc18a
+Boxes & Enclosures > Enclosures - Commercial Type,Tools & Meters > Marking & Labeling,no,no,none,ct_labels,none,ct can|trans encl|ct cabinet|current transformer cabinet|csuct|u4468,warning|wop label|service disconnect|heat shrink
+"Fasteners & Hardware > Nuts, Bolts, Washers",Fasteners & Hardware > Screws,no,no,none,hexnut_screws,thread,8-32|10-32|10-24|1/4-20|3/8-16,rhms|machine screw|524|phillips
+"Fasteners & Hardware > Nuts, Bolts, Washers","Fasteners & Hardware > Nuts, Bolts, Washers",no,no,none,hexnut_washers,thread,8-32|10-32|10-24|1/4-20|3/8-16,lockwasher|split lw|flat washer
+"Fasteners & Hardware > Nuts, Bolts, Washers","Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,hexnut_taps,none,8-32|10-32|10-24|1/4-20|3/8-16,drill tap|36-8/32|drill/tap
+"Fasteners & Hardware > Nuts, Bolts, Washers",Fasteners & Hardware > Screws,no,no,none,hexnut_kits,none,8-32|10-32|10-24|1/4-20|3/8-16,kit|39526|screw kit
+"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Indoor Lighting - Recessed",no,no,none,downlight_plate,none,slim downlight|commercial slim|wafer|downlight,new construction plate|pan-u|mounting plate
+"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,downlight_dimmer,none,slim downlight|commercial slim|wafer|downlight,0-10v|dvstv|rh4fbl3|dimmer
+"Lighting Fixtures, Control > Indoor Lighting","Tools & Meters > Bits, Blades, Punches, Holesaws",no,no,none,downlight_holesaw,none,slim downlight|commercial slim|wafer|downlight,hole saw|recessed lighting hole saw|dhs6375|dhs4375|dhs4250
+"Lighting Fixtures, Control > Indoor Lighting",Connectors & Crimps > Wire Connectors,no,no,none,downlight_wirenuts,none,slim downlight|commercial slim|wafer|downlight,wire nut|wing nut|twister|30-651|30-072
+"Lighting Fixtures, Control > Indoor Lighting","Wire, Cable & Cord > Building Wire",no,no,none,downlight_wire,none,slim downlight|commercial slim|wafer|downlight,14/2|12/2|romex|nm-b
+Fuses & Accessories > Power Fuses,Power Distribution > Safety Switches / Disconnects,no,no,none,fuse_hd_switch,amps,600v|trs\d|frsr|flsr,^(?!.*(?:non[- ]fusible|non[- ]fused|240v)).*(?:dh\d|heavy duty|600v)
+Fuses & Accessories > Power Fuses,"Fuses & Accessories > Fuse Blocks, Holders & Accessories",no,no,none,fuse_reducers,none,trs\d|tr\d+r|rk5|class r,fuse reducer|fuse puller|r63|r16|r21
+"Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Indoor Lighting",no,no,none,t8_fixtures,none,t8|t5|linear tube,strip|wired for directdrive|kt-ddsledt8|cbt24
+"Lamps, Bulbs & Ballast > Bulbs - LED","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,t8_retrofit_kit,none,t8|t5|linear tube,retrofit conversion kit|tombstone|epco 14070|epco 14050
+"Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Lampholders, Adapters & Extensions",no,no,none,t8_lampholders,none,t8|t5|linear tube,lampholder|tombstone socket|fl skt
+"Lamps, Bulbs & Ballast > Bulbs - LED",Connectors & Crimps > Wire Connectors,no,no,none,t8_connectors,none,t8|t5|linear tube,ballast con|873-902|wire.?nut|wago
+"Lamps, Bulbs & Ballast > Bulbs - LED","Wire, Cable & Cord > Building Wire",no,no,none,t8_wire,none,t8|t5|linear tube,thhn-12|thhn-14|solid
+Power Distribution > Circuit Breakers,Tools & Meters > Safety Equipment,no,no,none,breaker_loto,none,^(?!.*(?:din rail|minicb)).*(?:breaker|hom\d|qo\d|br\d|ch\d),lockout|ubl1|44-810|padlock
+Power Distribution > Circuit Breakers,Tools & Meters > Meters - Test Equipment - Calculators,no,no,none,breaker_testers,none,^(?!.*(?:din rail|minicb)).*(?:breaker|hom\d|qo\d|br\d|ch\d),et310|ncvt|rt210|circuit breaker finder|tester
+Power Distribution > Circuit Breakers,"Wire, Cable & Cord > Building Wire",no,no,none,breaker_wire_15a,none,15a|15 amp|15-amp|hom115|hom215|qo115|qo215|br115|br215,nm-b-14/2|nm-b-14/3|14/2|14/3
+Power Distribution > Circuit Breakers,"Wire, Cable & Cord > Building Wire",no,no,none,breaker_wire_20a,none,20a|20 amp|20-amp|hom120|hom220|qo120|qo220|br120|br220,nm-b-12/2|nm-b-12/3|12/2|12/3
+Power Distribution > Circuit Breakers,"Wire, Cable & Cord > Building Wire",no,no,none,breaker_wire_30a,none,30a|30 amp|30-amp|br230|hom230|qo230|ch230,nm-b-10/2|nm-b-10/3|10/2|10/3
+Power Distribution > Circuit Breakers,"Wire, Cable & Cord > Building Wire",no,no,none,breaker_wire_40a,none,40a|40 amp|40-amp|br240|hom240|qo240|ch240,nm-b-8/2|nm-b-8/3|8/2|8/3
+Power Distribution > Circuit Breakers,"Wire, Cable & Cord > Building Wire",no,no,none,breaker_wire_50a,none,50a|50 amp|50-amp|br250|hom250|qo250|ch250,nm-b-6/2|nm-b-6/3|6/2|6/3
+Power Distribution > Circuit Breakers,Wiring Devices > Receptacles,no,no,none,breaker_recp_50a,none,50a|50 amp|50-amp|br250|hom250|qo250|ch250,14-50|6-50|range recp|welder recp|ev charger
+Power Distribution > Circuit Breakers,Wiring Devices > Receptacles,no,no,none,breaker_recp_40a,none,40a|40 amp|40-amp|br240|hom240|qo240|ch240,14-50|range recp|50a
+Power Distribution > Circuit Breakers,Control & Automation > Disconnect Switches,no,no,none,breaker_ac_disc,none,30a|40a|50a|60a|br230|hom230|qo230|br240|hom240|br250|hom250,disconnect|u065|u3822|pullout
+Power Distribution > Circuit Breakers,Fittings > NM Cable Fittings,no,no,none,breaker_nm_connectors,none,^(?!.*(?:din rail|minicb)).*(?:breaker|hom\d|qo\d|br\d|ch\d),nm94|nm95|rcr50|rcr75|push in connector
+Power Distribution > Circuit Breakers,Boxes & Enclosures > Boxes - Metallic,no,no,none,breaker_boxes,none,^(?!.*(?:din rail|minicb)).*(?:breaker|hom\d|qo\d|br\d|ch\d),4sq|square box|232
+Tools & Meters > Hand Tools,Connectors & Crimps > Lugs & Split Bolts,no,no,none,hexkey_lugs,none,hex key|allen\b|fldg hex|fold hex,unitap|mechanical lug|k4a|k2a|ka\d|split bolt
+Tools & Meters > Hand Tools,Tools & Meters > Hand Tools,yes,no,none,hexkey_companion_tools,none,hex key|allen\b|fldg hex|fold hex,pliers|stripper|d213|d248|lineman|diagonal
+Tools & Meters > Hand Tools,Tools & Meters > Storage,no,no,none,hexkey_storage,none,hex key|allen\b|fldg hex|fold hex,pouch|tool bag|organizer|belt
+Tools & Meters > Hand Tools,Tools & Meters > Safety Equipment,no,no,none,hexkey_ppe,none,hex key|allen\b|fldg hex|fold hex,safety glasses|gloves
+Tools & Meters > Cable Pulling & Hoist,Tools & Meters > Cable Pulling & Hoist,no,no,none,pull_rope,none,pulling head|simpull,simrope|pull line|mule tape|rope in
+Tools & Meters > Cable Pulling & Hoist,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,pull_lube,none,pulling head|simpull,clearglide|wire lube|polywater|pulling lubricant
+Tools & Meters > Cable Pulling & Hoist,Tools & Meters > Cable Pulling & Hoist,no,no,none,pull_accessories,none,pulling head|simpull,foam carrier|pull buddy|sheave|swivel
+Tools & Meters > Cable Pulling & Hoist,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,pull_ductseal,none,pulling head|simpull,duct seal|foam sealant|aft-16
+Tools & Meters > Cable Pulling & Hoist,"Wire, Cable & Cord > Building Wire",no,no,none,pull_wire,none,pulling head|simpull,thhn|xhhw|1 awg|2/0|3/0|4/0|250 mcm|500 mcm
+Connectors & Crimps > Lugs & Split Bolts,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,ctap_pene,none,c tap|c-tap|hytap|yghc|yc[0-9]c,penetrox|pene-8|pena4|anti-oxidant
+Connectors & Crimps > Lugs & Split Bolts,Tools & Meters > Hand Tools,no,no,none,ctap_crimpers,none,c tap|c-tap|hytap|yghc|yc[0-9]c,crimp|wire stripper|cable cutter|lineman|d213
+Connectors & Crimps > Lugs & Split Bolts,Fasteners & Hardware > Tapes,no,no,none,ctap_tapes,none,c tap|c-tap|hytap|yghc|yc[0-9]c,130c|rubber tape|super 33|vinyl tape|splicing tape
+Connectors & Crimps > Lugs & Split Bolts,"Wire, Cable & Cord > Building Wire",no,no,none,ctap_wire,none,c tap|c-tap|hytap|yghc|yc[0-9]c,thhn|copper|bare|solid|stranded
+Connectors & Crimps > Lugs & Split Bolts,Connectors & Crimps > Grounding Products,no,no,none,ctap_grounding,none,c tap|c-tap|hytap|yghc|yc[0-9]c,ground rod|ground clamp|c11b|c11d
+Power Distribution > Load Centers / Panelboards,Power Distribution > Circuit Breakers,yes,no,none,three_ph_breakers,none,3\s*(?:ph|phase)|3br\d,br3\d{2}|br320|br330|br340|br350|br360|br3100
+Power Distribution > Load Centers / Panelboards,Power Distribution > Load Centers / Panelboards,yes,no,none,three_ph_panel_accs,none,3\s*(?:ph|phase)|3br\d,gbk\d|gbkp|brfp|nl20|nl300|brhdk|cktdir
+"Wire, Cable & Cord > Building Wire","Conduit, Strut & Raceways > Conduit - Metallic",no,no,none,thhn_pipe,none,thhn|thwn|xhhw,con emt|1/2 emt|3/4 emt|emt conduit
+"Wire, Cable & Cord > Building Wire",Fittings > EMT Fittings,no,no,none,thhn_emt_fittings,none,thhn|thwn|xhhw,connector|coupling|set screw|compression
+"Wire, Cable & Cord > Building Wire",Tools & Meters > Cable Pulling & Hoist,no,no,none,thhn_fishtape,none,thhn|thwn|xhhw,fish tape|pull line|mule tape
+"Wire, Cable & Cord > Building Wire","Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,thhn_lube,none,thhn|thwn|xhhw,clearglide|wire lube|polywater|pulling lubricant
+"Wire, Cable & Cord > Building Wire",Boxes & Enclosures > Boxes - Metallic,no,no,none,thhn_boxes,none,thhn|thwn|xhhw,4sq|square box|232|handy
+"Wire, Cable & Cord > Building Wire",Tools & Meters > Marking & Labeling,no,no,none,thhn_markers,none,thhn|thwn|xhhw,wire marker|book|dispenser|dymo
+Wiring Devices > Wallplates,Wiring Devices > Receptacles,no,yes,none,plate_recp,none,tp82|2 duplex|2 gang.*duplex|2g.*duplex,duplex|receptacle|8300|cr20|cr15|br20
+Wiring Devices > Receptacles,Wiring Devices > Wallplates,no,yes,none,hg_recp_plate,none,8300|hospital|hg,wallplate|tp8|tp82|p8
+Wiring Devices > Receptacles,Boxes & Enclosures > Boxes - Metallic,no,no,none,hg_recp_box,none,8300|hospital|hg,4sq|square box|232|mud ring
+Wiring Devices > Receptacles,"Wire, Cable & Cord > Armored Cable",no,no,none,hg_recp_wire,none,8300|hospital|hg,hcf|health care|mc-al|12/2
+"Wire, Cable & Cord > Armored Cable",Wiring Devices > Receptacles,no,no,none,hcf_receptacle,none,hcf|health care,8300|hospital|hg|receptacle
+"Conduit, Strut & Raceways > Conduit - Non-Metallic","Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,pvc_cement,none,pvc|kraloy|sch(?:edule)? ?(?:40|80),quick set cement|cement|glue|vc998
+"Conduit, Strut & Raceways > Conduit - Non-Metallic",Boxes & Enclosures > Boxes - Weatherproof,no,no,strict,pvc_wp_boxes,none,pvc|kraloy|sch(?:edule)? ?(?:40|80),fse|fsc|fd|wp box|bell
+"Conduit, Strut & Raceways > Conduit - Non-Metallic","Wire, Cable & Cord > Building Wire",no,no,none,pvc_wire,none,pvc|kraloy|sch(?:edule)? ?(?:40|80),thhn|thwn|solid|stranded
+Connectors & Crimps > Grounding Products,Boxes & Enclosures > Boxes - Metallic,no,no,none,ground_screw_boxes,none,ground screw|grounding screw|80006|pigtail,4sq|square box|232|handy box
+Connectors & Crimps > Grounding Products,Boxes & Enclosures > Boxes - Metallic,no,no,none,ground_screw_mudrings,none,ground screw|grounding screw|80006|pigtail,mud ring|768|769
+Connectors & Crimps > Grounding Products,"Wire, Cable & Cord > Building Wire",no,no,none,ground_screw_wire,none,ground screw|grounding screw|80006|pigtail,bare-sd|bare|solid.*cu|thhn-12.*green
+Connectors & Crimps > Grounding Products,Tools & Meters > Hand Tools,no,no,none,ground_screw_tools,none,ground screw|grounding screw|80006|pigtail,screwdriver|cushion-grip|mag.*driver|11-in-1
+Connectors & Crimps > Grounding Products,Connectors & Crimps > Wire Connectors,no,no,none,ground_screw_wirenuts,none,ground screw|grounding screw|80006|pigtail,wire nut|wing nut|twister|greenie|30-092|30-651
+Connectors & Crimps > Grounding Products,Wiring Devices > Receptacles,no,no,none,ground_screw_recp,none,ground screw|grounding screw|80006|pigtail,duplex|cr20|cr15|5362|tamper
+Boxes & Enclosures > Boxes - Non-Metallic,Fasteners & Hardware > Screws,no,no,none,extender_screws,none,box extender|\bbe[1-4]r?\b,6-32|rhms|truss head|524|39546|extra long
+Boxes & Enclosures > Boxes - Non-Metallic,Wiring Devices > Wallplates,no,no,none,extender_plates,none,box extender|\bbe[1-4]r?\b,tp8|tp26|tp1|wallplate|nylon
+Boxes & Enclosures > Boxes - Non-Metallic,Wiring Devices > Receptacles,no,no,none,extender_recp,none,box extender|\bbe[1-4]r?\b,duplex|cr20|cr15|decora|tamper
+Boxes & Enclosures > Boxes - Non-Metallic,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,extender_shims,none,box extender|\bbe[1-4]r?\b,spacer shims|receptacle shim|cprs25
+Boxes & Enclosures > Boxes - Non-Metallic,Wiring Devices > Switches,no,no,none,extender_switches,none,box extender|\bbe[1-4]r?\b,toggle|switch|cs120|single pole
+"Fasteners & Hardware > Nuts, Bolts, Washers","Fasteners & Hardware > Nuts, Bolts, Washers",no,no,none,fender_washers_hw,thread,fender washer,hex nut|lock nut|hex head bolt|split lw|lockwasher
+"Fasteners & Hardware > Nuts, Bolts, Washers",Fasteners & Hardware > Screws,no,no,none,fender_washers_lags,none,fender washer,hex head lag|lag screw|574
+"Fasteners & Hardware > Nuts, Bolts, Washers","Conduit, Strut & Raceways > Strut",no,no,none,fender_washers_strut,none,fender washer,channel|spring nut|cone nut|strut
+"Fasteners & Hardware > Nuts, Bolts, Washers",Fasteners & Hardware > Anchors,no,no,none,fender_washers_anchors,none,fender washer,drop-in|wedge anchor|toggle bolt|sleeve
+"Fasteners & Hardware > Nuts, Bolts, Washers",Tools & Meters > Hand Tools,no,no,none,fender_washers_tools,none,fender washer,ratchet|socket|wrench|adjustable
+Fittings > Conduit Bodies,"Conduit, Strut & Raceways > Conduit - Metallic",no,no,strict,conduit_body_pipe,none,,con emt|rigid|rgd|grc|imc|conduit
+Fittings > Conduit Bodies,Fittings > Rigid Fittings,no,no,strict,conduit_body_rigid_conn,none,,nipple|coupling|locknut|bushing
+Fittings > Conduit Bodies,Fittings > Conduit Hubs,no,no,strict,conduit_body_hubs,none,,hub|watertight
+Fittings > Conduit Bodies,"Wire, Cable & Cord > Building Wire",no,no,none,conduit_body_wire,none,,thhn|copper|solid|stranded
+Fittings > Conduit Bodies,Tools & Meters > Cable Pulling & Hoist,no,no,none,conduit_body_pulling,none,,clearglide|wire lube|fish tape|lube
+Data & Telecom > Tools,Data & Telecom > Workstation,no,no,none,mod_crimp_connectors,none,modular.*crimp|vdv226,ez-rj45|rj45|connector|modular plug
+Data & Telecom > Tools,Data & Telecom > Low Voltage Cable,no,no,none,mod_crimp_cable,none,modular.*crimp|vdv226,cat5|cat6|riser|ethernet
+Data & Telecom > Tools,Data & Telecom > Tools,no,no,none,mod_crimp_testers,none,modular.*crimp|vdv226,scout|tester|tone & probe|punchdown|stripper
+Tools & Meters > Hand Tools,Connectors & Crimps > Wire Connectors,no,no,none,electrician_pliers_nuts,none,lineman|diagonal|wire stripper|croc stripper,wire.?nut|wing.?nut|twister|30-651|30-072
+Tools & Meters > Hand Tools,Tools & Meters > Meters - Test Equipment - Calculators,no,no,none,electrician_pliers_tester,none,lineman|diagonal|wire stripper|croc stripper,ncvt|voltage tester|outlet tester
+Tools & Meters > Hand Tools,"Wire, Cable & Cord > Building Wire",no,no,none,electrician_pliers_wire,none,lineman|diagonal|wire stripper|croc stripper,12/2|14/2|romex|thhn
+Tools & Meters > Hand Tools,Tools & Meters > Storage,no,no,none,electrician_pliers_pouch,none,lineman|diagonal|wire stripper|croc stripper,pouch|tool belt|bag|organizer
+Wiring Devices > Receptacles,Wiring Devices > Wallplates,no,no,none,dryer_wallplate,none,dryer|14-30|3864,tp703|ss703|s384|2\.15|power outlet
+Wiring Devices > Receptacles,"Wiring Devices > Extension Cords, Cord Reels & Portable Boxes",no,no,none,dryer_power_cord,none,dryer|14-30|3864,09154|09156|09126|dryer.*cord|10/4
+Wiring Devices > Receptacles,"Wire, Cable & Cord > Building Wire",no,no,none,dryer_wire_10awg,none,dryer|14-30|3864,nm-b-10/3|10/3|10/2
+Wiring Devices > Receptacles,Boxes & Enclosures > Boxes - Metallic,no,no,none,dryer_metal_box,none,dryer|14-30|3864,4-11/16|258|257|4sq|square box
+Wiring Devices > Receptacles,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,dryer_nonmetal_box,none,dryer|14-30|3864,rd-42|range/dryer
+Wiring Devices > Receptacles,Fittings > NM Cable Fittings,no,no,none,dryer_nm_clamp,none,dryer|14-30|3864,rcr75|nm95|3/4|connector
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

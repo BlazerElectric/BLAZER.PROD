@@ -52,7 +52,7 @@ REQUIRED_COLUMNS = {
     "sub_category",
 }
 MAX_CANDIDATES = 150
-CHECKPOINT_VERSION = "v3"
+CHECKPOINT_VERSION = "v5"
 SIZE_MATCHED_GROUPS = frozenset({"conduit", "conduit_fittings", "weatherheads"})
 # Candidates without a parseable size are dropped in these groups.
 STRICT_SIZE_GROUPS = frozenset({"conduit_fittings"})
@@ -223,7 +223,6 @@ GROUP_RULES: dict[
                 "Panelboard Interiors",
                 "Panelboards",
                 "Panelboards & Interiors",
-                "Pump Panels",
                 "Spa Panels",
                 "Spa Panels & Disconnects",
                 "Temporary Power Panels",
@@ -358,15 +357,24 @@ Choose products from the supplied candidate list that an electrician would
 purchase along with the target product to complete its installation.
 
 Return only candidate IDs, in useful purchase order, with no explanation.
-Return no more than 10 IDs and never return the target ID.
+Aim to select up to 10 complementary accessories (ideally 8 to 10) whenever
+compatible candidates exist in the list, and never return the target ID.
 Only select complementary, mating, required, mounting, grounding, sealing,
 termination, or installation consumables. Do not select direct substitutes,
 another color/brand/size version of the target, unrelated products, or items
 that merely belong to the same broad category. Use only IDs in the candidate
-list. It is valid to return an empty list when no candidate is clearly
+list. Select diverse accessories (e.g. choose at most one size/variant of a
+ground bar, enclosure, or connector rather than multiple sizes of the same part)
+so the customer sees a well-rounded installation package. It is valid to return an empty list when no candidate is clearly
 compatible. If the target lists install_jobs, favor candidates an electrician
 would need for the same job. Consider the target's size, material, voltage, wiring method, and
 other specifications before selecting an accessory.
+
+Order selected candidate IDs by installation priority (from first needed to finishing):
+1st: Direct mating part or required electrical connection (e.g. mating plug/receptacle, matching bulb, conduit connector, fuse, ground rod).
+2nd: Mounting hardware, rough-in box, or enclosure.
+3rd: Wire, cable, straps, or fasteners to secure and connect the assembly.
+4th: Finishing, weatherproofing, labels, or consumables (e.g. wallplate, tape, joint compound/deox, wire nuts).
 """
 
 
@@ -472,8 +480,98 @@ TAXONOMY_OVERRIDES = (
     ),
     (
         r"\b(?:jack|keystone|patch panel)\b",
-        ("Lighting Fixtures, Control > Bulbs - LED",),
+        ("Lighting Fixtures, Control > Bulbs - LED", "Lamps, Bulbs & Ballast > Bulbs - LED"),
         "Data & Telecom > Workstation",
+    ),
+    (
+        r"soladeck|grounding block|ground block",
+        ("Boxes & Enclosures > Boxes - Metallic",),
+        "Data & Telecom > Grounding and Bonding",
+    ),
+    (
+        r"screw cover gutter|wireway|gutter",
+        ("Power Distribution > Load Centers / Panelboards", "Boxes & Enclosures > Boxes - Non-Metallic"),
+        "Conduit, Strut & Raceways > Wire Duct, Wire Trough, Wireway",
+    ),
+    (
+        r"\b(?:doorbell|chime)\b",
+        ("Power Distribution > Transformers", "Fasteners & Hardware > Anchors"),
+        "Fire Alarm, Safety, Security > Doorbell Camera",
+    ),
+    (
+        r"\b(?:40ast|ast)\b|\bconduit connector\b|flexible metal conduit connector|connector for flexible metal|squeeze connector",
+        ("Conduit, Strut & Raceways > Conduit - Metallic", "Conduit, Strut & Raceways > Conduit - Flexible"),
+        "Fittings > MC, NMB, Liquidtight, Flex Fittings",
+    ),
+    (
+        r"allied moulded.*device box|device box.*(?:nail|bracket|ears)|thermoplastic.*device box",
+        ("Conduit, Strut & Raceways > Raceway Boxes - Metallic",),
+        "Boxes & Enclosures > Boxes - Non-Metallic",
+    ),
+    (
+        r"liquid ?tight.*connector|push.?(?:in|on).*connector.*liquid",
+        (
+            "Connectors & Crimps > Connectors, Crimps, Disconnects",
+            "Connectors & Crimps > Wire Connectors",
+            "Fittings > nan",
+            "Fittings > ",
+        ),
+        "Fittings > MC, NMB, Liquidtight, Flex Fittings",
+    ),
+    (
+        r"loadcenter|load center",
+        ("Lamps, Bulbs & Ballast > Bulbs Incandescent",),
+        "Power Distribution > Load Centers / Panelboards",
+    ),
+    (
+        r"socket adapter|square.*hex",
+        ("Fuses & Accessories > Plug Fuses & Accessories",),
+        "Tools & Meters > Bits, Blades, Punches, Holesaws",
+    ),
+    (
+        r"screw cover.*(?:enclosure|box|pull box)|nema 1.*screw cover|nema 3r.*screw cover|n1.*screw cover",
+        (
+            "Boxes & Enclosures > FS & FD Devices",
+            "Boxes & Enclosures > Boxes - Non-Metallic",
+            "Data & Telecom > Audio Video Equipment",
+            "Boxes & Enclosures > Underground Pull Boxes",
+        ),
+        "Boxes & Enclosures > Enclosures - Commercial Type",
+    ),
+    (
+        r"clamp meter|true[ -]rms",
+        ("Fasteners & Hardware > Guy Wire Hardware",),
+        "Tools & Meters > Meters - Test Equipment - Calculators",
+    ),
+    (
+        r"mast guying kit|mast kit",
+        ("Fasteners & Hardware > Guy Wire Hardware",),
+        "Fittings > Flashings, Weatherhead",
+    ),
+    (
+        r"f-connector|\bhdmi\b|\bkeystone\b",
+        ("Connectors & Crimps > Connectors, Crimps, Disconnects",),
+        "Data & Telecom > Workstation",
+    ),
+    (
+        r"air conditioning disconnect|\bac disconnect\b",
+        ("Connectors & Crimps > Connectors, Crimps, Disconnects",),
+        "Power Distribution > Safety Switches / Disconnects",
+    ),
+    (
+        r"push button.*station",
+        ("Connectors & Crimps > Connectors, Crimps, Disconnects",),
+        "Control & Automation > Pilot Devices",
+    ),
+    (
+        r"unitap|splice reducer|in-line splice|splice connector",
+        ("Connectors & Crimps > Connectors, Crimps, Disconnects",),
+        "Connectors & Crimps > Lugs & Split Bolts",
+    ),
+    (
+        r"crimp sleeve|splice cap",
+        ("Connectors & Crimps > Connectors, Crimps, Disconnects",),
+        "Connectors & Crimps > Wire Connectors",
     ),
     (
         r"\b(?:urd|uf-b|uf-\d|underground feeder)\b|\buf-",
@@ -498,7 +596,17 @@ TAXONOMY_OVERRIDES = (
     (r"outlet plate", ("Boxes & Enclosures > Boxes - Non-Metallic",), "Wiring Devices > Wallplates"),
     (r"rj45|rj-45|cat ?[56]e?\b", ("Connectors & Crimps > Wire Connectors",), "Data & Telecom > Low Voltage Cable"),
     (r"lkg conn|locking conn|twist.?lock", ("Connectors & Crimps > Wire Connectors",), "Wiring Devices > Pin & Sleeve"),
-    (r"underground enclosure|tier \d", ("Connectors & Crimps > Wire Connectors",), "Boxes & Enclosures > Underground Pull Boxes"),
+    (
+        r"underground enclosure|tier \d|quaz|polymer box|handhole|\bpe\d{2}\b|\bpg\d{4}\b|\bpc\d{4}\b",
+        (
+            "Connectors & Crimps > Wire Connectors",
+            "Boxes & Enclosures > Boxes - Weatherproof",
+            "Boxes & Enclosures > Boxes - Metallic",
+            "Boxes & Enclosures > Boxes - Non-Metallic",
+            "Boxes & Enclosures > ",
+        ),
+        "Boxes & Enclosures > Underground Pull Boxes",
+    ),
     (
         r"metal clad|\bmc cable\b|armored",
         ("Fittings > Clips, Clamps, Hangers", "Wire, Cable & Cord > Building Wire"),
@@ -537,7 +645,7 @@ TAXONOMY_OVERRIDES = (
         "Data & Telecom > Distribution Devices",
     ),
     (
-        r"telephone jack|data jack|keystone",
+        r"telephone jack|data jack|keystone|tracjack|trackjack",
         ("Fasteners & Hardware > Fixture Hardware",),
         "Data & Telecom > Workstation",
     ),
@@ -572,9 +680,369 @@ TAXONOMY_OVERRIDES = (
         "Boxes & Enclosures > Boxes - Non-Metallic",
     ),
     (
-        r"locking|twist-?lock|turnlok|\bl\d{1,2}-\d{2}",
-        ("Wiring Devices > Straight Blade 10-20 Amp", "Wiring Devices > Receptacles"),
+        r"locking|twist-?lock|turnlok|\bl\d{1,2}-\d{2}|cs\d{4}",
+        ("Wiring Devices > Straight Blade 10-20 Amp", "Wiring Devices > Receptacles", "Lighting Fixtures, Control > Photocells", "Wiring Devices > Combination Devices"),
         "Wiring Devices > Twistlock",
+    ),
+    (
+        r"\b(?:c[- ]tap|h[- ]tap)\b",
+        ("Fittings > EMT Fittings", "Wire, Cable & Cord > Service Wire", "Conduit, Strut & Raceways > Conduit - Metallic"),
+        "Connectors & Crimps > Lugs & Split Bolts",
+    ),
+    (
+        r"\b(?:jiffy clip|stud clip|cable clip)\b",
+        ("Wire, Cable & Cord > Armored Cable", "Wire, Cable & Cord > Building Wire"),
+        "Fittings > Clips, Clamps, Hangers",
+    ),
+    (
+        r"offset nipple|chase nipple",
+        ("Fittings > EMT Fittings", "Fittings > Rigid Fittings"),
+        "Fittings > Bushing / K.O. Seal / Locknuts",
+    ),
+    (
+        r"thermoplastic.*(?:sw|switch|outlet|box)\b",
+        ("Conduit, Strut & Raceways > Raceway Boxes - Metallic", "Boxes & Enclosures > Boxes - Metallic"),
+        "Boxes & Enclosures > Boxes - Non-Metallic",
+    ),
+    (
+        r"bluetooth.*speaker|jobsite speaker|wearable.*speaker|speaker.*wearable",
+        ("Data & Telecom > Residential", "Data & Telecom > Audio Video Equipment"),
+        "Tools & Meters > Hand Tools",
+    ),
+    (
+        r"ugskit|underground splice kit",
+        ("Connectors & Crimps > Grounding Products", "Fans, Heaters > Heat Cable"),
+        "Connectors & Crimps > Splicing & Terminating Kits",
+    ),
+    (
+        r"wall ?plate|plate.*(?:blank|box mount|toggle|duplex)",
+        ("Data & Telecom > Audio Video Equipment",),
+        "Wiring Devices > Wallplates",
+    ),
+    (
+        r"non[- ]?metallic junction box|jbx\d+|pvc.*junction box",
+        ("Boxes & Enclosures > Boxes - Explosionproof",),
+        "Boxes & Enclosures > Boxes - Non-Metallic",
+    ),
+    (
+        r"512h|box hanger|hanger.*box",
+        ("Caddy > Cable/Conduit", "Caddy > Ceiling/Acoustical"),
+        "Fittings > Clips, Clamps, Hangers",
+    ),
+    (
+        r"11-in-1|multibit|multi-bit|screwdriver",
+        ("Tools & Meters > Bits, Blades, Punches, Holesaws",),
+        "Tools & Meters > Hand Tools",
+    ),
+    (
+        r"jiffy clip|pipe strap|conduit strap|1-hole strap|one-hole strap|2-hole strap|th-18\d{2}|th-19\d{2}|\b18\d{2}\b.*strap|\b19\d{2}\b.*strap",
+        ("Conduit, Strut & Raceways > Strut", "Wire, Cable & Cord > Armored Cable"),
+        "Fittings > Straps",
+    ),
+    (
+        r"unitap|uni-tap|splice reducer",
+        (
+            "Connectors & Crimps > Distribution & Terminal Blocks",
+            "Fasteners & Hardware > Tapes",
+            "Fittings > PVC Fittings",
+            "Connectors & Crimps > Connectors, Crimps, Disconnects",
+        ),
+        "Connectors & Crimps > Lugs & Split Bolts",
+    ),
+    (
+        r"insulation piercing|bipc\d+",
+        ("Connectors & Crimps > Splicing & Terminating Kits",),
+        "Connectors & Crimps > Lugs & Split Bolts",
+    ),
+    (
+        r"dvstv|dvtv|ntstv|rh4fbl3|mrf2s-8sd010|0-10v.*dimmer|0-10.*dim",
+        (
+            "Wiring Devices > Switches",
+            "Wiring Devices",
+        ),
+        "Lighting Fixtures, Control > Dimmers/Dimming Controls",
+    ),
+    (
+        r"time clock|time switch|timeswitch|\bt10[1-4]\b|\be101b\b|tripper.*t100|156t|\bet\d{4}c\b|\b1109a\b",
+        (
+            "Lighting Fixtures, Control > Occupancy Sensors",
+            "Wiring Devices > Switches",
+            "Control & Automation > Disconnect Switches",
+        ),
+        "Lighting Fixtures, Control > Timer Controls",
+    ),
+    (
+        r"power monitor|phase monitor|voltage monitor|phase loss",
+        (
+            "Control & Automation > Measuring, Monitoring & Logic Devices",
+            "Power Distribution > Transformers",
+            "Control & Automation > ",
+        ),
+        "Control & Automation > Relays",
+    ),
+    (
+        r"distribution block|\bpdb\b",
+        ("Power Distribution > ", "Power Distribution > Load Centers / Panelboards"),
+        "Connectors & Crimps > Lugs & Split Bolts",
+    ),
+    (
+        r"\b[1-4]fs[cd]?\b|\b[1-4]fd[cd]?\b|cast (?:iron )?device box",
+        ("Conduit, Strut & Raceways > Raceway Boxes - Metallic",),
+        "Boxes & Enclosures > Boxes - Metallic",
+    ),
+    (
+        r"tombstone|fl skt|t8 retro fit kit|t8 retrofit",
+        (
+            "Tools & Meters > Hand Tools",
+            "Lighting Fixtures, Control > Indoor Lighting",
+            "Lamps, Bulbs & Ballast > Bulbs - LED",
+        ),
+        "Lighting Fixtures, Control > Lampholders, Adapters & Extensions",
+    ),
+    (
+        r"v20\d{2}|2010|2011|2048|2001 stl",
+        (
+            "Conduit, Strut & Raceways > Raceway - Non-Metallic",
+            "Conduit, Strut & Raceways > Raceway Boxes - Metallic",
+            "Fittings > Rigid Fittings",
+            "Data & Telecom > Non-Metallic Raceway",
+        ),
+        "Conduit, Strut & Raceways > Plugmold",
+    ),
+    (
+        r"lattice guard|guard cage|stringlight guard",
+        ("Lighting Fixtures, Control > Indoor Lighting",),
+        "Lighting Fixtures, Control > Temporary Lighting",
+    ),
+    (
+        r"dou125|dos125|dou200|dou275|dos5s|dou5s|dou9s|nitrus omt|open-lok|multi-tool blade|oscillating blade",
+        (
+            "Fittings > Bushing / K.O. Seal / Locknuts",
+            "Tools & Meters > Cordless Tools",
+            "Tools & Meters > Bits, Blades, Punches, Holesaws",
+        ),
+        "Tools & Meters > Bits, Blades, Punches, Holesaws",
+    ),
+    (
+        r"sawzall|recip.*blade|the torch|the ax|\bax\b.*blade|torch.*nitrus|nitrus.*carbide|demo demon.*blade|steel demon.*recip",
+        (
+            "Tools & Meters > Cordless Tools",
+            "Tools & Meters > Bits, Blades, Punches, Holesaws",
+        ),
+        "Tools & Meters > Bits, Blades, Punches, Holesaws",
+    ),
+    (
+        r"flush mount|flush with alabaster|vanity strip|vanity mount|bath bar|semi-flush",
+        (
+            "Lighting Fixtures, Control > Occupancy Sensors",
+            "Lighting Fixtures, Control > Temporary Lighting",
+            "Lighting Fixtures, Control > Emergency Lighting & Signs",
+        ),
+        "Lighting Fixtures, Control > Indoor Lighting",
+    ),
+    (
+        r"swivel flood|weatherproof.*flood|floodlight",
+        (
+            "Lighting Fixtures, Control > Indoor Lighting",
+        ),
+        "Lighting Fixtures, Control > Outdoor Lighting",
+    ),
+    (
+        r"\bwas\d{3}\b|\bseal,\s*ot\b",
+        (
+            "Fittings > Conduit Hubs",
+        ),
+        "Fittings > Bushing / K.O. Seal / Locknuts",
+    ),
+    (
+        r"pipe choke|grounding hub|hub\d+l\b",
+        (
+            "Fittings > Conduit Hubs",
+        ),
+        "Connectors & Crimps > Grounding Products",
+    ),
+    (
+        r"filterfan|filter fan|exhaust filter|pfa\d+|pf\s*\d{4,5}|flz-\d|finder.*filterfan",
+        (
+            "Boxes & Enclosures > Enclosures - Commercial Type",
+            "Fans, Heaters > Fans & Fan Controls",
+            "Fans, Heaters",
+        ),
+        "Boxes & Enclosures > Enclosure Accessories",
+    ),
+    (
+        r"ø?22\.5mm|22\.5\s*mm|pb0[1-6]c|pb19c|pb20c|bs3dl|10250t|mp3-10|mp1-10|mpd4-11",
+        (
+            "Wiring Devices > Specialty Switches",
+            "Wiring Devices",
+            "Fire Alarm, Safety, Security > Pushbuttons & Switches",
+            "Lighting Fixtures, Control > Outdoor Lighting",
+        ),
+        "Control & Automation > Pilot Devices",
+    ),
+    (
+        r"downlight retrofit|retrofit.*downlight",
+        (
+            "Lighting Fixtures, Control > Indoor Lighting",
+        ),
+        "Lighting Fixtures, Control > Indoor Lighting - Recessed",
+    ),
+    (
+        r"nm-b|romex|uf-b",
+        (
+            "Data & Telecom > Non-Metallic Raceway",
+        ),
+        "Wire, Cable & Cord > Building Wire",
+    ),
+    (
+        r"^mc\s+mc-|\bmc-al\b|\bhcf-ac\b|\bmc-pcs\b|\bmc-stl\b|\bmcap\b|\bmetal clad\b",
+        (
+            "Fittings > Clips, Clamps, Hangers",
+            "Data & Telecom > Non-Metallic Raceway",
+            "Wire, Cable & Cord",
+            "Wire, Cable & Cord > ",
+        ),
+        "Wire, Cable & Cord > Armored Cable",
+    ),
+    (
+        r"^con emt\s+",
+        (
+            "Fittings > EMT Fittings",
+        ),
+        "Conduit, Strut & Raceways > Conduit - Metallic",
+    ),
+    (
+        r"\b(?:3br\d{4}|chp32b|chp32l|brp\d{2}[bl]|brc\d{2}[bl]|loadcenter|load center)\b",
+        (
+            "Power Distribution > Circuit Breakers",
+            "Boxes & Enclosures > Enclosures - Commercial Type",
+            "Boxes & Enclosures > Boxes - Non-Metallic",
+            "Lamps, Bulbs & Ballast > Bulbs Incandescent",
+        ),
+        "Power Distribution > Load Centers / Panelboards",
+    ),
+    (
+        r"chpx\d|loadcenter cover|neutral flush cover",
+        (
+            "Boxes & Enclosures > Boxes - Non-Metallic",
+            "Boxes & Enclosures > Boxes - Metallic",
+        ),
+        "Power Distribution > Load Centers / Panelboards",
+    ),
+    (
+        r"brpsurge|brnsurge|clnsurge|chsurge",
+        (
+            "Control & Automation > Starters & Contactors",
+        ),
+        "Power Distribution > Circuit Breakers",
+    ),
+    (
+        r"ezb20\d{2}|ez trim|ezt20\d{2}|gwpbq\d{4}|lugkit\d{3}",
+        (
+            "Boxes & Enclosures",
+            "Boxes & Enclosures > ",
+            "Boxes & Enclosures > Enclosures - Commercial Type",
+            "Tools & Meters > Storage",
+            "Power Distribution > Metering & Temporary Power",
+        ),
+        "Power Distribution > Load Centers / Panelboards",
+    ),
+    (
+        r"carflex.*(?:100|50|coil)|liquidtight.*(?:100|50)\s*(?:coil|ft|')",
+        (
+            "Conduit, Strut & Raceways > Conduit - Non-Metallic",
+            "Fittings > MC, NMB, Liquidtight, Flex Fittings",
+        ),
+        "Conduit, Strut & Raceways > Conduit - Flexible",
+    ),
+    (
+        r"coupling|end bell|female adp|male adpt|junction box adapter|conduit clamp|elbow|elb\b",
+        (
+            "Conduit, Strut & Raceways > Conduit - Non-Metallic",
+        ),
+        "Fittings > PVC Fittings",
+    ),
+    (
+        r"led wallpack|wall pack|crosstour|wpled|wlp\d{2}",
+        (
+            "Lighting Fixtures, Control > Occupancy Sensors",
+            "Lighting Fixtures, Control > Temporary Lighting",
+        ),
+        "Lighting Fixtures, Control > Outdoor Lighting",
+    ),
+    (
+        r"led disk light|disk light|wafer down|hlc6fs|slim downlight|commercial slim downlight|proled select slim downlight",
+        (
+            "Power Distribution > Metering & Temporary Power",
+            "Lighting Fixtures, Control > Occupancy Sensors",
+            "Lighting Fixtures, Control > Indoor Lighting - Recessed",
+        ),
+        "Lighting Fixtures, Control > Indoor Lighting",
+    ),
+    (
+        r"lock out tag out|lockout.*tagout|\b44-97[01]\b",
+        (
+            "Fasteners & Hardware > Anchors",
+        ),
+        "Tools & Meters > Safety Equipment",
+    ),
+    (
+        r"ct can|trans encl|ct cabinet|current transformer cabinet|csuct|u4468",
+        (
+            "Power Distribution > Transformers",
+        ),
+        "Boxes & Enclosures > Enclosures - Commercial Type",
+    ),
+    (
+        r"rk5|rk1|class j|ajt\d|trs\d|tr\d+r|frsr|frnr|flsr|flnr|a4bq|a6d",
+        (
+            "Fuses & Accessories > General Purpose Fuses",
+        ),
+        "Fuses & Accessories > Power Fuses",
+    ),
+    (
+        r"led t8|led t5|t8 led|t5 led|t8 hybrid|t8 linear tube|24t8|36t8|48t8|96t8",
+        (
+            "Lighting Fixtures, Control > Indoor Lighting",
+        ),
+        "Lamps, Bulbs & Ballast > Bulbs - LED",
+    ),
+    (
+        r"c tap|c-tap|hytap|butt splice|compression splice|ygfc|yghc|yc[0-9]c|ys[0-9]",
+        (
+            "Fittings > EMT Fittings",
+        ),
+        "Connectors & Crimps > Lugs & Split Bolts",
+    ),
+    (
+        r"ground screw|grounding screw|grn ground|grounding clips?",
+        (
+            "Fasteners & Hardware > Screws",
+        ),
+        "Connectors & Crimps > Grounding Products",
+    ),
+    (
+        r"box extender|\bbe[1-4]r?\b|spacer shims|receptacle shim",
+        (
+            "Boxes & Enclosures > Boxes - Metallic",
+            "Wiring Devices > Wallplates",
+            "Wiring Devices > Combination Devices",
+        ),
+        "Boxes & Enclosures > Boxes - Non-Metallic",
+    ),
+    (
+        r"modular crimp|vdv226|punchdown|punch down|scout.*tester|vdv\d{3}",
+        (
+            "Tools & Meters > Hand Tools",
+        ),
+        "Data & Telecom > Tools",
+    ),
+    (
+        r"s384-c|range/dryer plate|flush range dryer plate|tp703|ss703|p703w",
+        (
+            "Boxes & Enclosures > Boxes - Non-Metallic",
+        ),
+        "Wiring Devices > Wallplates",
     ),
 )
 RANK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "BLAZER.RANK.csv")
@@ -601,10 +1069,10 @@ SMALL_TOOL_NODES = (
     "Tools & Meters > Marking",
     "Tools & Meters > Batteries",
 )
-TOP_ANCHORS = 1  # best sellers always offered; the rest rotate
+TOP_ANCHORS = 4  # best sellers always offered; the rest rotate
 SPREAD_FACTOR = 10
-MIN_SUGGESTIONS = 5
-FALLBACK_FILL = 8
+MIN_SUGGESTIONS = 10
+FALLBACK_FILL = 12
 
 
 def attach_orders(source: pd.DataFrame, path: str = RANK_PATH) -> pd.DataFrame:
@@ -646,6 +1114,8 @@ def _color(row: dict[str, str]) -> str:
     text = " ".join(
         str(row.get(column, "")).lower() for column in ("PRODUCT", "clean_title")
     )
+    if re.search(r"\b(?:red|rd)\b", text):
+        return "red"
     for color in COLORS:
         if re.search(rf"\b{color}\b", text):
             return "gray" if color == "grey" else color
@@ -682,12 +1152,13 @@ def _brand(row: dict[str, str]) -> str:
 
 
 _BREAKER_SERIES = (
+    ("DIN", re.compile(r"\bL9-\d|\bMINICB\b|\bST20\d\b|DIN.?RAIL", re.I)),
     ("HOM", re.compile(r"\bHOM[A-Z]*\d*\b|Homeline", re.I)),
     ("QO", re.compile(r"\bQO[A-Z]{0,3}\d*\b")),
     ("THQL", re.compile(r"\bTHQL[A-Z]*\d*\b")),
     ("THQB", re.compile(r"\bTH?H?QB[A-Z]*\d*\b|\bTHQC\w*", re.I)),
     ("QP", re.compile(r"\bQP\w*|\bQ\d{2,3}\w*|Siemens Q\b")),
-    ("BAB", re.compile(r"\bBAB\w*|\bBQD\w*|\bQPF\w*|\bBQ\w*")),
+    ("BAB", re.compile(r"\bBAB\w*|\bBQD\w*|\bQPF\w*|\bBQ\w*|PRL1|PRL2", re.I)),
     ("BR", re.compile(r"\bBR[A-Z]{0,3}\d*\b|\bBQ[A-Z]{0,2}\d*\b")),
     ("CH", re.compile(r"\bCH[A-Z]{0,3}\d*\b|\bCL\d*\b")),
 )
@@ -721,11 +1192,16 @@ def breaker_series(row: dict[str, str]) -> str:
     return ""
 
 
-_THREAD = re.compile(r"#\s?(\d{1,2})\b|\b(\d{1,2}/\d{1,2})\s*(?:inch|in\b|-\s?\d|\")", re.I)
+_THREAD = re.compile(
+    r"#\s?(\d{1,2})\b|\b(\d{1,2}/\d{1,2})\s*(?:inch|in\b|-\s?\d|\")|\b(\d{1,2})-(?:32|24|20|16|13|11|10)\b",
+    re.I,
+)
 
 
 def box_kind(row: dict[str, str]) -> str:
     text = _text(row).lower()
+    if re.search(r"fan (?:and )?fixture|fan box|ceiling fan box|saddle box|fbrs|fbs4|fb4\d\d", text):
+        return "fan_box"
     if re.search(r"4-11/16|4\.6875|4 11/16", text):
         return "4-11/16"
     if re.search(r"\bsquare\b.*\b4\b|\b4\b.*\bsquare\b|\b4(?:-| )?(?:inch|in)\b.*square|\b4s\b|\b4 ?sq", text):
@@ -743,7 +1219,11 @@ def fastener_diameter(row: dict[str, str]) -> str:
     match = _THREAD.search(f"{row.get('clean_title', '')} {row.get('PRODUCT', '')}")
     if not match:
         return ""
-    return "#" + match.group(1) if match.group(1) else match.group(2)
+    if match.group(1):
+        return "#" + match.group(1)
+    if match.group(2):
+        return match.group(2)
+    return "#" + match.group(3)
 
 
 def platform(row: dict[str, str]) -> str:
@@ -768,7 +1248,7 @@ def _gauge_area(number: str, unit: str) -> float | None:
 
 
 _WIRE_TYPE_GAUGE = re.compile(
-    r"\b(?:thhn|thwn(?:-2)?|xhhw(?:-2)?|use-2|rhw(?:-2)?)\s+(\d{1,2}(?:/0)?)\b", re.I
+    r"\b(?:thhn|thwn(?:-2)?|xhhw(?:-2)?|use-2|rhw(?:-2)?|coilpak)\s*[- ]\s*(\d{1,2}(?:/0)?)\b", re.I
 )
 _NM_GAUGE = re.compile(r"\b(\d{1,2})/[2-5]\b")
 _CABLE_WORDS = re.compile(r"sheathed|nm-b|romex|metal clad|\bmc\b|\buf\b|underground feeder", re.I)
@@ -1213,26 +1693,26 @@ def build_candidates(
                     target, by_group, have, FALLBACK_FILL - len(candidates)
                 ),
             )
-    if len(candidates) <= MAX_CANDIDATES:
-        return candidates
 
     by_subcategory: dict[str, list[dict[str, str]]] = defaultdict(list)
     for candidate in candidates:
-        by_subcategory[candidate["sub_category"]].append(candidate)
+        key = candidate.get("sub_category") or candidate.get(TAX_COL, "")
+        by_subcategory[key].append(candidate)
     for subcategory_candidates in by_subcategory.values():
         subcategory_candidates.sort(key=lambda candidate: (-candidate.get(ORDERS_COL, 0), candidate[ID_COL]))
 
     selected: list[dict[str, str]] = []
     subcategories = sorted(by_subcategory)
     round_index = 0
-    while len(selected) < MAX_CANDIDATES:
+    limit = min(len(candidates), MAX_CANDIDATES)
+    while len(selected) < limit:
         added = False
         for subcategory in subcategories:
             products = by_subcategory[subcategory]
             if round_index < len(products):
                 selected.append(products[round_index])
                 added = True
-                if len(selected) == MAX_CANDIDATES:
+                if len(selected) == limit:
                     break
         if not added:
             break
@@ -1250,11 +1730,15 @@ def _eligible_candidates(
     seen: set[str] = {target_id}
     for group in groups:
         group_candidates: list[dict[str, str]] = []
+        is_tool_group = group.startswith("rule") and (
+            TAXONOMY_RULES[group].accessory_path == "Tools & Meters > Cordless Tools"
+            or bool(TAXONOMY_RULES[group].accessory_keywords and re.search(r"exhaust filter|filter vent|thermostat|contact block|collar with|shroud|legend plate|tagout|kit|hasp|padlock|do not operate", TAXONOMY_RULES[group].accessory_keywords.pattern))
+        )
         for candidate in by_group[group]:
             if (
-                candidate.get(ORDERS_COL, MIN_CANDIDATE_ORDERS) < MIN_CANDIDATE_ORDERS
-                or "obsolete" in candidate["PRODUCT"].lower()
-            ):
+                not is_tool_group
+                and candidate.get(ORDERS_COL, MIN_CANDIDATE_ORDERS) < MIN_CANDIDATE_ORDERS
+            ) or "obsolete" in candidate["PRODUCT"].lower():
                 continue
             if group in TAXONOMY_RULES and not _taxonomy_compatible(
                 group, target, candidate
@@ -1441,8 +1925,31 @@ def top_up_selection(
     if len(selected) >= MIN_SUGGESTIONS:
         return selected
     rule_based = _drop_conflicts(target, _eligible_candidates(target, by_group))
+
+    # Interleave rule-based candidates by subcategory
+    by_subcat: dict[str, list[dict[str, str]]] = defaultdict(list)
+    for c in rule_based:
+        key = c.get("sub_category") or c.get(TAX_COL, "")
+        by_subcat[key].append(c)
+    for subcat_cands in by_subcat.values():
+        subcat_cands.sort(key=lambda c: (-c.get(ORDERS_COL, 0), c[ID_COL]))
+
+    interleaved: list[dict[str, str]] = []
+    subcats = sorted(by_subcat)
+    round_idx = 0
+    while len(interleaved) < len(rule_based):
+        added = False
+        for subcat in subcats:
+            items = by_subcat[subcat]
+            if round_idx < len(items):
+                interleaved.append(items[round_idx])
+                added = True
+        if not added:
+            break
+        round_idx += 1
+
     result = list(selected)
-    for candidate in rule_based:
+    for candidate in interleaved:
         if len(result) >= MIN_SUGGESTIONS:
             break
         if candidate[ID_COL] not in result and candidate[ID_COL] != target[ID_COL]:
@@ -1476,7 +1983,9 @@ async def run(
     model: str,
     sample: int = 0,
     seed: int = 42,
+    pids_only: set[str] | None = None,
 ) -> int:
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
     load_dotenv()
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
@@ -1489,12 +1998,18 @@ async def run(
     source = attach_taxonomy(source.drop_duplicates(subset=ID_COL, keep="first"))
     by_group = _candidate_indexes(source)
     if sample:
-        has_pool = source[
-            [bool(build_candidates(t, by_group)) for t in source.to_dict("records")]
-        ]
-        source = has_pool.sample(n=min(sample, len(has_pool)), random_state=seed)
+        active = source[source[ORDERS_COL] >= MIN_CANDIDATE_ORDERS]
+        pool = active if len(active) >= sample else source
+        sampled = pool.sample(n=min(sample * 3, len(pool)), random_state=seed)
+        valid = [t for t in sampled.to_dict("records") if build_candidates(t, by_group)]
+        source = pd.DataFrame(valid[:sample])
     done = load_checkpoint(checkpoint_path)
-    pending = source[~source[ID_COL].isin(set(done[OUTPUT_ID_COL]))]
+    if pids_only:
+        pending = source[source[ID_COL].isin(pids_only)]
+        # Remove pending items from done so they get recomputed
+        done = done[~done[OUTPUT_ID_COL].isin(pids_only)]
+    else:
+        pending = source[~source[ID_COL].isin(set(done[OUTPUT_ID_COL]))]
     logger.info("%d rows total, %d done, %d pending", len(source), len(done), len(pending))
 
     client = genai.Client(api_key=api_key)
@@ -1561,6 +2076,11 @@ def main() -> None:
         help="Run Gemini on N random products only, using separate sample output/checkpoint files.",
     )
     parser.add_argument("--seed", type=int, default=42, help="Random seed for --sample.")
+    parser.add_argument(
+        "--rebuild-rules",
+        action="store_true",
+        help="Rebuild only products affected by the newly added rules (rules 560-750).",
+    )
     args = parser.parse_args()
     if args.sample:
         if args.output == "product_accessories.csv":
@@ -1581,8 +2101,29 @@ def main() -> None:
         except (OSError, ValueError) as exc:
             parser.error(str(exc))
         return
+    pids_only = None
+    if args.rebuild_rules:
+        source_df = pd.read_csv(args.input, dtype=str, keep_default_na=False)
+        source_df = attach_taxonomy(source_df.drop_duplicates(subset=ID_COL, keep="first"))
+        new_rule_indices = [f"rule{i}" for i in range(560, 755)]
+        pids_only = set()
+        for r in source_df.to_dict("records"):
+            groups = _matching_groups(r)
+            if any(g in new_rule_indices for g in groups):
+                pids_only.add(r[ID_COL])
+        logger.info("Found %d products affected by rules 560-755 to regenerate.", len(pids_only))
     try:
-        failures = asyncio.run(run(args.input, args.output, args.checkpoint, args.model, args.sample, args.seed))
+        failures = asyncio.run(
+            run(
+                args.input,
+                args.output,
+                args.checkpoint,
+                args.model,
+                args.sample,
+                args.seed,
+                pids_only=pids_only,
+            )
+        )
     except (OSError, RuntimeError, ValueError) as exc:
         parser.error(str(exc))
     sys.exit(1 if failures else 0)

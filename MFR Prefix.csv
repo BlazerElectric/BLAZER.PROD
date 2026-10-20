@@ -33,7 +33,7 @@ Cully,CUL
 DSG-CANUSA,DSG
 Diablo,DBL
 "Dial Manufacturing, Inc.",DIAL
-Diode led,DIO
+Diode LED,DIO
 Dottie,DOT
 Dual-Lite,DUL
 E-Mon,EMON
@@ -59,7 +59,7 @@ Greenlee Textron Inc.,GRE
 Halco,HALCO
 Hammond Power Solutions,HAM
 Harger,HAR
-Haydon,HDN
+Haydon Strut,HDN
 HellermannTyton,HT
 Highline,HLN
 Hillbilly Hand Scrub LLC,HHS
@@ -115,7 +115,7 @@ Phoenix Support Systems,PHX
 "Pilla Electrical Products, Inc.",PILLA
 Platinum Tools,PLT
 "Platte Anchor Bolt, Inc.",PLATTE
-Porcelain Products,POR
+Tiffin Insulators,POR
 PowerSonic, PSG
 Power-Strut,STRUT
 Prescolite,PRE
@@ -168,6 +168,10 @@ Copper Generic,COP
 Aluminum Generic,ALW
 Kilark,KIL
 Nipple Generic,NIP
+Elbow Generic,ELB
+Conduit Generic,CON
+PVC Generic,PVC
+Liquidtight Generic,LQT
 NSi Industries,NSI
 Superflex Sealproof,SLP
 Optical Cable Corporation,OCC

@@ -28,6 +28,7 @@ Service upgrade,service entrance cable,Wire,\bSE[RU]?\b|service.?entrance|\bSER\
 Service upgrade,weatherhead / hub,,weatherhead|service head|meter hub|sealing ring|sealtite.*hub,3
 Service upgrade,anti-oxidant compound,,\boxide|noalox|penetrox|anti.?ox|alumi.?shield|joint compound|\bPEN\b,2
 Service upgrade,lugs,Connectors & Crimps,lug|split bolt|connector.*aluminum|\bAL\b.*CU,3
+Service upgrade,emergency disconnect label,Tools & Meters > Marking & Labeling,emergency|service disconnect|wop label,2
 Rough-in,old-work/new-work box,Boxes & Enclosures > Boxes - Non-Metallic,old work|new work|1-gang|zip|adj,1
 Rough-in,NM cable,Wire,\b(14|12)/(2|3)\b.*(NM|WG|ROMEX|COIL|RL),3
 Rough-in,cable staples/straps,,staple|strap.*(nm|romex|cable)|\bnm\b.*strap|cable.*clip,3
@@ -142,7 +143,7 @@ Control panel build,terminal blocks,Control & Automation > Terminal Blocks,.,3
 Control panel build,relays,Control & Automation,relay|socket|timer|contactor,3
 Control panel build,pilot devices,Control & Automation > Pilot,push.?button|selector|pilot|indicator|e.?stop,3
 Control panel build,power supply,Control & Automation > Power Supply,power supply|24V|DIN,2
-Control panel build,panel enclosure,Boxes & Enclosures,N12|N4|screw cover|enclosure|panel|back ?panel|subpanel,2
+Control panel build,panel enclosure,Boxes & Enclosures > Enclosures - Commercial Type,N12|N4|screw cover|enclosure|panel|back ?panel|subpanel,2
 Control panel build,wire duct,"Conduit, Strut & Raceways > Wire Duct",.,2
 Control panel build,control wire / ferrules,,MTW|TFFN|ferrule|control wire|\b16 AWG|\b18 AWG,2
 Control panel build,fuse blocks,Fuses,fuse (block|holder)|holder,2
@@ -164,7 +165,7 @@ High-bay / HID lighting,ballast / driver,"Lamps, Bulbs & Ballast",ballast|driver
 High-bay / HID lighting,lamps,"Lamps, Bulbs",metal halide|MH|\bHPS\b|LED.*(lamp|retrofit)|\bMH\b|MP\d,2
 High-bay / HID lighting,chain / hook,,chain|hook|hanger|cable.*(hanger|kit)|pendant|aircraft cable,2
 High-bay / HID lighting,sensor,"Lighting Fixtures, Control",sensor|occupan|motion|daylight|photocell,1
-High-bay / HID lighting,cord / plug,,\bwhip\b|\bcord\b|\bplug\b(?!-)|twist.?lock|pigtail|\bSOW?O?\b,1
+High-bay / HID lighting,cord / plug,Wire,whip|drop cord|fixture cord|pigtail|twist.?lock.*cord,1
 Power distribution,transformer,Power Distribution,transformer|\bKVA\b|buck,2
 Power distribution,panelboard / load center,Power Distribution > Load Centers,panel|load center,2
 Power distribution,breakers,Power Distribution > Circuit Breakers,"(^|\s)(QO|HOM|BR|Q|THQL|THQP|THQB|CH|BD)\d?-?\d{2,3}\b",2
@@ -213,3 +214,8 @@ Shop stock,benders and tools,Tools & Meters,bender|reamer|knockout|punch|saw|dri
 Shop stock,lugs and terminals,Connectors & Crimps,lug|terminal|crimp|split bolt|ring|spade|butt,1
 Shop stock,consumables,,tape|label|ties|lube|lubricant|cutting oil|marker|pulling,1
 Shop stock,boxes,Boxes & Enclosures,4.?sq|handy|junction|pull box|1900|octagon|cover,1
+Dryer / range hookup,appliance cord,Wiring Devices,dryer|range|appliance.*cord|10/4.*30a|10/3.*30a|6/2-8/2|6/3.*50a,2
+Dryer / range hookup,receptacle,Wiring Devices,dryer|range|14-30|14-50|10-30|10-50|\b50\s?a\b.*\b(recp|receptacle)|\b30\s?a\b.*\b(recp|receptacle),2
+Dryer / range hookup,wallplate,Wiring Devices,power outlet|2\.15|703|dryer|range,2
+Dryer / range hookup,deep box,Boxes & Enclosures,4-11/16|2-1/8|4sq|square box,2
+Dryer / range hookup,cable connector,Fittings,romex|nm.*connector|connector.*nm|\b670\b|\b674\b|\b675\b,2

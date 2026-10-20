@@ -29,6 +29,8 @@ from tenacity import (
 )
 from tqdm.asyncio import tqdm
 
+from manufacturer_normalization import normalize_enriched_products
+
 MODEL = "gemini-3.1-flash-lite"
 CONCURRENCY = 12
 CHECKPOINT_EVERY = 100
@@ -46,6 +48,16 @@ descriptive text and typos.
 Rules:
 - Extract and resolve brand codes (e.g. BPT = Bridgeport Fittings, HUB = Hubbell,
   RAB = RAB Lighting, EAT = Eaton/Cutler-Hammer, LEV = Leviton).
+- Treat leading catalog manufacturer prefixes as authoritative: DBL = Diablo,
+  COP = Copper Generic, ALW = Aluminum Generic, DOT = Dottie, and RAT =
+  Rack-A-Tiers. Do not infer DeWalt from DBL or named cable manufacturers from
+  COP/ALW unless the raw product explicitly says so. This catalog does not sell DeWalt.
+- Commodity prefixes NIP, ELB, CON, PVC, LQT and MC identify generic nipples,
+  elbows, conduit, PVC products, liquidtight products and MC cable rather than
+  a guaranteed manufacturer. Do not infer brand-specific source from those codes.
+- Confirmed manufacturer prefixes CUL, HDN, POR, GLA, VC, PNS and DIO map to
+  Cully, Haydon Strut, Tiffin Insulators, Glas Masters, Vertical Cable,
+  Pass & Seymour and Diode LED, respectively.
 - Correct typos in the raw text (e.g. 'SPILT BUSHING' -> 'SPLIT BUSHING').
 - Standardize all trade sizes and measurement units
   (e.g. '1/2IN' -> '1/2 Inch (0.50 in)').
@@ -197,6 +209,7 @@ async def run(input_path: str, output_path: str, checkpoint_path: str) -> int:
     final = source.merge(
         done.drop(columns=[PRODUCT_COL]), on=ID_COL, how="left"
     )
+    final = normalize_enriched_products(final)
     save_atomic(final, output_path)
     logger.info("Wrote %s (%d failures; re-run to retry them)", output_path, failures)
     return failures

@@ -1,6 +1,8 @@
 .env
 __pycache__/
 *.pyc
-enriched_products.checkpoint.csv
+*.checkpoint*.csv
 product_accessories*.csv
+similar_products.csv
 *.sample.csv
+*.tmp

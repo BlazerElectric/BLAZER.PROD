@@ -42,11 +42,21 @@ python3 generate_similar_products.py
 python3 generate_accessories.py --checkpoint product_accessories.csv
 ```
 - Uses `product_accessories.csv` as the checkpoint: existing products are preserved, and only new/unprocessed products build candidate pools and invoke Gemini.
+- Preserves all locked hero packages in `curated_accessories.csv`.
 - If specific rule sets (e.g. rules 560-755) need targeted rebuilding, use:
   ```bash
   python3 generate_accessories.py --checkpoint product_accessories.csv --rebuild-rules
   ```
 - Generates `product_accessories.csv`.
+
+### Step 5: Deterministic Quality Audit & Fill (0 API Calls)
+```bash
+python3 audit_and_fix_accessories.py
+```
+- Preserves all 33+ locked hero packages in `curated_accessories.csv`.
+- Fills any short rows (under 10 items) to guarantee full 10/10 coverage across all 8,477 items.
+- Enforces trade sanity rules (e.g. strips expensive tools off low-cost fasteners).
+- Runs locally in ~3 seconds with $0.00 API cost.
 
 ---
 

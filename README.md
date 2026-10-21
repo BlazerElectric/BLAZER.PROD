@@ -112,7 +112,7 @@ python generate_similar_products.py \
 
 ## Future Updates: Adding New Products or Dropping Discontinued SKUs
 
-When receiving a new `products.csv` or updated `BLAZER.RANK.csv`, run this 4-step sequence:
+When receiving a new `products.csv` or updated `BLAZER.RANK.csv`, run this 5-step sequence:
 
 ```sh
 # 1. Enrich only the new SKUs (existing products load from checkpoint in seconds)
@@ -126,5 +126,8 @@ python3 generate_similar_products.py
 
 # 4. Generate Accessories (Carousel 1, processes only new SKUs using checkpoint)
 python3 generate_accessories.py --checkpoint product_accessories.csv
+
+# 5. Deterministic Quality Audit & Fill (0 API cost, guarantees 10/10 slots & preserves curated items)
+python3 audit_and_fix_accessories.py
 ```
 

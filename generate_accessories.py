@@ -65,6 +65,14 @@ COLORS = (
 )
 
 RULES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "accessory_rules.csv")
+CURATED_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "curated_accessories.csv")
+
+
+def load_curated_accessories(path: str = CURATED_PATH) -> pd.DataFrame:
+    if os.path.exists(path):
+        df = pd.read_csv(path, dtype=str, keep_default_na=False)
+        return df.drop_duplicates(subset=OUTPUT_ID_COL, keep="last")
+    return pd.DataFrame(columns=[OUTPUT_ID_COL, *RELATION_COLUMNS])
 
 
 class TaxonomyRule(NamedTuple):
@@ -1663,6 +1671,11 @@ def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
         tcolor, ccolor = _color(target), _color(cand)
         if tcolor and ccolor and tcolor != ccolor:
             return "color"
+    # Never suggest power tools or heavy hand tools on small commodity fasteners
+    if tparts[0] == "Fasteners & Hardware" and cparts[0] == "Tools & Meters":
+        if re.search(r"\b(?:washer|hex nut|locknut|lock nut|machine screw|drywall screw)\b", _text(target), re.I):
+            if re.search(r"\b(?:plier|wrench|ratchet|saw|driver system|packout)\b", _text(cand), re.I):
+                return "tool_mismatch"
     return ""
 
 
@@ -1954,6 +1967,7 @@ def top_up_selection(
             break
         if candidate[ID_COL] not in result and candidate[ID_COL] != target[ID_COL]:
             result.append(candidate[ID_COL])
+
     return result
 
 
@@ -2004,13 +2018,21 @@ async def run(
         valid = [t for t in sampled.to_dict("records") if build_candidates(t, by_group)]
         source = pd.DataFrame(valid[:sample])
     done = load_checkpoint(checkpoint_path)
+    curated = load_curated_accessories()
+    curated_ids = set(curated[OUTPUT_ID_COL])
     if pids_only:
-        pending = source[source[ID_COL].isin(pids_only)]
+        pending = source[source[ID_COL].isin(pids_only) & ~source[ID_COL].isin(curated_ids)]
         # Remove pending items from done so they get recomputed
         done = done[~done[OUTPUT_ID_COL].isin(pids_only)]
     else:
-        pending = source[~source[ID_COL].isin(set(done[OUTPUT_ID_COL]))]
-    logger.info("%d rows total, %d done, %d pending", len(source), len(done), len(pending))
+        pending = source[~source[ID_COL].isin(set(done[OUTPUT_ID_COL])) & ~source[ID_COL].isin(curated_ids)]
+    logger.info(
+        "%d rows total (%d curated locked), %d done, %d pending",
+        len(source),
+        len(curated_ids),
+        len(done),
+        len(pending),
+    )
 
     client = genai.Client(api_key=api_key)
     semaphore = asyncio.Semaphore(CONCURRENCY)
@@ -2051,6 +2073,15 @@ async def run(
         done, on=OUTPUT_ID_COL, how="left"
     )
     final = final[[OUTPUT_ID_COL, *RELATION_COLUMNS]].fillna("")
+
+    # Guarantee locked curated accessories overwrite any batch or stale checkpoint rows
+    if not curated.empty:
+        curated_map = curated.set_index(OUTPUT_ID_COL)
+        mask = final[OUTPUT_ID_COL].isin(curated_ids)
+        for col in RELATION_COLUMNS:
+            final.loc[mask, col] = final.loc[mask, OUTPUT_ID_COL].map(curated_map[col])
+        logger.info("Preserved %d curated accessories in final output.", len(curated_ids))
+
     save_atomic(final, output_path)
     logger.info("Wrote %s (%d failures; re-run to retry them)", output_path, failures)
     return failures

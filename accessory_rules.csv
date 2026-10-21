@@ -724,7 +724,6 @@ Boxes & Enclosures > Boxes - Non-Metallic,Wiring Devices > Switches,no,no,none,e
 "Fasteners & Hardware > Nuts, Bolts, Washers",Fasteners & Hardware > Screws,no,no,none,fender_washers_lags,none,fender washer,hex head lag|lag screw|574
 "Fasteners & Hardware > Nuts, Bolts, Washers","Conduit, Strut & Raceways > Strut",no,no,none,fender_washers_strut,none,fender washer,channel|spring nut|cone nut|strut
 "Fasteners & Hardware > Nuts, Bolts, Washers",Fasteners & Hardware > Anchors,no,no,none,fender_washers_anchors,none,fender washer,drop-in|wedge anchor|toggle bolt|sleeve
-"Fasteners & Hardware > Nuts, Bolts, Washers",Tools & Meters > Hand Tools,no,no,none,fender_washers_tools,none,fender washer,ratchet|socket|wrench|adjustable
 Fittings > Conduit Bodies,"Conduit, Strut & Raceways > Conduit - Metallic",no,no,strict,conduit_body_pipe,none,,con emt|rigid|rgd|grc|imc|conduit
 Fittings > Conduit Bodies,Fittings > Rigid Fittings,no,no,strict,conduit_body_rigid_conn,none,,nipple|coupling|locknut|bushing
 Fittings > Conduit Bodies,Fittings > Conduit Hubs,no,no,strict,conduit_body_hubs,none,,hub|watertight
@@ -743,6 +742,27 @@ Wiring Devices > Receptacles,"Wire, Cable & Cord > Building Wire",no,no,none,dry
 Wiring Devices > Receptacles,Boxes & Enclosures > Boxes - Metallic,no,no,none,dryer_metal_box,none,dryer|14-30|3864,4-11/16|258|257|4sq|square box
 Wiring Devices > Receptacles,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,dryer_nonmetal_box,none,dryer|14-30|3864,rd-42|range/dryer
 Wiring Devices > Receptacles,Fittings > NM Cable Fittings,no,no,none,dryer_nm_clamp,none,dryer|14-30|3864,rcr75|nm95|3/4|connector
+Tools & Meters > Batteries,Tools & Meters > Cordless Tools,yes,no,none,batt_to_tools,platform,,drill|impact|saw|driver|light|multitool
+Tools & Meters > Batteries,Tools & Meters > Cordless Tools,yes,no,none,batt_to_charger,platform,,charger|station
+Tools & Meters > Batteries,Tools & Meters > Storage,yes,no,none,batt_to_packout,none,,packout|case|bag|organizer
+"Wire, Cable & Cord > Building Wire","Connectors & Crimps > Small Terminals, Forks, Rings",no,no,none,tffn_terminals,none,tffn|fixture wire,fork|ring|spade|disconnect
+"Wire, Cable & Cord > Building Wire",Fasteners & Hardware > Tapes,no,no,none,tffn_tape,none,tffn|fixture wire,electrical tape|vinyl|super 33
+Wiring Devices > Wallplates,Wiring Devices > Switches,no,yes,none,wallplate_switches,none,^(?!.*(tp82|2 duplex)).*,toggle|rocker|decorator|single pole|3-way
+Wiring Devices > Wallplates,Wiring Devices > Receptacles,no,yes,none,wallplate_recp,none,^(?!.*(tp82|2 duplex)).*,duplex|decora|tamper|receptacle
+Wiring Devices > Wallplates,Boxes & Enclosures > Boxes - Metallic,no,no,none,wallplate_boxes,none,,4sq|handy|switch box
+Wiring Devices > Wallplates,Boxes & Enclosures > Boxes - Non-Metallic,no,no,none,wallplate_nm_boxes,none,,switch box|outlet box|b12|old work
+"Fittings > MC, NMB, Liquidtight, Flex Fittings","Conduit, Strut & Raceways > Conduit - Flexible",no,no,strict,large_lqt_pipe,none,3\s*in|3-1/2|4\s*in,liquidtight|liquid|sealtight|flex
+"Fittings > MC, NMB, Liquidtight, Flex Fittings",Fittings > Bushing / K.O. Seal / Locknuts,no,no,strict,large_lqt_bush,none,3\s*in|3-1/2|4\s*in,locknut|bushing|grounding
+"Lamps, Bulbs & Ballast > Bulbs - HID","Lamps, Bulbs & Ballast > Ballast -HID",no,no,none,hid_kit_ballast,none,metal halide|mh-|hps-|ballast kit,ballast|quad tap|5 tap
+"Lamps, Bulbs & Ballast > Bulbs - HID","Lighting Fixtures, Control > Lampholders, Adapters & Extensions",no,no,none,hid_kit_socket,none,metal halide|mh-|hps-|ballast kit,mogul|socket|porcelain
+"Fire Alarm, Safety, Security > Fire Equipment",Tools & Meters > Batteries,no,no,none,smoke_batteries,none,smoke|carbon monoxide|detector|alarm,9v|aa battery|alkaline
+"Fire Alarm, Safety, Security > Fire Equipment",Boxes & Enclosures > Boxes - Metallic,no,no,none,smoke_boxes,none,smoke|carbon monoxide|detector|alarm,octagon|round|pan|ceiling box
+"Fire Alarm, Safety, Security > Fire Equipment","Wire, Cable & Cord > Building Wire",no,no,none,smoke_wire,none,smoke|carbon monoxide|detector|alarm,14/3|14/2|romex
+Tools & Meters > Benders,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,bender_blanket_cleaner,none,pvc blanket|heater|bender,pvc cement|cleaner|lube
+Tools & Meters > Benders,"Conduit, Strut & Raceways > Conduit - Non-Metallic",no,no,none,bender_pvc_pipe,none,pvc blanket|heater|bender,pvc|sch 40|sch 80
+Fuses & Accessories > Midget Fuses,"Fuses & Accessories > Fuse Blocks, Holders & Accessories",no,no,none,midget_fuse_holders,none,atqr|atdr|ccmr|fnq|midget,fuse block|fuse holder|in-line|feb-
+Fuses & Accessories > Midget Fuses,Tools & Meters > Meters - Test Equipment - Calculators,no,no,none,midget_fuse_testers,none,atqr|atdr|ccmr|fnq|midget,multimeter|tester|continuity
+
 
 
 

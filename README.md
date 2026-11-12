@@ -36,6 +36,7 @@ The storefront recommendation engine uses two distinct, complementary carousels:
 
 2. **Carousel 2: Similar & Alternative Products (`similar_products.csv`)**
    - **Purpose:** Surfaces direct substitutes, sibling ratings, alternative sizes, and color variants (e.g. 15A vs 20A breaker, 12/2 vs 12/3 MC cable, White vs Gray receptacle, 3/4" vs 1" conduit body).
+   - **Compatibility:** Similarity is not a guarantee of interchangeability. In particular, breaker alternatives can differ in amperage, pole count, protection, or mounting; verify the panel listing and application before use.
    - **Engine:** `generate_similar_products.py` (100% deterministic, 0 API tokens).
    - **Format:** `PROD_ID`, `SIMILAR_ID_1` through `SIMILAR_ID_10`.
    - **Ordering Principle:** Scored by compatibility dimensions (exact series match, tool sub-type, fixture sub-type, brand, color/finish, wire construction), then sorted descending by:

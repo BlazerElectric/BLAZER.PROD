@@ -251,6 +251,19 @@ class HardConflictTests(unittest.TestCase):
     def _row(self, product, path):
         return {"PRODUCT": product, "clean_title": "", "normalized_specs": "", "tax_path": path}
 
+    def test_square_box_cover_requires_matching_shape_and_size(self):
+        from generate_accessories import hard_conflict
+
+        path = "Boxes & Enclosures > Boxes - Metallic"
+        box = self._row("RAC 232 SQUARE BOX 4 -2-1/8DP", path)
+        square_cover = self._row("RAC 752 4 SQ FLAT BLANK COVER", path)
+        larger_cover = self._row("4-11/16 SQUARE FLAT BLANK COVER", path)
+        octagon_cover = self._row("4 OCTAGON FLAT BLANK COVER", path)
+
+        self.assertEqual(hard_conflict(box, square_cover), "")
+        self.assertEqual(hard_conflict(box, larger_cover), "box")
+        self.assertEqual(hard_conflict(box, octagon_cover), "box")
+
     def test_gang_mismatch_is_dropped(self):
         from generate_accessories import hard_conflict
 

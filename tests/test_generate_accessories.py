@@ -367,6 +367,21 @@ class HardConflictTests(unittest.TestCase):
                 node,
             ])
 
+    def test_tape_light_channels_are_not_strut(self):
+        from generate_accessories import _taxonomy_paths
+        from unittest.mock import patch
+
+        products = pd.DataFrame([
+            {"BLAZER ID": "chan", "PRODUCT": "DIO DI-CB48 Premium Diffused Channel Bundle 48 Inch", "clean_title": ""},
+            {"BLAZER ID": "strut", "PRODUCT": "HDN H-164x10PG Shallow Strut Channel", "clean_title": ""},
+        ])
+        node = "Conduit, Strut & Raceways > Strut"
+        with patch("generate_accessories._raw_taxonomy_paths", return_value=pd.Series([node] * 2)):
+            self.assertEqual(_taxonomy_paths(products, "unused").tolist(), [
+                "Lighting Fixtures, Control > Indoor Lighting",
+                node,
+            ])
+
     def test_mapper_does_not_reclassify_mc_clips_as_cable(self):
         import contextlib
         import io
@@ -461,6 +476,26 @@ class HardConflictTests(unittest.TestCase):
         self.assertEqual(hard_conflict(siemens_breaker, ground_bar), "panel_brand")
         self.assertEqual(hard_conflict(ground_bar, siemens_breaker), "panel_brand")
         self.assertEqual(hard_conflict(eaton_breaker, ground_bar), "")
+
+    def test_tape_light_components_reject_line_voltage_dimmers_and_sensors(self):
+        from generate_accessories import hard_conflict
+
+        node = "Lighting Fixtures, Control > Indoor Lighting"
+        jumper = self._row("DIO DI-TB8-60JPR-TTT25 60 Inch Tape Light Jumper", node)
+        spool = self._row("DIO Blaze Basics 24V 3000K LED Tape Light 16.4 Foot Spool", node)
+        dimmer = self._row("Lutron Diva CFL/LED Dimmer, Single Pole/3-Way, 150/600 Watt",
+                           "Lighting Fixtures, Control > Dimmers/Dimming Controls")
+        zero_ten = self._row("Lutron Diva 0-10V Single Pole/3-Way Dimmer Switch",
+                             "Lighting Fixtures, Control > Dimmers/Dimming Controls")
+        sensor = self._row("Wattstopper PW-301-W PIR Wall Switch Occupancy Sensor",
+                           "Lighting Fixtures, Control > Occupancy Sensors")
+        for target in (jumper, spool):
+            self.assertEqual(hard_conflict(target, dimmer), "low_voltage_control")
+            self.assertEqual(hard_conflict(target, sensor), "low_voltage_control")
+            self.assertEqual(hard_conflict(target, zero_ten), "")
+        # Line-voltage fixtures keep their dimmer pairings
+        downlight = self._row("Cooper Lighting 4 Inch Non-IC Remodel Recessed Housing", node)
+        self.assertEqual(hard_conflict(downlight, dimmer), "")
 
     def test_verified_floor_box_and_lug_accessories_are_not_generic_parts(self):
         from generate_accessories import hard_conflict

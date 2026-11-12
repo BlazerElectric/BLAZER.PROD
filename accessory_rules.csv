@@ -60,7 +60,7 @@ Data & Telecom > Fiber Optic Products,"Data & Telecom > Cabinets, Racks & Wire M
 Data & Telecom > Fiber Optic Products,Data & Telecom > Distribution Devices,no,no,none,,,,fiber|\blc\b|\bsc\b|coupler
 Data & Telecom > Tools,Data & Telecom > Workstation,no,no,none,,,,
 "Lighting Fixtures, Control > Indoor Lighting","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,,,^(?!.*\b(?:led|panel|troffer|high ?bay|low ?bay|strip|integrated|wrap|vapor)\b)|lamp ready|socket|medium base,
-"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,,,^(?!.*(?:0-10|010 ?v|\btube|\bt[5-8]\b|\bt12\b|hybrid)),
+"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,,,^(?!.*(?:0-10|010 ?v|\btube|\bt[5-8]\b|\bt12\b|hybrid|tape light|tape.?to.?(?:tape|wire)|light jumper|light lead|channel bundle|\bdio\b|diode led|\b24 ?v\b)),
 "Lighting Fixtures, Control > Indoor Lighting - Recessed","Lamps, Bulbs & Ballast > Bulbs - LED",no,no,none,,,,
 "Lighting Fixtures, Control > Indoor Lighting - Recessed","Lamps, Bulbs & Ballast > Drivers - LED",no,no,none,,,,
 "Lamps, Bulbs & Ballast > Bulbs - LED","Lighting Fixtures, Control > Lampholders, Adapters & Extensions",no,no,none,,,^(?!.*(\bhid\b|high ?bay|fan cooled|\btube|\bt[58]\b|jack|\ba\d{2}\b)),keyless|porcelain|cleat|pigtail|socket
@@ -289,7 +289,7 @@ Data & Telecom > Grounding and Bonding,"Wire, Cable & Cord > Building Wire",no,n
 Data & Telecom > Grounding and Bonding,Connectors & Crimps > Lugs & Split Bolts,no,no,none,top100b,none,,
 Data & Telecom > Grounding and Bonding,Tools & Meters > Hand Tools,no,no,none,top100b,none,,crimp|strip|cutter|wrench|nut ?driver
 "Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Dimmers/Dimming Controls",no,no,none,fixture,none,0-10|010 ?v,0-10|dvstv|dv\b|010
-"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Occupancy Sensors",no,no,none,fixture,none,^(?!.*(?:\btube|\bt[5-8]\b|\bt12\b|hybrid)),ceiling|dual tech|ultrasonic|corner|sensor
+"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Occupancy Sensors",no,no,none,fixture,none,^(?!.*(?:\btube|\bt[5-8]\b|\bt12\b|hybrid|tape light|tape.?to.?(?:tape|wire)|light jumper|light lead|channel bundle|\bdio\b|diode led|\b24 ?v\b)),ceiling|dual tech|ultrasonic|corner|sensor
 "Lighting Fixtures, Control > Indoor Lighting","Wire, Cable & Cord > Armored Cable",no,no,none,fixture,none,,whip|fixture
 "Lighting Fixtures, Control > Indoor Lighting",Connectors & Crimps > Wire Connectors,no,no,none,fixture,none,,^(?:IDE|3M)\b(?!.*(?:disconnect|grounding|butt|gelfilled)).*(?:wire.?nut|wing.?nut|twister|spring connector)
 "Lighting Fixtures, Control > Indoor Lighting",Wiring Devices > Switches,no,no,none,fixture,none,0-10|010 ?v,0-10|dvstv
@@ -920,3 +920,5 @@ Fittings > PVC Fittings,Fittings > Bushing / K.O. Seal / Locknuts,no,no,strict,m
 
 
 
+"Lighting Fixtures, Control > Indoor Lighting","Lamps, Bulbs & Ballast > Drivers - LED",no,no,none,tape_light_system,none,tape light|tape.?to.?(?:tape|wire)|light jumper|light lead|channel bundle|diffused channel|frosted channel|\bdio\b.*channel,24 ?v|omnidrive|switchex
+"Lighting Fixtures, Control > Indoor Lighting","Lighting Fixtures, Control > Indoor Lighting",yes,no,none,tape_light_system,none,tape light|tape.?to.?(?:tape|wire)|light jumper|light lead|channel bundle|diffused channel|frosted channel|\bdio\b.*channel,tape|strip light|channel|jumper|lead|terminal block

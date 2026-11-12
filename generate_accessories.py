@@ -1337,6 +1337,11 @@ TAXONOMY_OVERRIDES = (
         ("Control & Automation > Terminal Blocks",),
         "Connectors & Crimps > Small Terminals, Forks, Rings",
     ),
+    (
+        r"^dio\b.*channel",
+        ("Conduit, Strut & Raceways > Strut",),
+        "Lighting Fixtures, Control > Indoor Lighting",
+    ),
 )
 RANK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "BLAZER.RANK.csv")
 ORDERS_COL = "orders_6m"
@@ -1476,6 +1481,14 @@ _CONNECTOR_WORDS = re.compile(
 
 
 _AMPS = re.compile(r"\b(\d{1,4})\s*(?:amps?|a)\b", re.I)
+
+# 24V tape/strip-light ecosystem (spools, jumpers, leads, tape-to-X connectors, channels)
+_TAPE_LIGHT = re.compile(
+    r"\btape light\b|tape[- ]?to[- ]?(?:tape|wire)|light jumper|light lead"
+    r"|channel bundle|diffused channel|frosted channel|\bdio\b.*\bchannel\b"
+    r"|\b24 ?v\b.*\bstrip light\b|\bstrip light\b.*\b24 ?v\b",
+    re.I,
+)
 
 
 def amp_ratings(row: dict[str, str]) -> set[int]:
@@ -2443,6 +2456,15 @@ def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
         and cparts[1] in ("Circuit Breakers", "Load Centers / Panelboards")
     ):
         return "panel_gear_mismatch"
+
+    # 24V tape/strip-light ecosystem components are controlled at the driver, not by
+    # line-voltage wall dimmers or occupancy sensors (0-10V dimmers pair with 2-in-1 drivers)
+    if _TAPE_LIGHT.search(target_text):
+        candidate_tax = str(cand.get(TAX_COL, ""))
+        if "Dimmers/Dimming Controls" in candidate_tax and not re.search(r"0-10|010 ?v", candidate_text, re.I):
+            return "low_voltage_control"
+        if "Occupancy Sensors" in candidate_tax:
+            return "low_voltage_control"
 
     # Round/ceiling boxes do not accept rectangular wall switches or receptacles
     if box_kind(target) in ("round_box", "fan_box") and cparts[0] == "Wiring Devices" and cparts[1:2] and cparts[1] in ("Receptacles", "Switches", "Combination Devices", "GFCI Personnel Protection Devices", "Specialty Switches", "Straight Blade 10-20 Amp"):

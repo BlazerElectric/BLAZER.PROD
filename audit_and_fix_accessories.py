@@ -44,6 +44,56 @@ def _is_device_wire_staple(target_taxonomy: str, product_id: str) -> bool:
     return "Wiring Devices" in target_taxonomy and product_id in _DEVICE_WIRE_IDS
 
 
+def _is_rough_in_box(row: dict[str, str]) -> bool:
+    taxonomy = row.get(ga.TAX_COL, "")
+    text = row.get("clean_title", "") + " " + row.get("PRODUCT", "")
+    return (
+        "Boxes & Enclosures" in taxonomy
+        and any(k in taxonomy for k in ["Boxes - Non-Metallic", "Boxes - Metallic", "Boxes - Weatherproof"])
+        and not bool(re.search(r"\b(?:shim|spacer|extender|bushing|clip)\b", text, re.I))
+    )
+
+
+def _is_wire_nut(row: dict[str, str]) -> bool:
+    text = " ".join(row.get(key, "") for key in ("clean_title", "PRODUCT", "normalized_specs"))
+    return "Wire Connectors" in row.get(ga.TAX_COL, "") and bool(
+        re.search(r"\b(?:wire.?nut|wing.?nut|spring connector|twister|twist[- ]on)\b", text, re.I)
+    )
+
+
+def _installation_essentials(
+    target: dict[str, str], candidates: list[dict[str, str]]
+) -> list[str]:
+    text = ga._text(target)
+    node = target.get(ga.TAX_COL, "")
+    kinds = []
+    if re.search(r"\b38ast\b", text, re.I):
+        kinds = ["mc", "box"]
+    elif ga.box_component(target).endswith("cover") and ga.box_kind(target) in {"4sq", "4-11/16"}:
+        kinds = ["cover_screw"]
+    elif ga.bushing_kind(target) == "grounding":
+        kinds = ["bonding_wire"]
+    elif "PVC Fittings" in node and re.search(r"\bmale\b.*adapt", text, re.I):
+        kinds = ["cement", "locknut"]
+
+    selected = []
+    for kind in kinds:
+        for candidate in candidates:
+            c_node, c_text = candidate.get(ga.TAX_COL, ""), ga._text(candidate)
+            matches = (
+                (kind == "mc" and "Armored Cable" in c_node and ga.cable_family(candidate) == "mc")
+                or (kind == "box" and "Boxes & Enclosures" in c_node and ga.box_component(candidate) == "box" and 0.5 in ga.knockout_sizes(candidate))
+                or (kind == "cover_screw" and "Screws" in c_node and bool(re.search(r"\b8-32\b.*(?:rhms|machine screw)", c_text, re.I)))
+                or (kind == "bonding_wire" and "Wire, Cable & Cord" in c_node and ("Bare Copper" in c_node or ga.conductor_role(candidate) == "ground"))
+                or (kind == "cement" and "Paint, Chemicals" in c_node and bool(re.search(r"pvc.*cement|solvent.*cement|quick.?set cement", c_text, re.I)))
+                or (kind == "locknut" and ga.bushing_kind(candidate) == "locknut")
+            )
+            if matches and not ga.hard_conflict(target, candidate):
+                selected.append(candidate[ga.ID_COL])
+                break
+    return selected
+
+
 def main() -> None:
     logger.info("Loading catalog, taxonomy, and order volumes...")
     source = pd.read_csv("enriched_products.csv", dtype=str, keep_default_na=False)
@@ -58,7 +108,7 @@ def main() -> None:
     # Wire nuts, electrical tape, voltage tester, pulling lube, 4sq box, 12/2 romex, grounding pigtail
     universal_staples = [
         "2951",    # IDE 30-651 Yellow Wire Nut 500-pack
-        "2387",    # 3M Scotch Super 33+ Vinyl Electrical Tape
+        "329271",  # IDE 46-1700 Black Vinyl Tape
         "122128",  # KLE NCVT3P Non-Contact Voltage Tester
         "2956",    # IDE 31-388 ClearGlide Wire Pulling Lubricant
         "3223",    # RAC 232 4-Square Deep Metal Box
@@ -67,7 +117,6 @@ def main() -> None:
         "1021",    # COP NM-B-12/2-CU-WG 250ft coil
         "1026",    # COP NM-B-14/2-CU-WG 250ft coil
         "222277",  # GB MS-550 Romex Metal Staples 1/2in (500-pack)
-        "329271",  # IDE 46-1700 Black Vinyl Tape
         "2915",    # CUL RCR50 1/2in Push-in Romex Connector
         "239455",  # MIL Clear Performance Safety Glasses
         "273445",  # KLE 32500MAG 11-in-1 Magnetic Screwdriver
@@ -78,6 +127,7 @@ def main() -> None:
 
     # Load locked curated accessories
     curated = ga.load_curated_accessories(CURATED_FILE)
+    ga.validate_curated_accessories(curated, set(source_map))
     curated_map = {}
     if not curated.empty:
         for r in curated.to_dict("records"):
@@ -97,12 +147,14 @@ def main() -> None:
     nuts_cleaned_count = 0
     incompat_cleaned_count = 0
     filled_count = 0
+    short_count = 0
 
     for r in current_rows:
         pid = r["PROD_ID"]
         target = source_map.get(pid, {})
         t_text = target.get("clean_title", "") + " " + target.get("PRODUCT", "")
         t_tax = target.get(ga.TAX_COL, "")
+        is_device = "Wiring Devices" in t_tax or ga.box_component(target).endswith("cover") or bool(re.search(r"\bs2-lf(?:sq)?\b", t_text, re.I))
 
         # 1. Apply locked curated row if present
         if pid in curated_map:
@@ -111,6 +163,16 @@ def main() -> None:
             continue
 
         acc_ids = [r.get(col, "").strip() for col in RELATION_COLS if r.get(col, "").strip()]
+        cands = None
+        needs_essentials = (
+            bool(re.search(r"\b38ast\b", t_text, re.I))
+            or (ga.box_component(target).endswith("cover") and ga.box_kind(target) in {"4sq", "4-11/16"})
+            or ga.bushing_kind(target) == "grounding"
+            or ("PVC Fittings" in t_tax and bool(re.search(r"\bmale\b.*adapt", t_text, re.I)))
+        )
+        if needs_essentials:
+            cands = ga.build_candidates(target, by_group)
+            acc_ids = _installation_essentials(target, cands) + acc_ids
 
         # 2. Sanity check: remove self-recommendation or duplicate, enforce trade sanity & limits
         seen = {pid}
@@ -137,19 +199,15 @@ def main() -> None:
                 continue
 
             # Box redundancy: max 2 rough-in boxes for wiring devices (exclude shims/extenders)
-            is_box = (
-                "Boxes & Enclosures" in a_tax
-                and any(k in a_tax for k in ["Boxes - Non-Metallic", "Boxes - Metallic", "Boxes - Weatherproof"])
-                and not bool(re.search(r"\b(?:shim|spacer|extender|bushing|clip)\b", a_text, re.I))
-            )
-            if "Wiring Devices" in t_tax and is_box:
+            is_box = _is_rough_in_box(a_row)
+            if is_device and is_box:
                 if box_count >= 2:
                     boxes_cleaned_count += 1
                     continue
                 box_count += 1
 
             # Duplicate wire connectors: max 1 twist-on wire nut
-            is_wire_nut = "Wire Connectors" in a_tax and bool(re.search(r"\b(?:wire.?nut|wing.?nut|spring connector|twister)\b", a_text, re.I))
+            is_wire_nut = _is_wire_nut(a_row)
             if is_wire_nut:
                 if wire_nut_count >= 1:
                     nuts_cleaned_count += 1
@@ -158,7 +216,7 @@ def main() -> None:
 
             # Wallplate redundancy: max 1 wallplate per gang for wiring devices
             is_wallplate = "Wallplates" in a_tax or "wallplate" in a_text.lower()
-            if is_wallplate and "Wiring Devices" in t_tax:
+            if is_wallplate and is_device:
                 if wallplate_count >= 2:
                     continue
                 wallplate_count += 1
@@ -168,28 +226,28 @@ def main() -> None:
 
         # 4. Fill short rows up to 10 using rule-based candidates, device staples, then universal staples
         if len(cleaned_accs) < 10 and target:
-            cands = ga.build_candidates(target, by_group)
+            if cands is None:
+                cands = ga.build_candidates(target, by_group)
             for c in cands:
                 c_id = c[ga.ID_COL]
                 if c_id not in seen:
-                    c_tax = c.get(ga.TAX_COL, "")
-                    c_text = c.get("clean_title", "") + " " + c.get("PRODUCT", "")
                     if ga.hard_conflict(target, c):
                         continue
-                    is_c_box = (
-                        "Boxes & Enclosures" in c_tax
-                        and any(k in c_tax for k in ["Boxes - Non-Metallic", "Boxes - Metallic", "Boxes - Weatherproof"])
-                        and not bool(re.search(r"\b(?:shim|spacer|extender|bushing|clip)\b", c_text, re.I))
-                    )
-                    if "Wiring Devices" in t_tax and is_c_box and box_count >= 2:
+                    is_c_box = _is_rough_in_box(c)
+                    if is_device and is_c_box and box_count >= 2:
                         continue
-                    is_c_nut = "Wire Connectors" in c_tax and bool(re.search(r"\b(?:wire.?nut|wing.?nut|spring connector|twister)\b", c_text, re.I))
+                    is_c_nut = _is_wire_nut(c)
                     if is_c_nut and wire_nut_count >= 1:
+                        continue
+                    is_c_plate = "Wallplates" in c.get(ga.TAX_COL, "") or "wallplate" in ga._text(c).lower()
+                    if is_device and is_c_plate and wallplate_count >= 2:
                         continue
                     if is_c_box:
                         box_count += 1
                     if is_c_nut:
                         wire_nut_count += 1
+                    if is_c_plate:
+                        wallplate_count += 1
 
                     seen.add(c_id)
                     cleaned_accs.append(c_id)
@@ -213,12 +271,24 @@ def main() -> None:
                 if _is_device_wire_staple(t_tax, s_id):
                     continue
                 if s_id not in seen and s_id in source_map:
-                    if not ga.hard_conflict(target, source_map[s_id]):
+                    staple = source_map[s_id]
+                    is_box = _is_rough_in_box(staple)
+                    is_nut = _is_wire_nut(staple)
+                    if is_device and is_box and box_count >= 2:
+                        continue
+                    if is_nut and wire_nut_count >= 1:
+                        continue
+                    if not ga.hard_conflict(target, staple):
+                        box_count += is_box
+                        wire_nut_count += is_nut
                         seen.add(s_id)
                         cleaned_accs.append(s_id)
                         if len(cleaned_accs) == 10:
                             break
+        if len(acc_ids) < len(cleaned_accs):
             filled_count += 1
+        if len(cleaned_accs) < 10:
+            short_count += 1
 
         fixed_rows.append({"PROD_ID": pid, **dict(zip(RELATION_COLS, cleaned_accs[:10]))})
 
@@ -230,7 +300,11 @@ def main() -> None:
     logger.info("  - %d Excess redundant boxes capped and replaced", boxes_cleaned_count)
     logger.info("  - %d Duplicate wire nuts deduplicated and replaced", nuts_cleaned_count)
     logger.info("  - %d Incompatible plates/gang mismatches replaced", incompat_cleaned_count)
-    logger.info("  - %d Short rows topped up to full 10/10 capacity", filled_count)
+    logger.info("  - %d Rows gained relevant accessories", filled_count)
+    if short_count:
+        logger.warning("  - %d Rows remain below 10 accessories; incompatible filler was not added", short_count)
+    else:
+        logger.info("  - No short accessory rows remain")
 
     logger.info("Triggering final pipeline step: web catalog JSON export...")
     export_web_catalog.export_catalog()

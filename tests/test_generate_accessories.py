@@ -12,6 +12,17 @@ from generate_accessories import (
 
 
 class CandidateEligibilityTests(unittest.TestCase):
+    def test_verified_cover_fit_is_available_even_without_orders(self):
+        base = {"clean_title": "", "normalized_specs": "", "primary_category": "",
+                "sub_category": "Floor Boxes", "tax_path": "Boxes & Enclosures > Floor Boxes",
+                "orders_6m": 0}
+        box = {**base, "BLAZER ID": "box", "PRODUCT": "ARL FLBC8500 GANGABLE CONCRETE BOX"}
+        cover = {**base, "BLAZER ID": "cover", "PRODUCT": "ARL FLBC8510GY SINGLE GANG GRAY FLOOR"}
+        unrelated = {**base, "BLAZER ID": "other", "PRODUCT": "ARL OTHER FLOOR BOX"}
+        self.assertEqual(
+            [row["BLAZER ID"] for row in build_candidates(box, _candidate_indexes(pd.DataFrame([box, cover, unrelated])))],
+            ["cover"],
+        )
     def test_unsupported_target_does_not_fall_back_to_primary_category(self):
         target = {
             "BLAZER ID": "target",
@@ -250,6 +261,259 @@ class JobKitTests(unittest.TestCase):
 class HardConflictTests(unittest.TestCase):
     def _row(self, product, path):
         return {"PRODUCT": product, "clean_title": "", "normalized_specs": "", "tax_path": path}
+
+    def test_box_connector_fit_uses_knockouts_not_box_dimensions(self):
+        from generate_accessories import hard_conflict
+
+        box = self._row("4 Inch Square Box, 2-1/8 Inch Deep, 1/2 Inch and 3/4 Inch Knockouts",
+                        "Boxes & Enclosures > Boxes - Metallic")
+        for size, expected in (("1", "knockout_size"), ("1/2", "")):
+            connector = self._row(f"{size} Inch Flex Connector", "Fittings > MC, NMB, Liquidtight, Flex Fittings")
+            with self.subTest(size=size):
+                self.assertEqual(hard_conflict(box, connector), expected)
+                self.assertEqual(hard_conflict(connector, box), expected)
+        snap = self._row("ARL 38AST 3/8 Inch Snap-In AC/MC Connector", "Fittings > MC, NMB, Liquidtight, Flex Fittings")
+        snap["normalized_specs"] = "3/8 Inch Trade Size, 1/2 Inch Knockout"
+        self.assertEqual(hard_conflict(box, snap), "")
+
+    def test_blank_covers_reject_devices_even_with_unknown_cutout(self):
+        from generate_accessories import hard_conflict
+
+        device = self._row("USB CHARGER OUTLET", "Wiring Devices > Receptacles")
+        for path in ("Wiring Devices > Wallplates", "Boxes & Enclosures > Boxes - Weatherproof"):
+            plate = self._row("1 Gang Blank Cover", path)
+            with self.subTest(path=path):
+                self.assertEqual(hard_conflict(plate, device), "cutout_mismatch")
+                self.assertEqual(hard_conflict(device, plate), "cutout_mismatch")
+
+    def test_decora_plate_rejects_four_way_toggle_model(self):
+        from generate_accessories import hard_conflict
+
+        plate = self._row("2 Gang Decora Wallplate", "Wiring Devices > Wallplates")
+        toggle = self._row("PNS 664-WG SW WHT 4W 15A", "Wiring Devices > Switches")
+        self.assertEqual(hard_conflict(plate, toggle), "cutout_mismatch")
+
+    def test_square_cover_uses_cover_screw_thread(self):
+        from generate_accessories import hard_conflict
+
+        cover = self._row("4 Inch Square Blank Cover", "Boxes & Enclosures > Boxes - Metallic")
+        for thread, expected in (("8-32", ""), ("6-32", "cover_thread"), ("1/4-20", "cover_thread")):
+            screw = self._row(f"{thread} RHMS MACHINE SCREW", "Fasteners & Hardware > Screws")
+            with self.subTest(thread=thread):
+                self.assertEqual(hard_conflict(cover, screw), expected)
+
+    def test_ground_rod_requires_a_rod_clamp_with_matching_diameter(self):
+        from generate_accessories import hard_conflict
+
+        rod = self._row("5/8 Inch x 8 Foot Ground Rod", "Connectors & Crimps > Grounding Products")
+        for text, expected in (
+            ("5/8 Inch Ground Rod Clamp", ""),
+            ("3/4 Inch Ground Rod Clamp", "rod_diameter"),
+            ("5/8 Inch Water Pipe Ground Clamp", "rod_clamp"),
+        ):
+            clamp = self._row(text, "Connectors & Crimps > Grounding Products")
+            with self.subTest(text=text):
+                self.assertEqual(hard_conflict(rod, clamp), expected)
+
+    def test_shallow_strut_rejects_regular_spring_nuts(self):
+        from generate_accessories import hard_conflict
+
+        channel = self._row("HDN H-164-OSx10PG SHALLOW CHANNEL", "Conduit, Strut & Raceways > Strut")
+        regular = self._row("HDN N-820 1/4 SPRING NUT", "Conduit, Strut & Raceways > Strut")
+        short = self._row("HDN N-810 1/4 SHORT SPRING NUT", "Conduit, Strut & Raceways > Strut")
+        self.assertEqual(hard_conflict(channel, regular), "strut_spring")
+        self.assertEqual(hard_conflict(channel, short), "")
+
+    def test_nm_cable_does_not_accept_ac_mc_connector(self):
+        from generate_accessories import hard_conflict
+
+        cable = self._row("14/2 NM-B CABLE", "Wire, Cable & Cord > Building Wire")
+        connector = self._row("ARL 38AST SNAP-IN AC/MC CONNECTOR", "Fittings > MC, NMB, Liquidtight, Flex Fittings")
+        self.assertEqual(hard_conflict(cable, connector), "cable_type")
+
+    def test_threaded_lb_requires_an_emt_transition(self):
+        from generate_accessories import hard_conflict
+
+        body = self._row("3/4 Inch LB CONDUIT BODY COMPLETE THREADED", "Fittings > Conduit Bodies")
+        emt = self._row("3/4 Inch EMT CONDUIT", "Conduit, Strut & Raceways > Conduit - Metallic")
+        transition = self._row("3/4 Inch EMT CONNECTOR NPT THREAD", "Fittings > EMT Fittings")
+        self.assertEqual(hard_conflict(body, emt), "threaded_transition")
+        self.assertEqual(hard_conflict(body, transition), "")
+
+    def test_runtime_taxonomy_keeps_two_level_candidate_nodes_after_detailed_override(self):
+        from generate_accessories import _taxonomy_paths
+        from unittest.mock import patch
+
+        products = pd.DataFrame([{"BLAZER ID": "cover", "PRODUCT": "RAC 752 COVER", "clean_title": ""}])
+        with patch("generate_accessories._raw_taxonomy_paths", return_value=pd.Series(["Boxes & Enclosures > Boxes - Metallic"])):
+            self.assertEqual(_taxonomy_paths(products, "unused").tolist(), ["Boxes & Enclosures > Boxes - Metallic"])
+
+    def test_mapper_does_not_reclassify_mc_clips_as_cable(self):
+        import contextlib
+        import io
+        import os
+        import tempfile
+        from unittest.mock import patch
+        import map_taxonomy
+
+        with tempfile.TemporaryDirectory() as directory:
+            source = os.path.join(directory, "products.csv")
+            categories = os.path.join(directory, "categories.csv")
+            output = os.path.join(directory, "taxonomy.csv")
+            pd.DataFrame([{
+                "BLAZER ID": "clip", "PRODUCT": "MIN 121 JIFFY CLIP 12/2 MC CABLE",
+                "clean_title": "Minerallac Jiffy Clip for MC Cable",
+                "primary_category": "Fittings", "sub_category": "Clips, Clamps, Hangers",
+            }]).to_csv(source, index=False)
+            pd.DataFrame([
+                ["Fittings", "Clips, Clamps, Hangers", "", "", ""],
+                ["Wire, Cable & Cord", "Armored Cable", "", "", ""],
+            ], columns=map_taxonomy.LEVELS).to_csv(categories, index=False)
+            with patch("sys.argv", ["map_taxonomy", "--input", source, "--taxonomy", categories, "--output", output]):
+                with contextlib.redirect_stdout(io.StringIO()):
+                    map_taxonomy.main()
+            result = pd.read_csv(output, keep_default_na=False)
+            self.assertEqual(result.loc[0, "Main Category"], "Fittings")
+            self.assertEqual(result.loc[0, "Subcategory 1"], "Clips, Clamps, Hangers")
+
+    def test_bushing_substitutes_belong_in_similar_not_accessories(self):
+        from generate_accessories import hard_conflict
+
+        target = self._row("2 Inch Plastic Bushing", "Fittings > Bushing / K.O. Seal / Locknuts")
+        substitute = self._row("2 Inch Grounding Bushing", "Fittings > Bushing / K.O. Seal / Locknuts")
+        locknut = self._row("2 Inch Locknut", "Fittings > Bushing / K.O. Seal / Locknuts")
+        self.assertEqual(hard_conflict(target, substitute), "bushing_substitute")
+        self.assertEqual(hard_conflict(target, locknut), "")
+
+    def test_cover_alternatives_are_not_installation_accessories(self):
+        from generate_accessories import hard_conflict
+
+        blank = self._row("1 Gang Blank Cover", "Boxes & Enclosures > Boxes - Weatherproof")
+        other = self._row("1 Gang Weatherproof Toggle Cover", "Boxes & Enclosures > Boxes - Weatherproof")
+        box = self._row("1 Gang Weatherproof Box", "Boxes & Enclosures > Boxes - Weatherproof")
+        self.assertEqual(hard_conflict(blank, other), "cover_substitute")
+        self.assertEqual(hard_conflict(blank, box), "")
+
+    def test_skylark_dual_control_requires_designer_wallplate(self):
+        from generate_accessories import hard_conflict
+
+        control = self._row("LUT S2-LF-LA SKYLARK DUAL FAN/LIGHT", "Fans, Heaters > Fans & Fan Controls")
+        decora = self._row("DECORA WALLPLATE", "Wiring Devices > Wallplates")
+        duplex = self._row("DUPLEX WALLPLATE", "Wiring Devices > Wallplates")
+        self.assertEqual(hard_conflict(control, decora), "")
+        self.assertEqual(hard_conflict(control, duplex), "cutout_mismatch")
+        fan = self._row("BRO 80 CFM VENTILATION FAN", "Fans, Heaters > Fans & Fan Controls")
+        self.assertEqual(hard_conflict(control, fan), "unverified_fan_control_accessory")
+
+    def test_oscillating_blade_does_not_recommend_reciprocating_saw(self):
+        from generate_accessories import hard_conflict
+
+        blade = self._row("MIL NITRUS OMT CARBIDE BLADE", "Tools & Meters > Bits, Blades, Punches, Holesaws")
+        saw = self._row("MIL M18 HACKZALL", "Tools & Meters > Cordless Tools")
+        self.assertEqual(hard_conflict(blade, saw), "tool_mismatch")
+
+    def test_verified_floor_box_and_lug_accessories_are_not_generic_parts(self):
+        from generate_accessories import hard_conflict
+
+        box = self._row("ARL FLBC8500 CONCRETE FLOOR BOX", "Boxes & Enclosures > Floor Boxes")
+        cover = self._row("ARL FLBC8510GY SINGLE GANG GRAY FLOOR", "Boxes & Enclosures > Floor Boxes")
+        receptacle = self._row("HUB DUPLEX RECEPTACLE", "Wiring Devices > Receptacles")
+        lug = self._row("SPS L11-TL3 TERMINAL LUG KIT", "Connectors & Crimps > Lugs & Split Bolts")
+        switch = self._row("SPS L11-J400-1753 FUSED DISCONNECT", "Control & Automation > Disconnect Switches")
+        fork = self._row("SMALL FORK TERMINAL", "Connectors & Crimps > Small Terminals, Forks, Rings")
+        self.assertEqual(hard_conflict(box, cover), "")
+        self.assertEqual(hard_conflict(box, receptacle), "unverified_floor_box_accessory")
+        self.assertEqual(hard_conflict(lug, switch), "")
+        self.assertEqual(hard_conflict(lug, fork), "unverified_lug_accessory")
+
+    def test_machine_screw_accepts_matching_nuts_and_washers_only(self):
+        from generate_accessories import hard_conflict
+
+        screw = self._row("10-32 RHMS MACHINE SCREW", "Fasteners & Hardware > Screws")
+        nut = self._row("10-32 HEX NUT", "Fasteners & Hardware > Nuts, Bolts, Washers")
+        wrong_nut = self._row("10-24 HEX NUT", "Fasteners & Hardware > Nuts, Bolts, Washers")
+        washer = self._row("#10 FLAT WASHER", "Fasteners & Hardware > Nuts, Bolts, Washers")
+        tek = self._row("10-16 HWH TEK SCREW Hex Washer Head", "Fasteners & Hardware > Screws")
+        self.assertEqual(hard_conflict(screw, nut), "")
+        self.assertEqual(hard_conflict(screw, washer), "")
+        self.assertEqual(hard_conflict(screw, wrong_nut), "unverified_fastener_accessory")
+        self.assertEqual(hard_conflict(screw, tek), "unverified_fastener_accessory")
+
+    def test_halco_tube_rejects_external_drivers_and_unverified_sockets(self):
+        from generate_accessories import hard_conflict
+
+        lamp = self._row("HALCO 87204 48 INCH LED T8 TYPE B", "Lamps, Bulbs & Ballast > Bulbs - LED")
+        driver = self._row("LED DRIVER", "Lamps, Bulbs & Ballast > Drivers - LED")
+        socket = self._row("T8 BIPIN SOCKET", "Lighting Fixtures, Control > Lampholders, Adapters & Extensions")
+        known = self._row("T8 NON-SHUNTED SOCKET", "Lighting Fixtures, Control > Lampholders, Adapters & Extensions")
+        self.assertEqual(hard_conflict(lamp, driver), "type_b_driver")
+        self.assertEqual(hard_conflict(lamp, socket), "unverified_lampholder")
+        self.assertEqual(hard_conflict(lamp, known), "")
+
+    def test_known_dimmer_and_toggle_switch_match_correct_wallplates(self):
+        from generate_accessories import hard_conflict
+
+        dimmer = self._row(
+            "LUT DVCL-153P-WH CFL/LED DIMMER", "Lighting Fixtures, Control > Dimmers/Dimming Controls"
+        )
+        switch = self._row("PNS 660-WG WHITE 1P SWITCH", "Wiring Devices > Switches")
+        decora = self._row("PNS TP26-W WHITE DECORA WALLPLATE", "Wiring Devices > Wallplates")
+        duplex = self._row("PNS TP8-W WHITE DUPLEX WALLPLATE", "Wiring Devices > Wallplates")
+        toggle = self._row("PNS TP1-W WHITE TOGGLE WALLPLATE", "Wiring Devices > Wallplates")
+        blank = self._row("PNS TP13-W WHITE BLANK WALLPLATE", "Wiring Devices > Wallplates")
+        combo = self._row(
+            "PNS TP18-W 1 TOGGLE 1 DUPLEX COMBINATION WALLPLATE", "Wiring Devices > Wallplates"
+        )
+        single_combo = self._row(
+            "1 TOGGLE 1 SINGLE RECEPTACLE COMBINATION WALLPLATE", "Wiring Devices > Wallplates"
+        )
+        single = self._row("1 GANG SINGLE RECEPTACLE", "Wiring Devices > Receptacles")
+        combo_device = self._row("COMBINATION SWITCH RECEPTACLE", "Wiring Devices > Combination Devices")
+        radiant = self._row(
+            "PNS RHL153PW RADIANT LED DIMMER", "Wiring Devices > Switches"
+        )
+
+        self.assertEqual(hard_conflict(dimmer, decora), "")
+        self.assertEqual(hard_conflict(dimmer, duplex), "cutout_mismatch")
+        self.assertEqual(hard_conflict(dimmer, blank), "cutout_mismatch")
+        self.assertEqual(hard_conflict(dimmer, combo), "cutout_mismatch")
+        self.assertEqual(hard_conflict(single, single_combo), "")
+        self.assertEqual(hard_conflict(combo_device, combo), "")
+        self.assertEqual(hard_conflict(switch, toggle), "")
+        self.assertEqual(hard_conflict(duplex, switch), "cutout_mismatch")
+        self.assertEqual(hard_conflict(duplex, radiant), "cutout_mismatch")
+
+    def test_dimmer_substitutes_are_not_installation_accessories(self):
+        from generate_accessories import hard_conflict
+
+        path = "Lighting Fixtures, Control > Dimmers/Dimming Controls"
+        dimmer = self._row("LUT DVCL-153P-WH LED DIMMER", path)
+        alternate = self._row("LUT AYCL-153P-WH LED DIMMER", path)
+        companion = self._row("LUT COMPANION DIMMER", path)
+        self.assertEqual(hard_conflict(dimmer, alternate), "dimmer_substitute")
+        self.assertEqual(hard_conflict(dimmer, companion), "")
+
+    def test_dvcl_dimmer_does_not_get_unverified_lighting_control_hardware(self):
+        from generate_accessories import hard_conflict
+
+        dimmer = self._row(
+            "LUT DVCL-153P-WH LED DIMMER", "Lighting Fixtures, Control > Dimmers/Dimming Controls"
+        )
+        pico = self._row("LUT PICO-WBX-ADAPT WALLBOX ADAPTER", "Lighting Fixtures, Control > Indoor Lighting")
+        pole = self._row("LITH 20 FOOT STEEL LIGHT POLE", "Lighting Fixtures, Control > Outdoor Lighting")
+        plate = self._row("PNS TP26-W WHITE DECORA WALLPLATE", "Wiring Devices > Wallplates")
+
+        self.assertEqual(hard_conflict(dimmer, pico), "dimmer_control_mismatch")
+        self.assertEqual(hard_conflict(dimmer, pole), "dimmer_control_mismatch")
+        self.assertEqual(hard_conflict(dimmer, plate), "")
+
+    def test_unknown_dimmer_style_is_not_guessed(self):
+        from generate_accessories import device_cutout
+
+        self.assertEqual(
+            device_cutout(self._row("UNKNOWN DIMMER", "Lighting Fixtures, Control > Dimmers/Dimming Controls")),
+            "",
+        )
 
     def test_square_box_cover_requires_matching_shape_and_size(self):
         from generate_accessories import hard_conflict

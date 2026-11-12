@@ -873,6 +873,14 @@ Tools & Meters > Hand Tools,Tools & Meters > Safety Equipment,no,no,none,level_p
 "Boxes & Enclosures > Boxes - Metallic","Boxes & Enclosures > Mud Rings / Covers",no,no,none,box_support_rings,none,box mount support|stud bracket|box bracket,mud ring|plaster ring
 "Boxes & Enclosures > Boxes - Metallic",Fasteners & Hardware > Screws,no,no,none,box_support_screws,none,box mount support|stud bracket|box bracket,wafer|tek|lath|drywall
 "Boxes & Enclosures > Boxes - Metallic",Connectors & Crimps > Grounding Products,no,no,none,box_support_ground,none,box mount support|stud bracket|box bracket,pigtail|ground clip
+Boxes & Enclosures > Floor Boxes,Boxes & Enclosures > Floor Boxes,yes,no,none,verified_fit,none,\bflbc8500\b,\bflbc85(?:10|20)\w*\b
+Connectors & Crimps > Lugs & Split Bolts,Control & Automation > Disconnect Switches,yes,no,none,verified_fit,none,\bl11-tl3\b,\bl11-(?:j400|nu400)-1753\b
+Boxes & Enclosures > Boxes - Metallic,Fasteners & Hardware > Screws,no,no,none,cover_thread,none,\b(?:cover|cvr)\b,\b8-32\b.*(?:rhms|machine screw)
+"Fittings > MC, NMB, Liquidtight, Flex Fittings",Boxes & Enclosures > Boxes - Metallic,no,no,none,snap_box,none,\b38ast\b,box
+Fittings > Bushing / K.O. Seal / Locknuts,"Wire, Cable & Cord > Bare Copper",no,no,none,bonding_wire,gauge,ground.*bushing|bushing.*lug,bare
+Fittings > Bushing / K.O. Seal / Locknuts,"Wire, Cable & Cord > Building Wire",no,no,none,bonding_wire,gauge,ground.*bushing|bushing.*lug,green|grn
+Fittings > PVC Fittings,"Tools & Meters > Paint, Chemicals, Cleaning Supplies",no,no,none,male_adapter_cement,none,\bmale\b.*adapt,pvc.*cement|solvent.*cement|quick.?set cement
+Fittings > PVC Fittings,Fittings > Bushing / K.O. Seal / Locknuts,no,no,strict,male_adapter_locknut,none,\bmale\b.*adapt,locknut|lock nut
 
 
 

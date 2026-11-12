@@ -2874,7 +2874,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 2317,Tools & Meters,"Paint, Chemicals, Cleaning Supplies",,,,6.13,1.129,"Tools & Meters > Paint, Chemicals, Cleaning Supplies > Cleaning & Preparation Products > Cleaning Supplies"
 2318,Tools & Meters,"Paint, Chemicals, Cleaning Supplies",,,,6.13,1.129,"Tools & Meters > Paint, Chemicals, Cleaning Supplies > Cleaning & Preparation Products > Cleaning Supplies"
 231814,Tools & Meters,Safety Equipment,,,,6.586,0.299,Tools & Meters > Safety Equipment > Eyewear > Safety Glasses
-2320,Tools & Meters,"Paint, Chemicals, Cleaning Supplies",,,,9.99,5.215,"Fittings > Clips, Clamps, Hangers > Conduit, Cable"
+2320,Tools & Meters,"Paint, Chemicals, Cleaning Supplies",,,,6.13,1.055,"Tools & Meters > Paint, Chemicals, Cleaning Supplies > Adhesives, Bonding & PVC Cement > PVC Cement"
 23200,"Wire, Cable & Cord",Building Wire,,,,7.858,2.069,"Wire, Cable & Cord > Building Wire > THHN - Stranded > THHN - 14 AWG"
 23204,Connectors & Crimps,Grounding Products,Ground Clamps,Ground Clamps - Bare Wire,,6.691,1.103,Connectors & Crimps > Grounding Products > Ground Clamps
 2322,Boxes & Enclosures,Boxes - Weatherproof,,,,8.276,0.075,Boxes & Enclosures > Boxes - Weatherproof > Metallic Boxes & Covers > 1-Gang Boxes
@@ -3258,7 +3258,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 2494,"Conduit, Strut & Raceways",Conduit - Flexible,Flexible Conduit -Liquidtight,,,6.72,0.599,"Conduit, Strut & Raceways > Conduit - Flexible"
 2495,Fittings,PVC Fittings,ENT Fittings,,,5.212,0.135,Fittings > PVC Fittings > PVC Couplings
 2496,Boxes & Enclosures,Boxes - Weatherproof,Metallic Boxes & Covers,1-Gang Boxes,,8.064,0.0,Boxes & Enclosures > Boxes - Weatherproof > Metallic Boxes & Covers > 2-Gang Boxes
-2497,Boxes & Enclosures,Boxes - Non-Metallic,,,,9.99,2.684,Boxes & Enclosures > Boxes - Weatherproof > Metallic Boxes & Covers > 1-Gang Boxes
+2497,Boxes & Enclosures,Boxes - Metallic,Gang Boxes & Accessories,Gang Box Covers,,7.383,0.077,Boxes & Enclosures > Boxes - Weatherproof > Metallic Boxes & Covers > 1-Gang Boxes
 249723,Tools & Meters,Flashlights / Work Lights,Flashlights - Head Lights,Rechargeable,,5.64,0.137,Tools & Meters > Flashlights / Work Lights
 24975,Power Distribution,Circuit Breakers,Circuit Breakers Residential,Arc Fault Circuit Breakers,,8.782,0.795,Power Distribution > Circuit Breakers > Circuit Breakers Residential > Combo Arc Fault / Ground Circuit Breakers
 249764,Tools & Meters,"Bits, Blades, Punches, Holesaws",,,,7.622,0.209,"Tools & Meters > Bits, Blades, Punches, Holesaws > Saw Blades > Bandsaw Blades"
@@ -4861,7 +4861,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 328844,Control & Automation,Disconnect Switches,Disconnect Switches,Disconnect Switches,,8.556,0.001,Control & Automation > Disconnect Switches > Disconnect Switches
 328846,Control & Automation,Disconnect Switches,Disconnect Switch Accessories,Shafts,,4.838,0.403,Control & Automation > Disconnect Switches
 328847,Control & Automation,Disconnect Switches,Disconnect Switches,,,7.173,0.007,Control & Automation > Disconnect Switches > Disconnect Switches > Disconnect Switches
-328848,Boxes & Enclosures,Boxes - Non-Metallic,,,,5.892,0.798,Boxes & Enclosures > Boxes - Metallic
+328848,Connectors & Crimps,Lugs & Split Bolts,,,,9.99,4.897,Boxes & Enclosures > Boxes - Metallic
 3290,Fittings,"MC, NMB, Liquidtight, Flex Fittings",,,,7.972,0.815,"Fittings > MC, NMB, Liquidtight, Flex Fittings > Liquidtight - Flex"
 3292,Fittings,"MC, NMB, Liquidtight, Flex Fittings",,,,7.972,0.815,"Fittings > MC, NMB, Liquidtight, Flex Fittings > Liquidtight - Flex"
 32924,Control & Automation,Terminal Blocks,Terminal Blocks,,,8.599,0.023,Control & Automation > Terminal Blocks
@@ -5300,7 +5300,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 3399,Boxes & Enclosures,Mud Rings / Covers,,,,9.99,4.836,Boxes & Enclosures > Boxes - Weatherproof > Non-Metallic Boxes & Covers
 3400,Boxes & Enclosures,Mud Rings / Covers,,,,9.99,3.388,Boxes & Enclosures > Boxes - Metallic
 340294,Fittings,EMT Fittings,,,,7.144,1.177,Fittings > EMT Fittings > Steel
-3403,Boxes & Enclosures,Boxes - Metallic,4-11/16 Square Boxes,4-11/16 Square Box Covers,,6.082,0.35,Boxes & Enclosures > Boxes - Weatherproof > Metallic Boxes & Covers
+3403,Boxes & Enclosures,Boxes - Metallic,4 Square Boxes,4IN Square Covers,,9.99,4.257,Boxes & Enclosures > Boxes - Weatherproof > Metallic Boxes & Covers
 340325,"Lighting Fixtures, Control",Indoor Lighting,,,,5.165,0.745,"Lighting Fixtures, Control > Indoor Lighting > LED"
 34036,Power Distribution,Circuit Breakers,,,,7.885,0.45,Power Distribution > Circuit Breakers > Circuit Breaker Accessories
 340394,Data & Telecom,"Cabinets, Racks & Wire Management",,,,8.723,1.656,"Data & Telecom > Cabinets, Racks & Wire Management > Equipment Racks"
@@ -5458,7 +5458,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 3471,Boxes & Enclosures,Boxes - Weatherproof,Non-Metallic Boxes & Covers,,,6.467,0.538,Boxes & Enclosures > Boxes - Non-Metallic > Switch / Outlet Boxes > Covers
 34718,Fuses & Accessories,Power Fuses,Class L Fuses,,,6.115,0.234,Fuses & Accessories > General Purpose Fuses > Class CC Fuses > Time Delay
 3473,Boxes & Enclosures,Boxes - Weatherproof,Non-Metallic Boxes & Covers,,,6.467,0.576,Boxes & Enclosures > Boxes - Non-Metallic
-3475,Boxes & Enclosures,Mud Rings / Covers,,,,9.99,4.573,Boxes & Enclosures > Boxes - Metallic > 4-11/16 Square Boxes > 4-11/16 Square Box Covers
+3475,Boxes & Enclosures,Boxes - Metallic,4 Square Boxes,Industrial Cover,,9.99,4.573,Boxes & Enclosures > Boxes - Metallic > 4-11/16 Square Boxes > 4-11/16 Square Box Covers
 347549,Control & Automation,Starters & Contactors,Starters & Contactor Accessories,Overload Relays - Electronic Type,,5.083,0.327,Control & Automation > Starters & Contactors > Starters & Contactor Accessories > Overload Relays - Thermal Type
 347551,"Lighting Fixtures, Control",Lighting Control Systems,Programmable Lighting Controls,Lighting Panel Relays,,7.032,0.79,"Lighting Fixtures, Control > Lighting Control Systems"
 347552,Control & Automation,Starters & Contactors,Starters & Contactor Accessories,Overload Relays - Electronic Type,,5.083,0.327,Control & Automation > Starters & Contactors > Starters & Contactor Accessories > Overload Relays - Thermal Type
@@ -5670,8 +5670,8 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 359799,Data & Telecom,Distribution Devices,,,,9.99,4.984,Data & Telecom > Switches & Media Converters > Switch
 359802,Data & Telecom,Distribution Devices,,,,4.462,0.383,Data & Telecom > Switches & Media Converters > PoE Devices
 359839,Fittings,NM Cable Fittings,,,,6.813,1.057,Fittings > NM Cable Fittings > Connectors > Cable Connectors
-359873,Control & Automation,Terminal Blocks,,,,6.541,0.003,Control & Automation > Terminal Blocks > Terminal Blocks
-359884,Control & Automation,Terminal Blocks,,,,6.541,0.003,Control & Automation > Terminal Blocks > Terminal Blocks
+359873,Connectors & Crimps,Lugs & Split Bolts,,,,9.99,3.452,Control & Automation > Terminal Blocks > Terminal Blocks
+359884,Connectors & Crimps,Lugs & Split Bolts,,,,9.99,3.452,Control & Automation > Terminal Blocks > Terminal Blocks
 359915,Control & Automation,Disconnect Switches,Disconnect Switches,,,7.934,0.003,Control & Automation > Disconnect Switches > Disconnect Switches > Disconnect Switches
 360027,Power Distribution,Circuit Breakers,,,,7.199,0.418,Power Distribution > Circuit Breakers > Circuit Breaker Accessories
 36005,"Wire, Cable & Cord",Building Wire,,,,6.427,0.594,"Wire, Cable & Cord > Building Wire > THHN - Stranded > THHN - 14 AWG"
@@ -5884,7 +5884,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 373188,Fittings,"Clips, Clamps, Hangers",,,,6.969,0.929,Caddy > Cable/Conduit > Clamps and Clips
 373189,Fittings,"Clips, Clamps, Hangers",,,,5.283,0.645,"Fittings > Clips, Clamps, Hangers > Acoustical > Adjustable Box & Conduit Support"
 373190,Fittings,Pipe Support,Roof Block,,,5.332,1.114,Fittings > Pipe Support
-373191,"Conduit, Strut & Raceways",Strut,,,,6.141,0.596,Caddy > Cable/Conduit > Strut
+373191,"Conduit, Strut & Raceways",Strut,Strut - Fittings & Support,"Brackets, Connectors",,4.311,0.07,"Conduit, Strut & Raceways > Strut"
 373192,Fittings,"Clips, Clamps, Hangers",,,,6.407,0.389,"Fittings > Clips, Clamps, Hangers > Beam Clamps"
 373193,Fittings,"Clips, Clamps, Hangers","Conduit, Cable",Support Bracket for MC/AC Cable,,5.982,0.589,"Fittings > Clips, Clamps, Hangers > Cable Supporter > Cable Support Clip"
 373195,Boxes & Enclosures,Boxes - Metallic,,,,7.356,1.343,Boxes & Enclosures > Boxes - Non-Metallic
@@ -5907,7 +5907,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 373211,Caddy,Structural Attachments,Beam/Purlin,Purlin Clamps and Clips,Purlin Clips,4.961,0.27,Caddy > Structural Attachments > Beam/Purlin > Purlin Clamps and Clips
 373212,Fittings,"Clips, Clamps, Hangers",,,,6.407,0.696,Caddy > Cable/Conduit > Clamps and Clips
 373213,Boxes & Enclosures,Boxes - Metallic,Accessories,Box Supports,,7.668,0.312,Boxes & Enclosures > Boxes - Metallic
-373214,Caddy,Cable/Conduit,Clamps and Clips,,,6.978,0.009,"Fittings > Clips, Clamps, Hangers"
+373214,Fittings,"Clips, Clamps, Hangers",,,,6.969,0.416,Caddy > Cable/Conduit > Clamps and Clips
 3733,Data & Telecom,Residential,,,,3.285,0.965,Data & Telecom > Residential > Multimedia Enclosures > Enclosure Covers
 373304,Tools & Meters,Datacomm Tools,Punchdown Tools,66 Blade,,4.971,0.0,Tools & Meters > Datacomm Tools > Punchdown Tools > 110 Blade
 373356,Fittings,"Clips, Clamps, Hangers",Beam Clamps,,,7.373,0.404,"Fittings > Clips, Clamps, Hangers"
@@ -5945,7 +5945,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 37461,"Conduit, Strut & Raceways",Conduit - Metallic,Conduit Elbows,,,6.877,0.208,"Conduit, Strut & Raceways > Conduit - Metallic"
 374686,Data & Telecom,"Cabinets, Racks & Wire Management",,,,9.99,5.078,Power Distribution > Power Quality/Protection > Surge Protection & Power Quality
 374688,Data & Telecom,"Cabinets, Racks & Wire Management",,,,9.99,5.078,Power Distribution > Power Quality/Protection > Surge Protection & Power Quality
-374719,"Lamps, Bulbs & Ballast",Bulbs - Halogen,Halogen - Linear,Lamps - Single Ended,,6.598,0.023,"Lamps, Bulbs & Ballast > Bulbs - Halogen > Halogen - Linear > Lamps - Double-Ended"
+374719,"Lamps, Bulbs & Ballast",Bulbs - LED,LED - Tube Type,,,9.99,3.415,"Lamps, Bulbs & Ballast > Bulbs - Halogen > Halogen - Linear > Lamps - Double-Ended"
 37484,Fittings,Cord/Cable Fittings,,,,6.978,2.084,Fittings > Cord/Cable Fittings > Cord Grip Aluminum
 374979,"Lighting Fixtures, Control",Indoor Lighting,LED,,,5.258,0.093,"Lighting Fixtures, Control > Indoor Lighting"
 374995,Control & Automation,Disconnect Switches,Disconnect Switches,,,7.173,0.007,Control & Automation > Disconnect Switches > Disconnect Switches > Disconnect Switches
@@ -5969,7 +5969,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 376471,"Fire Alarm, Safety, Security",Fire Equipment,Alarm Equipment & Accessories,,,5.949,0.08,"Fire Alarm, Safety, Security > Fire Equipment"
 376652,Power Distribution,Metering & Temporary Power,,,,5.802,0.349,Power Distribution > Metering & Temporary Power > Temporary Power
 376675,Tools & Meters,Hand Tools,,,,4.984,0.891,Tools & Meters > Hand Tools > Magnetic Accessories
-376691,"Lighting Fixtures, Control",Indoor Lighting,,,,5.165,0.745,"Lighting Fixtures, Control > Indoor Lighting > LED"
+376691,"Lighting Fixtures, Control",Indoor Lighting,,,,5.165,1.035,"Lighting Fixtures, Control > Dimmers/Dimming Controls > Low Voltage"
 376701,Data & Telecom,Low Voltage Cable,Fire Alarm Cable,,,6.548,0.381,Data & Telecom > Low Voltage Cable
 37677,Tools & Meters,Meters - Test Equipment - Calculators,,,,7.528,1.034,Tools & Meters > Meters - Test Equipment - Calculators > Light Meters
 377,Fasteners & Hardware,"Nuts, Bolts, Washers",Washers,Washer Kits,,7.613,0.144,"Fasteners & Hardware > Nuts, Bolts, Washers > Washers > Lock Washers"
@@ -7379,7 +7379,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 51961,Wiring Devices,Combination Devices,15/20 Amp Devices,Switch  Lights,,6.458,0.51,Wiring Devices > Combination Devices > 15/20 Amp Devices > Switch / Switch
 51963,Wiring Devices,Switches,,,,6.102,0.618,Wiring Devices > Combination Devices > 15/20 Amp Devices > Switch / Switch
 51964,Wiring Devices,Combination Devices,15/20 Amp Devices,Switch  Lights,,6.458,0.51,Wiring Devices > Combination Devices > 15/20 Amp Devices > Switch / Switch
-51965,Wiring Devices,Switches,,,,6.102,0.618,Wiring Devices > Combination Devices > 15/20 Amp Devices > Switch / Switch
+51965,Wiring Devices,Switches,,,,6.102,0.477,Wiring Devices > Specialty Switches > Toggle Switches
 51967,Wiring Devices,Combination Devices,15/20 Amp Devices,Switch / Switch,,6.545,0.0,Wiring Devices > Combination Devices > 15/20 Amp Devices > Switch / Switch / Switch
 51968,Wiring Devices,Combination Devices,15/20 Amp Devices,Switch  Lights,,6.908,0.364,Wiring Devices > Combination Devices > 15/20 Amp Devices > Switch / Switch
 51970,Wiring Devices,Combination Devices,15/20 Amp Devices,Switch / Switch,,6.545,0.0,Wiring Devices > Combination Devices > 15/20 Amp Devices > Switch / Switch / Switch
@@ -7472,7 +7472,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 52142,Wiring Devices,Wallplates,Decora Plates,1  Gang,,3.822,0.0,Wiring Devices > Wallplates > Decora Plates > 2  Gang
 52143,Wiring Devices,Wallplates,Accessories,Wall Plate Screws,,3.75,0.091,Wiring Devices > Wallplates > Single Receptacle Plates > 1  Gang
 52144,Wiring Devices,Wallplates,Accessories,Wall Plate Screws,,3.75,0.46,Wiring Devices > Wallplates
-52145,Wiring Devices,Wallplates,Accessories,Wall Plate Screws,,3.75,0.46,Wiring Devices > Wallplates
+52145,Wiring Devices,Wallplates,Decora Plates,2  Gang,,9.99,6.7,Wiring Devices > Wallplates
 52146,Wiring Devices,Wallplates,Accessories,Wall Plate Screws,,3.75,0.46,Wiring Devices > Wallplates
 52147,Wiring Devices,Wallplates,Decora Plates,1  Gang,,4.639,0.0,Wiring Devices > Wallplates > Decora Plates > 2  Gang
 52150,Wiring Devices,Wallplates,Decora Plates,1  Gang,,3.984,0.0,Wiring Devices > Wallplates > Decora Plates > 2  Gang
@@ -7484,7 +7484,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 52159,Wiring Devices,Wallplates,Accessories,Wall Plate Screws,,3.75,0.091,Wiring Devices > Wallplates > Single Receptacle Plates > 1  Gang
 52160,Wiring Devices,Wallplates,Accessories,Wall Plate Screws,,3.75,0.091,Wiring Devices > Wallplates > Single Receptacle Plates > 1  Gang
 52161,Wiring Devices,Wallplates,Accessories,Wall Plate Screws,,3.75,0.091,Wiring Devices > Wallplates > Single Receptacle Plates > 1  Gang
-52162,Wiring Devices,Combination Devices,Tamper Resistant Devices,Receptacle  Light,,4.089,0.339,Wiring Devices > Wallplates > Accessories > Wall Plate Screws
+52162,Wiring Devices,Wallplates,,,,9.99,6.24,Wiring Devices > Wallplates > Accessories > Wall Plate Screws
 52163,Wiring Devices,Wallplates,Toggle Plates,1  Gang,,3.791,0.0,Wiring Devices > Wallplates > Toggle Plates > 2  Gang
 52164,Wiring Devices,Wallplates,Toggle Plates,1  Gang,,3.791,0.0,Wiring Devices > Wallplates > Toggle Plates > 2  Gang
 52165,Wiring Devices,Specialty Switches,Toggle Switches,Toggle Switches,,4.326,0.02,Wiring Devices > Specialty Switches > Toggle Switches
@@ -7728,7 +7728,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 60643,Power Distribution,Transformers,Control Transformer,,,5.821,0.252,Power Distribution > Transformers
 60660,Fasteners & Hardware,Cable Management,Cable Ties & Accessories,Cable Tie Tools,,6.216,0.098,Fasteners & Hardware > Cable Management > Cable Ties & Accessories
 60661,Tools & Meters,Hand Tools,,,,7.221,1.843,Connectors & Crimps > Wire Connectors > Wire Connector Tools > Wire Connector Tools
-607,Fittings,"Clips, Clamps, Hangers",,,,9.99,4.534,Caddy > Cable/Conduit > Rod/Wire > Cable/Conduit Clip
+607,Fittings,"Clips, Clamps, Hangers",,,,6.969,0.455,Caddy > Cable/Conduit > Clamps and Clips
 60734,Data & Telecom,Fiber Optic Products,Connectors,,,5.807,0.447,Data & Telecom > Fiber Optic Products
 60768,Tools & Meters,Cable Pulling & Hoist,,,,7.113,0.066,Tools & Meters > Cable Pulling & Hoist > Cable Pulling - Accessories > Pulling - Other
 60770,Connectors & Crimps,"Small Terminals, Forks, Rings",Ferrules,Ferrule - Single-Insulated,,6.262,0.134,"Connectors & Crimps > Small Terminals, Forks, Rings"
@@ -7843,7 +7843,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 66785,Wiring Devices,Wallplates,Telephone / Cable Plates,1  Gang,,4.013,0.263,Wiring Devices > Wallplates > Accessories > Wall Plate Screws
 66802,Wiring Devices,Wallplates,Toggle Plates,1  Gang,,4.612,0.0,Wiring Devices > Wallplates > Toggle Plates > 2  Gang
 66921,Boxes & Enclosures,Boxes - Non-Metallic,NM Ceiling / Fixture Boxes,Fan Box,,7.747,0.005,Boxes & Enclosures > Boxes - Non-Metallic
-66990,Connectors & Crimps,Wire Connectors,,,,6.645,0.234,"Connectors & Crimps > Connectors, Crimps, Disconnects > Wire Connectors"
+66990,Connectors & Crimps,Lugs & Split Bolts,,,,9.99,3.579,"Connectors & Crimps > Connectors, Crimps, Disconnects > Wire Connectors"
 670,Fittings,Bushing / K.O. Seal / Locknuts,Locknuts,Locknuts - Sealing,,8.441,0.08,Fittings > Bushing / K.O. Seal / Locknuts > Locknuts
 671,Fittings,Bushing / K.O. Seal / Locknuts,Locknuts,Locknuts - Sealing,,8.441,0.08,Fittings > Bushing / K.O. Seal / Locknuts > Locknuts
 672,Fittings,Bushing / K.O. Seal / Locknuts,Locknuts,Locknuts - Sealing,,8.441,0.08,Fittings > Bushing / K.O. Seal / Locknuts > Locknuts
@@ -7963,7 +7963,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 72369,Tools & Meters,"Paint, Chemicals, Cleaning Supplies",,,,6.13,1.129,"Tools & Meters > Paint, Chemicals, Cleaning Supplies > Cleaning & Preparation Products > Cleaning Supplies"
 72384,Power Distribution,Circuit Breakers,,,,7.885,0.27,Power Distribution > Circuit Breakers > Circuit Breakers Residential > Quadplex Circuit Breakers
 72385,Power Distribution,Circuit Breakers,,,,8.568,0.481,Power Distribution > Circuit Breakers > Circuit Breaker Accessories
-724,Fittings,NM Cable Fittings,Connectors,,,6.035,0.092,Fittings > NM Cable Fittings > Connectors > Cable Connectors
+724,Fittings,"MC, NMB, Liquidtight, Flex Fittings",,,,7.938,1.37,"Fittings > MC, NMB, Liquidtight, Flex Fittings > Flex Fittings"
 725,Fasteners & Hardware,Tapes,Vinyl Electrical Tape,Color Coding Tape,,6.277,1.002,Fasteners & Hardware > Tapes > Vinyl Electrical Tape
 72550,"Conduit, Strut & Raceways",Conduit - Flexible,,,,7.695,0.022,"Conduit, Strut & Raceways > Conduit - Flexible > Flexible Conduit -Liquidtight"
 727,Fasteners & Hardware,Tapes,Vinyl Electrical Tape,Color Coding Tape,,6.277,1.002,Fasteners & Hardware > Tapes > Vinyl Electrical Tape
@@ -8115,7 +8115,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 79039,Tools & Meters,"Bits, Blades, Punches, Holesaws",,,,9.99,4.184,"Tools & Meters > Bits, Blades, Punches, Holesaws > Sawzall / Reciprocating Blades"
 79262,"Conduit, Strut & Raceways",Conduit - Flexible,Flexible Conduit - Steel,,,8.193,0.064,"Conduit, Strut & Raceways > Conduit - Flexible > Flexible Conduit - Steel > Flexible Conduit - Steel"
 793,Fittings,Conduit Bodies,Conduit Bodies - Iron,Conduit Bodies Type LB W/ Cover & Gasket,,9.241,0.131,Fittings > Conduit Bodies > Conduit Body - Cover & Gaskets
-795,Fittings,Conduit Bodies,Conduit Body - Cover & Gaskets,,,8.927,0.613,Fittings > Conduit Bodies
+795,Fittings,Conduit Bodies,Conduit Bodies Aluminum,Conduit Bodies Type LB,,9.99,1.676,Fittings > Conduit Bodies
 79670,Fittings,EMT Fittings,,,,6.224,0.224,Fittings
 79671,Fittings,EMT Fittings,,,,6.224,0.224,Fittings
 79672,Fittings,EMT Fittings,,,,6.224,0.224,Fittings
@@ -8161,7 +8161,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 81862,Fittings,"Clips, Clamps, Hangers",,,,5.283,0.701,"Fittings > Clips, Clamps, Hangers > Conduit, Cable"
 81983,"Lighting Fixtures, Control",Timer Controls,,,,4.869,0.147,"Lighting Fixtures, Control > Timer Controls > Mechanical Time Switches > 24 Hour"
 82166,Wiring Devices,Switches,,,,6.102,0.618,Wiring Devices > Combination Devices > 15/20 Amp Devices > Switch / Switch
-82199,Fittings,NM Cable Fittings,Connectors,,,6.975,0.253,Fittings > NM Cable Fittings
+82199,Fittings,"MC, NMB, Liquidtight, Flex Fittings",,,,9.115,1.113,"Fittings > MC, NMB, Liquidtight, Flex Fittings > MC, Armored Cable Fittings"
 82200,Fittings,NM Cable Fittings,,,,5.61,0.084,Fittings > NM Cable Fittings > Connectors > Snap-In Connector
 82280,"Fans, Heaters",Heaters & Thermostats,,,,7.006,1.106,"Fans, Heaters > Heaters & Thermostats > Thermostats - Line Voltage > Thermostats - Electronic"
 82296,Boxes & Enclosures,Boxes - Non-Metallic,,,,9.99,2.634,Boxes & Enclosures > Boxes - Metallic

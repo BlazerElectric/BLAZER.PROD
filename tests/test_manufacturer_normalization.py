@@ -7,6 +7,33 @@ from manufacturer_normalization import normalize_enriched_products
 
 
 class ManufacturerNormalizationTests(unittest.TestCase):
+    def test_verified_models_correct_cached_specifications_and_are_idempotent(self):
+        models = (
+            ("RAC 2104 SQZ CONNECT 1 TS FLEX", "1/2 Inch Connector", "MC, NMB, Liquidtight, Flex Fittings", "1 Inch Trade Size"),
+            ("CUL 52416J 8-32 X 1 RHMS", "1/2 Inch Screw", "Screws", "1 Inch Length"),
+            ("ARL 38AST CONNECTOR", "Screw-In NM Connector", "MC, NMB, Liquidtight, Flex Fittings", "1/2 Inch Knockout"),
+            ("PNS 664-WG SWITCH", "Single Pole Switch", "Switches", "Four-Way"),
+            ("HDN H-164-OSx10PG CHANNEL", "12 Gauge", "Strut", "14 Gauge"),
+            ("RAC 902C COVER", "1/2 Inch Duplex Opening", "Boxes - Metallic", "1/2 Inch Raised Depth"),
+            ("MIN BST BOX MOUNT SUPPORT", "Miniature size", "Boxes - Metallic", "Box Mount Support"),
+            ("CAR VC9982 QUICK SET CEMENT", "Vertical Cable Cement", "Paint, Chemicals, Cleaning Supplies", "PVC Solvent Cement"),
+        )
+        rows = [{
+            "BLAZER ID": str(i), "PRODUCT": product, "brand_manufacturer": "Wrong Brand",
+            "manufacturer_part_number": "", "clean_title": old_specs, "normalized_specs": old_specs,
+            "short_description": old_specs, "primary_category": "Old", "sub_category": subcategory,
+            "search_keywords": "[]", "common_misspellings": "[]",
+        } for i, (product, old_specs, subcategory, _) in enumerate(models)]
+        result = normalize_enriched_products(pd.DataFrame(rows))
+        for i, (_, old_specs, subcategory, expected) in enumerate(models):
+            with self.subTest(product=models[i][0]):
+                self.assertIn(expected, result.loc[i, "normalized_specs"])
+                self.assertNotIn(old_specs, result.loc[i, "short_description"])
+                self.assertEqual(result.loc[i, "sub_category"], subcategory)
+        self.assertEqual(result.loc[6, "brand_manufacturer"], "Minerallac")
+        self.assertEqual(result.loc[7, "brand_manufacturer"], "Carlon/Kraloy Generic")
+        pd.testing.assert_frame_equal(normalize_enriched_products(result), result)
+
     def test_known_prefixes_override_model_manufacturer_guesses(self):
         products = pd.DataFrame(
             [
@@ -166,6 +193,7 @@ class ManufacturerNormalizationTests(unittest.TestCase):
             ("PNS", "Pass & Seymour", "Panasonic", "Panasonic receptacle"),
             ("DIO", "Diode LED", "Diodes Incorporated", "Diodes Incorporated LED jumper"),
             ("RAC", "RACO", "Rack-A-Tiers", "Rack-A-Tiers 4-Inch Square Electrical Box"),
+            ("MIN", "Minerallac", "L.H. Dottie", "Dottie Conduit Hanger"),
         ]
         products = pd.DataFrame(
             [

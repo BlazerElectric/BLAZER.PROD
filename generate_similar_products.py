@@ -29,8 +29,8 @@ logger = logging.getLogger("generate_similar")
 def _tool_type(text: str) -> str:
     """Identify tool sub-type to keep pliers with pliers, drivers with drivers, etc."""
     patterns = (
-        ("sawzall_blade", r"sawzall|recip.*blade|the torch|the ax|\btorch\b.*nitrus|nitrus.*carbide|demo demon.*recip|steel demon.*recip|super sawzall"),
         ("oscillating_blade", r"omt|oscillat|multi-tool blade|starlock|open-lok"),
+        ("sawzall_blade", r"sawzall|recip.*blade|the torch|the ax|\btorch\b.*nitrus|nitrus.*carbide|demo demon.*recip|steel demon.*recip|super sawzall"),
         ("bandsaw_blade", r"band ?saw blade|compact.*band saw|deep cut.*band saw"),
         ("datacomm_tester", r"tone and probe|scout pro|vdv5|vdv-500|tone.*probe|wiremap|network tester"),
         ("punchdown_tool", r"punchdown|punch down|vdv427|66/110|110 blade|66 blade"),
@@ -87,6 +87,114 @@ def _lighting_type(text: str) -> str:
     return ""
 
 
+def _t8_length(text: str) -> str:
+    match = re.search(r"\b(24|36|48|96)\s*(?:inch|in\b|t8\b|\")|t8[- ](24|36|48|96)(?!\d)", text, re.I)
+    if match:
+        return match.group(1) or match.group(2)
+    match = re.search(r"\b([2348])\s*(?:ft|feet|foot)\b", text, re.I)
+    return {"2": "24", "3": "36", "4": "48", "8": "96"}.get(match.group(1), "") if match else ""
+
+
+def _functional_type(row: dict[str, str]) -> str:
+    node, text = row.get(ga.TAX_COL, ""), ga._text(row).lower()
+    if "Wallplates" in node:
+        if re.search(r"\b(?:insert|adapter|filler)\b", text):
+            return "plate_insert"
+        return "wallplate"
+    if "Boxes & Enclosures" in node and "Floor Boxes" not in node:
+        return ga.box_component(row)
+    if "Bushing / K.O. Seal / Locknuts" in node:
+        return ga.bushing_kind(row)
+    if "PVC Fittings" in node or "EMT Fittings" in node:
+        for kind, pattern in (
+            ("expansion", r"expansion"),
+            ("male_adapter", r"\bmale\b.*adapter|adapter.*\bmale\b"),
+            ("female_adapter", r"\bfemale\b.*adapter|adapter.*\bfemale\b"),
+            ("elbow", r"elbow|\belb\b|\bbend\b"),
+            ("coupling", r"coupling|cplg"),
+            ("connector", r"connector|\bconn\b"),
+        ):
+            if re.search(pattern, text):
+                return kind
+    if "Conduit Bodies" in node:
+        raw = str(row.get("PRODUCT", "")).lower()
+        if re.search(r"body complete|cond.*bdy|cndt.*body", raw):
+            return "body"
+        if re.search(r"cover|cvr|gasket|gask|wedgenut", raw):
+            return "body_cover"
+        if re.search(r"body complete|conduit body|cndt.*body|cond.*bdy", text):
+            return "body"
+        return "body_cover" if re.search(r"cover|cvr|gasket|gask", text) else "body"
+    if "Clips, Clamps, Hangers" in node or "Straps" in node:
+        if re.search(r"\b(?:connector|conn|coupling|cplg|cupl)\b", text):
+            return "fitting"
+        for kind, pattern in (
+            ("beam_clamp", r"beam clamp"),
+            ("box_hanger", r"t-?bar|box hanger|hanger.*box"),
+            ("mc_clip", r"\b(?:mc|mcac|bx)\b"),
+            ("conduit_clip", r"jiffy clip|conduit clip|pipe strap|\bstrap\b"),
+            ("conduit_hanger", r"hanger|stand.?off"),
+        ):
+            if re.search(pattern, text):
+                return kind
+    if "Grounding Products" in node:
+        if ga.is_ground_rod_clamp(row):
+            return "rod_clamp"
+        if ga.is_ground_rod(row):
+            return "rod"
+        return "other_grounding"
+    if "Paint, Chemicals" in node and re.search(r"pvc.*cement|solvent.*cement|quick[- ]?set cement", text):
+        return "pvc_cement"
+    if "Building Wire" in node or "Armored Cable" in node:
+        return ga.cable_family(row)
+    if "MC, NMB, Liquidtight, Flex Fittings" in node:
+        return ga.cable_family(row)
+    if "Circuit Breakers" in node:
+        if re.search(r"handle tie|handle lock|lockoff|hold.?down|\bkit\b|filler|ground bar", text):
+            return "breaker_accessory"
+        form = "tandem" if re.search(r"tandem|duplex|quadplex|\bbr(?:15|20|30|40|50){2}\b", text) else "standard"
+        protection = "standard"
+        for kind, pattern in (
+            ("surge", r"surge|spd|arrest"),
+            ("dual", r"dual.function|afci.*gfci|gfci.*afci"),
+            ("gfep", r"gfep|equipment protection"),
+            ("afci", r"afci|arc.fault|br(?:n|p)?caf"),
+            ("gfci", r"gfci|ground.fault|br(?:n|p)?gf"),
+        ):
+            if re.search(pattern, text):
+                protection = kind
+                break
+        neutral = "pon" if re.search(r"plug.on.neutral|\bpon\b", text) else "ordinary"
+        return f"{form}:{protection}:{neutral}"
+    if "Disconnect Switches" in node or "Safety Switches" in node:
+        return "hvac" if ga.is_hvac_disconnect(row) else "other_disconnect"
+    if "GFCI" in node:
+        return "gfci_switch" if re.search(r"\bswitch\b|combination", text) else "gfci"
+    return ""
+
+
+def _exact_fit(target: dict[str, str], candidate: dict[str, str]) -> bool:
+    node = target.get(ga.TAX_COL, "")
+    if "Building Wire" in node or "Armored Cable" in node:
+        t_gauge, c_gauge = ga.gauge_range(target), ga.gauge_range(candidate)
+        t_count = re.search(r"\b\d{1,2}/[2-5](?:/[2-5])?\b", ga._text(target))
+        c_count = re.search(r"\b\d{1,2}/[2-5](?:/[2-5])?\b", ga._text(candidate))
+        return bool(t_gauge and t_gauge == c_gauge and (
+            not t_count or (c_count and t_count.group(0) == c_count.group(0))
+        ))
+    if "Fittings" in node or "Conduit -" in node:
+        t_sizes, c_sizes = ga.trade_sizes(target), ga.trade_sizes(candidate)
+        return bool(t_sizes and c_sizes and t_sizes[0] == c_sizes[0])
+    if "Wiring Devices" in node:
+        return bool(ga.device_cutout(target) and ga.device_cutout(target) == ga.device_cutout(candidate)
+                    and ga.amp_ratings(target) == ga.amp_ratings(candidate))
+    if "Strut" in node:
+        t_profile = re.search(r"\bh-\d{3}(?=-|x|\b)", ga._text(target), re.I)
+        c_profile = re.search(r"\bh-\d{3}(?=-|x|\b)", ga._text(candidate), re.I)
+        return bool(t_profile and c_profile and t_profile.group(0).lower() == c_profile.group(0).lower())
+    return False
+
+
 def find_similar_products(
     target: dict[str, str],
     by_node: dict[str, list[dict[str, str]]],
@@ -103,6 +211,8 @@ def find_similar_products(
     target_series = ga.breaker_series(target) if "Circuit Breakers" in target_node else ""
     target_tool = _tool_type(target_text) if "Tools" in target_node else ""
     target_color = ga._color(target)
+    target_function = _functional_type(target)
+    target_role = ga.conductor_role(target) if ga.cable_family(target) == "thhn" else ""
 
     candidates = [
         c for c in by_node[target_node]
@@ -118,6 +228,122 @@ def find_similar_products(
         c_brand = ga._brand(c)
         c_orders = c.get(ORDERS_COL, 0)
         score = 0
+        if target_function and _functional_type(c) != target_function:
+            continue
+        if target_function == "conduit_clip" and ga.conduit_materials(target):
+            if not ga.conduit_materials(target) & ga.conduit_materials(c):
+                continue
+        if target_role and ga.conductor_role(c) != target_role:
+            continue
+        if target_function == "rod_clamp" and not ga.rod_sizes_compatible(target, c):
+            continue
+        if "Wallplates" in target_node:
+            if ga.gang_count(target) != ga.gang_count(c) or ga.device_cutout(target) != ga.device_cutout(c):
+                continue
+            if ga.plate_openings(target) != ga.plate_openings(c):
+                continue
+        if "Boxes & Enclosures" in target_node and ga.box_component(target).endswith("cover"):
+            if ga.box_kind(target) and ga.box_kind(c) and ga.box_kind(target) != ga.box_kind(c):
+                continue
+            if ga.device_cutout(target) != ga.device_cutout(c) or ga.plate_openings(target) != ga.plate_openings(c):
+                continue
+        if "GFCI" in target_node and re.search(r"\bwr\b|weather[- ]?resistant", target_text, re.I):
+            if not re.search(r"\bwr\b|weather[- ]?resistant", c_text, re.I):
+                continue
+
+        if target_tool in {"oscillating_blade", "sawzall_blade"}:
+            if _tool_type(c_text) != target_tool:
+                continue
+        if "GFCI" in target_node:
+            t_dead_front = bool(re.search(r"dead[- ]front", target_text, re.I))
+            c_dead_front = bool(re.search(r"dead[- ]front", c_text, re.I))
+            if t_dead_front != c_dead_front:
+                continue
+        if "Starters & Contactors" in target_node:
+            coil_pattern = r"\brenewal coil\b"
+            t_coil = bool(re.search(coil_pattern, target_text, re.I))
+            c_coil = bool(re.search(coil_pattern, c_text, re.I))
+            if t_coil != c_coil:
+                continue
+            if t_coil:
+                t_family = re.search(r"\bca7-t([a-z])\d+", target_text, re.I)
+                c_family = re.search(r"\bca7-t([a-z])\d+", c_text, re.I)
+                if t_family and (not c_family or t_family.group(1).lower() != c_family.group(1).lower()):
+                    continue
+        if "Screws" in target_node:
+            machine_pattern = r"\b(?:machine screw|rhms|fhms)\b"
+            t_machine = bool(re.search(machine_pattern, target_text, re.I))
+            c_machine = bool(re.search(machine_pattern, c_text, re.I))
+            if t_machine != c_machine:
+                continue
+            if t_machine:
+                thread_pattern = r"\b(\d{1,2}|\d+/\d+)-(32|24|20|16|13|11|10)\b"
+                t_thread = re.search(thread_pattern, target_text, re.I)
+                c_thread = re.search(thread_pattern, c_text, re.I)
+                if t_thread and (not c_thread or t_thread.group(0) != c_thread.group(0)):
+                    continue
+        if "Fans & Fan Controls" in target_node:
+            control_pattern = r"\b(?:control|switch|dimmer)\b"
+            if bool(re.search(control_pattern, target_text, re.I)) != bool(re.search(control_pattern, c_text, re.I)):
+                continue
+            if re.search(r"\bs2-lf(?:sq)?\b", target_text, re.I) and not re.search(
+                r"\bs2-lf(?:sq)?\b|\bdual\b.*\bcontrol\b|\bfan\b.*\blight\b.*(?:control|lut macl)", c_text, re.I
+            ):
+                continue
+            if re.search(r"\bs2-lf(?:sq)?\b", target_text, re.I) and re.search(r"humidity|humid sens", c_text, re.I):
+                continue
+        if "Floor Boxes" in target_node:
+            cover_pattern = r"\bflbc85(?:01|10|20|30)\w*\b"
+            if bool(re.search(cover_pattern, target_text, re.I)) != bool(re.search(cover_pattern, c_text, re.I)):
+                continue
+            if re.search(r"\bflbc8500\b", target_text, re.I) and re.search(
+                r"\b(?:cover|carpet|tile|flange|trim|plate|activation|thru-floor|adapter|ring)\b", c_text, re.I
+            ):
+                continue
+            if re.search(r"\bflbc8500\b", target_text, re.I) and not re.search(
+                r"\bconcrete\b|\bconc\b|\bflbc\d+\b", c_text, re.I
+            ):
+                continue
+        if "Bulbs - LED" in target_node and re.search(r"\bt8\b", target_text, re.I):
+            target_length = _t8_length(target_text)
+            if target_length and (
+                not re.search(r"(?:\b|(?<=\d))t8\b", c_text, re.I)
+                or _t8_length(c_text) != target_length
+                or re.search(r"\bu[- ]bend\b", c_text, re.I)
+            ):
+                continue
+            if re.search(r"\btype b\b", target_text, re.I) and re.search(r"\btype a\b", c_text, re.I) and not re.search(
+                r"\bhybrid\b|\btype a[/ -]b\b|\btype b\b", c_text, re.I
+            ):
+                continue
+        if "Lugs & Split Bolts" in target_node:
+            unitap_pattern = r"\b(?:unitap|uni-tap|splice reducer)\b"
+            lug_kit_pattern = r"\bl11-tl\d+\b"
+            if any(
+                bool(re.search(pattern, target_text, re.I)) != bool(re.search(pattern, c_text, re.I))
+                for pattern in (unitap_pattern, lug_kit_pattern)
+            ):
+                continue
+            if re.search(r"\bl11-tl3\b", target_text, re.I) and not re.search(r"\bl11-tl5\b", c_text, re.I):
+                continue
+
+        if "Heat Cable" in target_node:
+            splice_pattern = r"non[- ]?metallic.*splice kit"
+            t_splice = bool(re.search(splice_pattern, target_text, re.I))
+            c_splice = bool(re.search(splice_pattern, c_text, re.I))
+            if t_splice != c_splice:
+                continue
+        if "Grounding Products" in target_node:
+            rod_pattern = r"\b(?:ground|grd)\s+rod\b.*\bclamp\b"
+            t_rod = bool(re.search(rod_pattern, target_text, re.I))
+            c_rod = bool(re.search(rod_pattern, c_text, re.I))
+            if t_rod != c_rod:
+                continue
+        if "Grounding and Bonding" in target_node:
+            t_intersystem = bool(re.search(r"\binter[- ]?system\b", target_text, re.I))
+            c_intersystem = bool(re.search(r"\binter[- ]?system\b", c_text, re.I))
+            if t_intersystem != c_intersystem:
+                continue
 
         # Breakers: Must match series (e.g. Eaton BR with Eaton BR, Homeline with Homeline)
         if target_series:
@@ -823,6 +1049,11 @@ def find_similar_products(
             c_is_unitap = bool(re.search(r"unitap|uni-tap|splice reducer|\bbibd\b|\bpbtd\b|\bpbts\b", c_text, re.I))
             if t_is_unitap and c_is_unitap:
                 score += 100
+                for pattern in (r"\b(?:one|two)[- ]sided\b", r"\b\d+(?:/0)?\s*-\s*\d+(?:/0)?\b"):
+                    t_match = re.search(pattern, target_text, re.I)
+                    c_match = re.search(pattern, c_text, re.I)
+                    if t_match and c_match and t_match.group(0).lower() == c_match.group(0).lower():
+                        score += 100
                 # Further boost matching conductor range / gauge overlap
                 t_g = ga.gauge_range(target)
                 c_g = ga.gauge_range(c)
@@ -1424,10 +1655,12 @@ def find_similar_products(
         # Order volume tie-breaker
         score += min(c_orders, 500) / 10.0
 
-        scored.append((score, c_orders, c[ID_COL]))
+        exact = _exact_fit(target, c)
+        color_match = bool("Wiring Devices" in target_node and target_color and target_color == ga._color(c))
+        scored.append((exact, color_match, score, c_orders, c[ID_COL]))
 
-    scored.sort(key=lambda x: (-x[0], -x[1], x[2]))
-    return [item[2] for item in scored[:10]]
+    scored.sort(key=lambda x: (-x[0], -x[1], -x[2], -x[3], x[4]))
+    return [item[4] for item in scored[:10]]
 
 
 def main() -> None:

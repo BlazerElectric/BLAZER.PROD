@@ -56,6 +56,9 @@ Known leading manufacturer-prefix errors are corrected deterministically from `M
 * `RAT` $\to$ **Rack-A-Tiers**
 * Commodity codes `NIP`, `ELB`, `CON`, `PVC`, `LQT`, and `MC` normalize to generic product-class labels.
 * Confirmed vendor prefixes `CUL`, `HDN`, `POR`, `GLA`, `VC`, `PNS`, and `DIO` are authoritative for Cully, Haydon Strut, Tiffin Insulators, Glas Masters, Vertical Cable, Pass & Seymour, and Diode LED.
+* `MIN` is Minerallac, not Rack-A-Tiers or Dottie; `CAR` is Carlon/Kraloy Generic, not Vertical Cable.
+* Verified model corrections in `manufacturer_normalization.py` repair cached specifications as well as fresh enrichment. They include 38AST cable type/knockout, 664-WG four-way toggle function, H-164-OS channel dimensions/gauge, 902C raised depth, BST box support, and VC9982 PVC solvent cement.
+* Unambiguous raw-catalog dimensions also correct RACO 2104's one-inch trade size and Cully 52416J's one-inch screw length; their old enrichment incorrectly said one-half inch.
 
 To apply normalization to an enriched catalog:
 ```sh
@@ -63,6 +66,8 @@ python manufacturer_normalization.py \
   --input enriched_products.csv \
   --output enriched_products.csv
 ```
+
+Apply the same command to `enriched_products.checkpoint.csv` as both input and output when refreshing verified metadata, so the tracked recovery data stays current. Neither normalization command calls Gemini. Keep raw `products.csv` descriptions unchanged; unverified material, dimension, and vendor-fit claims require source review rather than guesses.
 
 To run unit tests verifying normalization:
 ```sh
@@ -91,9 +96,14 @@ Reports candidate pool health, identifies thin or zero pools, and displays top c
 
 ### 2. Taxonomy Rules & Subcategory Interleaving
 * Rules live in `accessory_rules.csv`. Each row maps a target `Main Category > Subcategory 1` to an accessory node.
+* `notes=verified_fit` bypasses the sales-volume minimum only for explicitly verified model-to-model accessory rules. Use restrictive model patterns and manufacturer documentation, not generic category matches.
+  - FLBC8500 cover family: [Arlington specification sheet](https://www.aimedia.co/media/spec-sheets/FLBC8500.pdf). FLBC8510 is single-gang; FLBC8520 requires a two-box assembly.
+  - L11-TL3: [Sprecher + Schuh lug hardware guidance](https://www.sprecherschuh.com/api/library/techdocs/posts/2015/06/L11-TL-lug-hardware.html).
+  - Halco 87200-87205: [Type B installation guide](https://www.halcolighting.com/media/resource/Halco-t8-ho-he%20install%20guide.pdf). Do not infer socket shunting or driver compatibility from generic LED descriptions.
 * **Bidirectional Relationships:** Key trade relationships are wired bidirectionally (Boxes $\leftrightarrow$ Devices, Disconnects $\leftrightarrow$ Emergency Warning Labels, Conduit $\leftrightarrow$ Fittings, Strut $\leftrightarrow$ Threaded Rod, Solar Wire $\leftrightarrow$ MC4 Connectors, Fuses $\leftrightarrow$ Disconnects).
 * **Subcategory Interleaving:** Candidate pools are interleaved across distinct subcategories, with subcategories ordered by their strongest sales volume, so one subcategory cannot dominate the early candidate slots.
-* **Capacity:** `MIN_SUGGESTIONS = 10` and `FALLBACK_FILL = 12` ensure carousels are populated up to 10 items. If Gemini returns 5–7 items, balanced subcategory top-up seamlessly completes slots 8–10 from the candidate pool.
+* **Capacity:** `MIN_SUGGESTIONS = 10` and `FALLBACK_FILL = 12` target up to 10 items when compatible candidates exist. Short or empty rows are preferable to unverified accessories; do not bypass compatibility guards to fill slots.
+* **Similar products are not certified substitutes:** sibling coil voltages, lug conductor ranges, GFCI amperages/protection features, and LED tube wiring types must be checked for the installation. CA7-TD855 currently has no verified 24V companion contactor in this catalog, so its accessory list is intentionally empty.
 
 ### 3. Testing with a Sample
 ```sh
@@ -128,8 +138,13 @@ python generate_similar_products.py \
 ```
 
 * Evaluates each product within its taxonomy node.
+* Rejects mismatched functional classes rather than filling ten slots with unrelated products: complete boxes versus extensions/supports, complete plates versus inserts, cover openings/gangs, grounding versus insulating/reducing bushings, PVC fitting geometry, conduit versus MC supports, PVC cement versus other chemicals, and complete conduit bodies versus replacement covers.
+* Keeps ordinary MC separate from HCF-AC/MC and power/control constructions. THHN alternatives preserve grounding versus neutral versus ungrounded identification; gauge/conductor-count changes remain application-dependent siblings.
+* Breakers retain series, standard/tandem form, protection type, and neutral connection type; WR GFCI alternatives retain weather resistance. These restrictions still do not certify panel or installation compatibility.
+* Exact trade size or wire construction ranks ahead of brand/popularity; matching device color follows exact fit. Short lists are intentional when qualified alternatives are unavailable.
 * Enforces breaker series compatibility (Eaton BR with BR, Homeline with Homeline).
 * Keeps tool sub-types aligned (screwdrivers with screwdrivers, strippers with strippers).
+* Separates non-metallic splice kits from heat cable, ground-rod clamps from other grounding products, and intersystem bonding bridges from unrelated grounding items.
 * Separates heavy-duty wiring devices (dryer/range 30A/50A) from standard 15A duplex receptacles.
 * Checks compatibility across product ratings and construction details, including wire type, voltage, phase/pole count, trade size, and conduit schedule.
 * Ranks results by 6-month sales order volume.
@@ -141,14 +156,21 @@ python generate_similar_products.py \
 
 * `audit_and_fix_accessories.py`: Deterministic catalog-wide quality audit and fixer (0 API cost; runtime varies by environment):
   - Preserves all 57+ locked hero packages in `curated_accessories.csv`.
-  - Guarantees 100% full 10/10 slot capacity across all 8,477 catalog items (0 short rows).
+  - Stops before writing if a locked package for an active product references a missing catalog ID; repair the curated row before retrying. Accessory generation performs the same check before calling Gemini.
+  - Fills up to 10 slots where compatible candidates exist and reports remaining short rows.
   - Enforces trade sanity guardrails:
     * Cutout style compatibility: Duplex vs Toggle vs Decora vs Single Round vs 2.15" Range/Dryer vs Blank.
     * Multi-gang limits (blocks multi-gang 3G/4G boxes on 1G devices).
     * Eliminates tool mismatches (no heavy strippers, crimpers, meters, or power tools on small commodity wiring devices, fasteners, or small hardware).
     * Box redundancy cap (maximum 2 rough-in boxes per wiring device).
     * Wire nut deduplication (maximum 1 standard twist-on nut per carousel).
+    * Model-specific verified-fit guards for FLBC8500 covers, L11-TL3 disconnects, CA7-TD855 coils, and Halco Type B tubes; matching-thread nuts and washers for machine screws.
+    * Oscillating blades are not paired with reciprocating saws. Skylark S2-LF controls use designer/Decora wallplate openings.
     * Optical fiber mode barriers (Single-Mode 9/125 vs Multimode 50/125 & 62.5/125).
+    * Connector entry size is checked against explicit box knockouts, not box width/depth. 38AST uses a 1/2-inch knockout despite its 3/8-inch trade size.
+    * Blank covers reject devices even when the device cutout cannot be identified; recognized plates reject unverified device openings. Square-box cover machine screws must be 8-32.
+    * Ground rods require listed rod-clamp diameter matches; threaded LB bodies cannot directly mate to EMT pipe. H-164 shallow strut rejects N-820-series regular-spring nuts.
+    * Auditing promotes compatible core essentials ahead of retained filler: MC cable/metal boxes for 38AST, 8-32 cover screws, bonding wire within a grounding bushing's lug range, and cement/matching locknuts for PVC male adapters. This is deterministic and leaves locked rows unchanged.
     * Network switch vs wall switch disambiguation.
     * Surveillance hard drive vs tool storage disambiguation.
   - Automatically triggers `export_web_catalog.py` as its final step to keep the storefront JSON synchronized.
@@ -159,6 +181,14 @@ python generate_similar_products.py \
   ```sh
   python -m unittest discover tests
   ```
+
+Manufacturer references for these checks:
+* [RACO square box knockout and 8-32 cover-mount details](https://www.hubbell.com/raco/en/products/4-in-square-box-drawn-2-18-in-deep-cat-232d/p/19515859).
+* [Arlington 38AST AC/MC snap-in connector](https://www.onewerner.com/product/Arlington-38AST).
+* [Legrand 664-WG four-way toggle](https://www.legrand.us/wiring-devices/light-switches-and-dimmers/residential-switches/trademaster-grounding-toggle-switch-white/p/664wg).
+* [Haydon H-164-OS channel](https://haydoncorp.com/catalog/product/h-164-os), [regular-spring nuts](https://haydoncorp.com/catalog/product/n-820-series), and [short-spring nuts](https://haydoncorp.com/catalog/product/N-810-Series?id=248&category=55).
+
+Locked curated packages bypass automatic cleanup. With explicit approval, BR230 SKU 2999's ET310 tester (90-120V only) was removed without a guessed replacement; the remaining nine items retain their relative order. Panel-specific accessories still require fit review; do not treat the package as certified for every 240V installation. Rank-only SKU 40855 remains outside the catalog pending a decision on its administrative role.
 
 ---
 
@@ -215,7 +245,7 @@ python3 generate_similar_products.py
 # 4. Generate Accessories (Carousel 1, processes only new SKUs using checkpoint)
 python3 generate_accessories.py --checkpoint product_accessories.csv
 
-# 5. Deterministic Quality Audit & Fill (0 API cost, guarantees 10/10 slots & preserves curated items)
+# 5. Deterministic Quality Audit & Fill (0 API cost, compatible slots only; preserves curated items)
 # Automatically triggers export_web_catalog.py upon completion
 python3 audit_and_fix_accessories.py
 

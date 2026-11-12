@@ -77,6 +77,23 @@ def load_curated_accessories(path: str = CURATED_PATH) -> pd.DataFrame:
     return pd.DataFrame(columns=[OUTPUT_ID_COL, *RELATION_COLUMNS])
 
 
+def validate_curated_accessories(curated: pd.DataFrame, product_ids: set[str]) -> None:
+    invalid = []
+    for row in curated.to_dict("records"):
+        target = row[OUTPUT_ID_COL]
+        if target not in product_ids:
+            continue
+        for column in RELATION_COLUMNS:
+            accessory = row[column].strip()
+            if accessory and accessory not in product_ids:
+                invalid.append(f"{target} {column}: {accessory}")
+    if invalid:
+        raise ValueError(
+            "Curated accessories reference products missing from the catalog: "
+            + "; ".join(invalid)
+        )
+
+
 class TaxonomyRule(NamedTuple):
     target_path: str
     accessory_path: str
@@ -86,6 +103,7 @@ class TaxonomyRule(NamedTuple):
     match: str
     target_keywords: re.Pattern | None
     accessory_keywords: re.Pattern | None
+    verified_fit: bool
 
 
 MATCH_MODES = frozenset({"none", "series", "gauge", "platform", "amps", "thread", "box"})
@@ -118,6 +136,7 @@ def load_taxonomy_rules(path: str = RULES_PATH) -> dict[str, TaxonomyRule]:
                 match,
                 _keywords(row.get("target_keywords", "")),
                 _keywords(row.get("accessory_keywords", "")),
+                (row.get("notes") or "").strip().lower() == "verified_fit",
             )
     return rules
 
@@ -427,7 +446,8 @@ def trade_sizes(row: dict[str, str]) -> list[float]:
     if coded:
         return coded
     text = f"{row.get('normalized_specs', '')} {row.get('clean_title', '')}"
-    return [_parse_size(token) for token in _SIZE_PATTERN.findall(text)]
+    sizes = [_parse_size(token) for token in _SIZE_PATTERN.findall(text)]
+    return sizes or [_parse_size(token) for token in _SIZE_PATTERN.findall(str(row.get("PRODUCT", "")))]
 
 
 def _sizes_compatible(
@@ -447,6 +467,51 @@ _TOOL_NODES = (
 )
 # The mapper sometimes files blades, bits and punches under tool nodes.
 TAXONOMY_OVERRIDES = (
+    (
+        r"^rac\s+752\b",
+        (),
+        "Boxes & Enclosures > Boxes - Metallic > 4 Square Boxes > 4IN Square Covers",
+    ),
+    (
+        r"^rac\s+902c\b",
+        (),
+        "Boxes & Enclosures > Boxes - Metallic > 4 Square Boxes > Industrial Cover",
+    ),
+    (
+        r"^bpt\s+lb-42cg\b",
+        (),
+        "Fittings > Conduit Bodies > Conduit Bodies Aluminum > Conduit Bodies Type LB",
+    ),
+    (
+        r"\btp262-w\b",
+        (),
+        "Wiring Devices > Wallplates > Decora Plates > 2  Gang",
+    ),
+    (
+        r"\b38ast\b|\bmc connector\b",
+        ("Fittings > NM Cable Fittings",),
+        "Fittings > MC, NMB, Liquidtight, Flex Fittings",
+    ),
+    (
+        r"\btp26[- ]\w+\b.*\bplate\b",
+        ("Wiring Devices > Combination Devices",),
+        "Wiring Devices > Wallplates",
+    ),
+    (
+        r"\bunitap\b|\buni-tap\b|\bsplice reducer\b",
+        ("Connectors & Crimps > Wire Connectors",),
+        "Connectors & Crimps > Lugs & Split Bolts",
+    ),
+    (
+        r"\bl11-tl\d+\b",
+        ("Control & Automation > Terminal Blocks", "Boxes & Enclosures > Boxes - Non-Metallic"),
+        "Connectors & Crimps > Lugs & Split Bolts",
+    ),
+    (
+        r"\bled\b.*\bt[58]\b|\bt[58]\b.*\bled\b",
+        ("Lamps, Bulbs & Ballast > Bulbs - Halogen",),
+        "Lamps, Bulbs & Ballast > Bulbs - LED > LED - Tube Type",
+    ),
     (
         r"\b(?:tp[1-4]|p[1-4])\b.*plate|wall plate|switch plate",
         ("Lighting Fixtures, Control > Occupancy Sensors",),
@@ -623,7 +688,7 @@ TAXONOMY_OVERRIDES = (
         "Boxes & Enclosures > Underground Pull Boxes",
     ),
     (
-        r"metal clad|\bmc cable\b|armored",
+        r"^(?!.*(?:clip|clamp|connector|hanger|support)).*(?:metal clad|\bmc cable\b|armored)",
         ("Fittings > Clips, Clamps, Hangers", "Wire, Cable & Cord > Building Wire"),
         "Wire, Cable & Cord > Armored Cable",
     ),
@@ -1316,8 +1381,9 @@ def _taxonomy_paths(source: pd.DataFrame, path: str) -> pd.Series:
     paths = _raw_taxonomy_paths(source, path)
     text = (source["PRODUCT"] + " " + source["clean_title"]).str.lower()
     for pattern, from_nodes, to_node in TAXONOMY_OVERRIDES:
-        mask = paths.isin(from_nodes) & text.str.contains(pattern, regex=True)
-        paths = paths.mask(mask, to_node)
+        eligible = paths.isin(from_nodes) if from_nodes else pd.Series(True, index=paths.index)
+        mask = eligible & text.str.contains(pattern, regex=True)
+        paths = paths.mask(mask, " > ".join(part.strip() for part in to_node.split(">")[:2]))
     return paths
 
 
@@ -1483,7 +1549,7 @@ _CABLE_WORDS = re.compile(r"sheathed|nm-b|romex|metal clad|\bmc\b|\buf\b|undergr
 
 def gauge_range(row: dict[str, str]) -> tuple[float, float] | None:
     values: list[float] = []
-    for match in _GAUGE.finditer(_text(row)):
+    for match in _GAUGE.finditer(_text(row) + " " + str(row.get("normalized_specs", ""))):
         if match.group(1):
             pairs = [
                 (match.group(1), match.group(2) or ""),
@@ -1830,23 +1896,27 @@ def gang_count(row: dict[str, str]) -> int:
 def device_cutout(row: dict[str, str]) -> str:
     text = (str(row.get("clean_title", "")) + " " + str(row.get("PRODUCT", ""))).lower()
     tax = str(row.get(TAX_COL, ""))
-    is_wallplate = "Wallplates" in tax or "wallplate" in text or "wall plate" in text
-    is_device = any(k in tax for k in ["Receptacles", "Switches", "GFCI", "Combination Devices", "Specialty Switches", "Straight Blade 10-20 Amp"]) or any(k in text for k in ["receptacle", "switch", "outlet", "dimmer"])
+    is_wallplate = "Wallplates" in tax or "wallplate" in text or "wall plate" in text or box_component(row).endswith("cover")
+    is_device = any(k in tax for k in ["Receptacles", "Switches", "GFCI", "Combination Devices", "Specialty Switches", "Straight Blade 10-20 Amp"]) or any(k in text for k in ["receptacle", "switch", "outlet", "dimmer"]) or bool(re.search(r"\bs2-lf(?:sq)?\b", text))
 
     if not (is_wallplate or is_device):
         return ""
 
+    if is_wallplate and len(plate_openings(row)) > 1:
+        return "combo"
     if re.search(r"\b(?:tp703|ss703|ss701|s384|2\.15|range/dryer plate|dryer plate|power outlet plate)\b", text):
         return "dryer_round"
     if re.search(r"\b(?:tp126|tp826|tp226|combo|combination)\b", text):
         return "combo"
     if re.search(r"\b(?:blank|tp13|p13|tp23|ss23|p23|tp33|p33|tp43)\b", text):
         return "blank"
-    if re.search(r"\b(?:decora|decorator|rocker|gfci|gfi|paddle|slide dimmer|tp26|p26|2604)\b", text):
+    if re.search(r"\b(?:decora|decorator|rocker|gfci|gfi|paddle|slide dimmer|dvcl|dvstv|rhl153p\w*|s2-lf(?:sq)?|tp26|p26|2604)\b", text):
         return "decora"
+    if not is_wallplate and re.search(r"\b(?:pns|pass\s*(?:&|and)\s*seymour)\s+66[014][- ]?wg\b", text):
+        return "toggle"
     if re.search(r"\b(?:toggle|tp[1-6]\b|p[1-6]\b|ss[1-6]\b|1201|1221|cs120|csb120|cs115)\b", text):
         return "toggle"
-    if re.search(r"\b(?:single receptacle|single recp|tp7\b|p7\b|1\.406|1\.59)\b", text) and not re.search(r"\bduplex\b", text):
+    if re.search(r"\b(?:single receptacle|single recp|tp7\b|p7\b|1\.406|1\.59\d*)\b", text) and not re.search(r"\bduplex\b", text):
         return "single_round"
     if re.search(r"\b(?:duplex|dplx|tp8\b|p8\b|tp82\b|p82\b|3232|5362|5262|cr20|cr15|br20|br15|8300)\b", text):
         return "duplex"
@@ -1855,6 +1925,133 @@ def device_cutout(row: dict[str, str]) -> str:
 
 def _path_parts(row: dict[str, str]) -> list[str]:
     return [part.strip() for part in str(row.get(TAX_COL, "")).split(">")]
+
+
+def plate_openings(row: dict[str, str]) -> tuple[tuple[str, int], ...]:
+    text = _text(row).lower()
+    openings = []
+    for kind, pattern in (
+        ("toggle", r"(?:toggle|tog)"),
+        ("duplex", r"(?:duplex|dplx)"),
+        ("decora", r"(?:decora|decorator|decor|gfci|gfi)"),
+        ("blank", r"blank"),
+        ("single_round", r"(?:single receptacle|single recp)"),
+    ):
+        if re.search(rf"\b{pattern}\b", text):
+            counts = re.findall(rf"(?<![\w/.])([1-6])\s*(?:g\s*)?{pattern}\b", text)
+            openings.append((kind, max(map(int, counts)) if counts else 1))
+    return tuple(openings)
+
+
+def conductor_role(row: dict[str, str]) -> str:
+    color = _color(row)
+    if color in {"green", "white", "gray"}:
+        return "ground" if color == "green" else "neutral"
+    return "ungrounded" if color else ""
+
+
+def box_component(row: dict[str, str]) -> str:
+    text = _text(row).lower()
+    if re.search(r"\b(?:extension|extender|extns|ext|spacer|shim)\b|\bbe[1-4]r?\b", text):
+        return "extension"
+    if re.search(r"box mount support|box support|box bracket|stud bracket|far[- ]side support", text):
+        return "support"
+    if re.search(r"\b(?:cover|cvr|wallplate|wall plate|lid|mud ring|plaster ring)\b", text) and not re.search(
+        r"(?:box|enclosure|body).*(?:with|w/|screw).*(?:cover|cvr)|screw cover.*(?:box|enclosure)", text
+    ):
+        if re.search(r"\bblank\b", text):
+            return "blank_cover"
+        if re.search(r"in[- ]?use|while.in.use", text):
+            return "in_use_cover"
+        return "cover"
+    return "box"
+
+
+_KO_NUMBER = r"(?:\d+-\d+/\d+|\d+/\d+|\d+(?:\.\d+)?)"
+_KO_SIZE = rf"{_KO_NUMBER}\s*(?:inch(?:es)?|in\b|\")?(?:\s*\([^)]*\))?"
+_KNOCKOUTS = re.compile(
+    rf"(?<![\w/.-])({_KO_SIZE}(?:\s*(?:&|and|,)\s*{_KO_SIZE})*)\s*(?:knockouts?|\bt?ko\b|k\.o\.)", re.I
+)
+
+
+def knockout_sizes(row: dict[str, str]) -> list[float]:
+    text = " ".join(str(row.get(k, "")) for k in ("normalized_specs", "clean_title", "PRODUCT"))
+    sizes = []
+    for match in _KNOCKOUTS.finditer(text):
+        sizes.extend(_parse_size(token) for token in re.findall(_KO_NUMBER, match.group(1)))
+    return list(dict.fromkeys(sizes))
+
+
+def cable_family(row: dict[str, str]) -> str:
+    text = _text(row).lower()
+    for family, pattern in (
+        ("nm", r"\bnm(?:-b)?\b|\bromex\b|non[- ]metallic (?:sheathed|cable)"),
+        ("hcf_ac", r"hcf[- ]?ac|health.?care.*\bac\b"),
+        ("hcf_mc", r"hcf[- ]?mc|health.?care.*\bmc\b"),
+        ("mc_pcs", r"mc[- ]?pcs|power.*control.*cable"),
+        ("lfnc", r"\blfnc\b|\bnmlt\d|carflex|non[- ]metallic.*liquidtight|liquidtight.*non[- ]metallic"),
+        ("lfmc", r"\blfmc\b|liquidtight.*metallic|metallic.*liquidtight"),
+        ("ac_mc", r"\b38ast\b|\bac/mc\b"),
+        ("mc", r"\bmc\b|metal[- ]?clad"),
+        ("ac", r"\bac[- ]cable\b|armored cable|\bbx\b"),
+        ("fmc", r"\bfmc\b|greenfield|sqz.*flex|squeeze.*flex|flexible metal conduit"),
+        ("thhn", r"\bthhn\b|\bthwn(?:-2)?\b"),
+    ):
+        if re.search(pattern, text, re.I):
+            return family
+    return ""
+
+
+def bushing_kind(row: dict[str, str]) -> str:
+    text = _text(row).lower()
+    raw = str(row.get("PRODUCT", "")).lower()
+    if re.search(r"\bhub\b", raw):
+        return "hub"
+    if raw.startswith("wmd "):
+        return "raceway"
+    for kind, pattern in (
+        ("locknut", r"lock ?nut"),
+        ("grounding", r"ground.*bushing|\bgrnd\b.*bushing|bushing.*(?:ground|lug)|lay[- ]?in lug"),
+        ("reducing", r"reduc.*bushing"),
+        ("knockout", r"(?:knock[- ]?out|\bko\b|\bk\.o\.)\s*bushing"),
+        ("emt", r"\bemt\d*\b.*bushing|bushing.*\bemt\b"),
+        ("split", r"split.*bushing"),
+        ("threaded", r"bushing"),
+        ("seal", r"knockout seal|\bko seal\b"),
+    ):
+        if re.search(pattern, text):
+            return kind
+    return ""
+
+
+def is_ground_rod_clamp(row: dict[str, str]) -> bool:
+    return bool(re.search(r"\b(?:ground|grd)\s+rod\b.*\bclamp\b", _text(row), re.I))
+
+
+def is_ground_rod(row: dict[str, str]) -> bool:
+    text = _text(row)
+    return bool(re.search(r"\b(?:ground|grd|grounding)\s+rod\b", text, re.I)) and not bool(
+        re.search(r"\b(?:clamp|driver|coupler|mold)\b", text, re.I)
+    )
+
+
+def rod_sizes_compatible(target: dict[str, str], candidate: dict[str, str]) -> bool:
+    def diameters(row: dict[str, str]) -> list[float]:
+        return trade_sizes(row) or [
+            _parse_size(token) for token in re.findall(r"(?<![\w/.-])\d+/\d+(?![\w/.-])", _text(row))
+        ]
+
+    t_sizes, c_sizes = diameters(target), diameters(candidate)
+    return bool(t_sizes and c_sizes and t_sizes[0] in c_sizes)
+
+
+def is_hvac_disconnect(row: dict[str, str]) -> bool:
+    text = _text(row)
+    if re.search(r"\bhvac\b|air condition|\bu(?:065|38)\w*\b", text, re.I):
+        return True
+    return bool(re.search(r"\bac disconnect\b", text, re.I)) and not bool(
+        re.search(r"\bmotor\b|\b3[- ]?(?:pole|phase|ph)\b|\b(?:480|600)\s*v", text, re.I)
+    )
 
 
 _CONDUIT_MAINS = frozenset({"Conduit, Strut & Raceways", "Fittings"})
@@ -1932,6 +2129,125 @@ _GAUGE_MAINS = frozenset({"Wire, Cable & Cord", "Connectors & Crimps"})
 def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
     """Return 'gang', 'color', 'series', 'box', 'gauge', 'material', 'size' or 'part' when a pair can never go together, else ''."""
     tparts, cparts = _path_parts(target), _path_parts(cand)
+    target_text, candidate_text = _text(target), _text(cand)
+    if (
+        (tparts[0] == "Boxes & Enclosures" or "Wallplates" in str(target.get(TAX_COL, "")))
+        and (cparts[0] == "Boxes & Enclosures" or "Wallplates" in str(cand.get(TAX_COL, "")))
+        and box_component(target).endswith("cover")
+        and box_component(cand).endswith("cover")
+    ):
+        return "cover_substitute"
+    for box, connector in ((target, cand), (cand, target)):
+        if "Boxes & Enclosures" in str(box.get(TAX_COL, "")) and box_component(box) == "box" and re.search(
+            r"\b(?:connector|conn)\b", _text(connector), re.I
+        ):
+            openings = knockout_sizes(box)
+            entries = knockout_sizes(connector) or trade_sizes(connector)[:1]
+            if openings and entries and not set(openings) & set(entries):
+                return "knockout_size"
+    if (
+        "Boxes & Enclosures" in str(target.get(TAX_COL, ""))
+        and box_kind(target) in {"4sq", "4-11/16"}
+        and re.search(r"\b(?:rhms|fhms|machine screw)\b", candidate_text, re.I)
+    ):
+        threads = re.findall(r"\b(?:\d{1,2}|\d+/\d+)-(?:32|24|20|16|13|11|10)\b", candidate_text)
+        if not threads or any(thread != "8-32" for thread in threads):
+            return "cover_thread"
+    if is_ground_rod(target) and re.search(r"\bclamp\b", candidate_text, re.I):
+        if not is_ground_rod_clamp(cand):
+            return "rod_clamp"
+        if not rod_sizes_compatible(target, cand):
+            return "rod_diameter"
+    if is_ground_rod_clamp(target) and is_ground_rod_clamp(cand):
+        return "clamp_substitute"
+    if re.search(r"\bh-164(?:-|\b)", target_text, re.I) and re.search(r"\bn-82\d\b", candidate_text, re.I):
+        return "strut_spring"
+    if (
+        "Bushing / K.O. Seal / Locknuts" in str(target.get(TAX_COL, ""))
+        and "bushing" in target_text.lower()
+        and "bushing" in candidate_text.lower()
+    ):
+        return "bushing_substitute"
+    if bushing_kind(target) == "grounding" and cparts[0] == "Wire, Cable & Cord":
+        if "Bare Copper" not in str(cand.get(TAX_COL, "")) and conductor_role(cand) != "ground":
+            return "bonding_wire"
+        wanted, have = gauge_range(target), gauge_range(cand)
+        if not wanted or not have or not wanted[0] <= have[0] <= have[1] <= wanted[1]:
+            return "gauge"
+    t_family, c_family = cable_family(target), cable_family(cand)
+    if (
+        (t_family == "nm" and c_family in {"ac", "ac_mc", "mc", "fmc", "lfnc", "lfmc"})
+        or (c_family == "nm" and t_family in {"ac", "ac_mc", "mc", "fmc", "lfnc", "lfmc"})
+    ):
+        return "cable_type"
+    if "Conduit Bodies" in str(target.get(TAX_COL, "")) and re.search(
+        r"\bthreaded\b|\bbody complete\b", target_text + " " + str(target.get("normalized_specs", "")), re.I
+    ) and conduit_materials(cand) == {"emt"} and re.search(r"Conduit - ", str(cand.get(TAX_COL, ""))):
+        return "threaded_transition"
+    if (
+        re.search(r"\b(?:omt|oscillat\w*|multi-tool blade|open-lok|starlock)\b", target_text, re.I)
+        and re.search(r"\b(?:sawzall|hackzall|reciprocating)\b", candidate_text, re.I)
+    ):
+        return "tool_mismatch"
+    if re.search(r"\bflbc8500\b", target_text, re.I):
+        if not re.search(r"\bflbc85(?:10|20)\w*\b", candidate_text, re.I):
+            return "unverified_floor_box_accessory"
+    if re.search(r"\bl11-tl3\b", target_text, re.I):
+        if not re.search(r"\bl11-(?:j400|nu400)-1753\b", candidate_text, re.I):
+            return "unverified_lug_accessory"
+    if re.search(r"\bca7-td855\b.*\brenewal coil\b", target_text, re.I):
+        if not (re.search(r"\bca7-(?:43|55)-", candidate_text, re.I)
+                and re.search(r"\b24\s*(?:v|volt)\b", candidate_text, re.I)):
+            return "unverified_coil_accessory"
+    if re.search(r"\bs2-lf(?:sq)?\b", target_text, re.I):
+        if "Fans & Fan Controls" in str(cand.get(TAX_COL, "")):
+            return "unverified_fan_control_accessory"
+        if "Boxes & Enclosures" in str(cand.get(TAX_COL, "")) and box_kind(cand) not in {"1g", "2g"}:
+            return "fan_control_box"
+        if re.search(r"\bpulling\b|\bclearglide\b", candidate_text, re.I):
+            return "unrelated"
+        if str(cand.get(ID_COL, "")) in {"1021", "1026"}:
+            return "unverified_control_cable"
+    if re.search(r"\bbibs2/03\b", target_text, re.I) and re.search(r"\bnm-b\b", candidate_text, re.I):
+        return "unverified_connector_cable"
+    if re.search(r"\bbibs2/03\b", target_text, re.I) and cparts[0] == "Connectors & Crimps":
+        return "connector_substitute"
+    if (
+        tparts[0] == "Fasteners & Hardware"
+        and "Screws" in tparts[1:2]
+        and re.search(r"\b(?:machine screw|rhms|fhms)\b", target_text, re.I)
+    ):
+        thread = re.search(r"\b(\d{1,2}|\d+/\d+)-(?:32|24|20|16|13|11|10)\b", target_text, re.I)
+        if thread:
+            is_washer = "Nuts, Bolts, Washers" in cparts[1:2] and bool(re.search(r"\b(?:washer|lockwasher)\b", candidate_text, re.I))
+            is_nut = "Nuts, Bolts, Washers" in cparts[1:2] and bool(re.search(r"\b(?:hex )?nut\b", candidate_text, re.I))
+            matching_nut = is_nut and bool(re.search(rf"\b{re.escape(thread.group(0))}\b", candidate_text, re.I))
+            matching_washer = is_washer and fastener_diameter(target) == fastener_diameter(cand)
+            if not (matching_nut or matching_washer):
+                return "unverified_fastener_accessory"
+    if re.search(r"\bhalco\s+8720[0-5]\b", target_text, re.I):
+        if cparts[0] == "Boxes & Enclosures" or re.search(r"\bpulling\b|\bclearglide\b", candidate_text, re.I):
+            return "unrelated"
+        if "Wire Connectors" in str(cand.get(TAX_COL, "")):
+            conductor_range = gauge_range({"PRODUCT": candidate_text + " " + str(cand.get("normalized_specs", ""))})
+            twelve_awg = _gauge_area("12", "AWG")
+            if not conductor_range or twelve_awg is None or not conductor_range[0] <= twelve_awg <= conductor_range[1]:
+                return "unverified_tube_connector"
+        if cparts[0] == "Wire, Cable & Cord" and not re.search(
+            r"\bthhn-(?:12|14)-(?:black|white|green)-(?:sol|solid)\b", candidate_text, re.I
+        ):
+            return "unverified_tube_wire"
+        if "Drivers" in str(cand.get(TAX_COL, "")):
+            return "type_b_driver"
+        if "Lampholders" in str(cand.get(TAX_COL, "")) and not re.search(
+            r"\bnon[- ]shunt", candidate_text + " " + str(cand.get("normalized_specs", "")), re.I
+        ):
+            return "unverified_lampholder"
+        if "Lighting Fixtures" in cparts[0] and "Lampholders" not in str(cand.get(TAX_COL, "")):
+            if not re.search(r"kt-ddsledt8-4-|wired for directdrive.*(?:4'|48)", candidate_text, re.I):
+                return "unverified_tube_fixture"
+        if "Bulbs - LED" in str(cand.get(TAX_COL, "")) and not re.search(r"\bnon[- ]shunt", candidate_text, re.I):
+            return "lamp_substitute"
     allowed = ONLY_WITH.get(" > ".join(tparts[:2]))
     if allowed and " > ".join(cparts[:2]) not in allowed:
         return "unrelated"
@@ -1962,13 +2278,15 @@ def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
             return "material"
         if "liquidtight" in tmat and "dry_flex" in cmat and "liquidtight" not in cmat:
             return "material"
-        if len(tmat) == 1 and cmat and not tmat & cmat:
+        pvc_locknut = tmat == {"pvc"} and bool(re.search(r"\bmale\b.*adapt", target_text, re.I)) and bushing_kind(cand) == "locknut"
+        if len(tmat) == 1 and cmat and not tmat & cmat and not pvc_locknut:
             return "material"
         if (
             tmat == {"pvc"}
             and cparts[1] == "Bushing / K.O. Seal / Locknuts"
             and "pvc" not in cmat
             and not _PLASTIC.search(str(cand.get("PRODUCT", "")))
+            and not pvc_locknut
         ):
             return "material"
         tsizes, csizes = trade_sizes(target), trade_sizes(cand)
@@ -2010,16 +2328,51 @@ def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
             if box_kind(cand) in ("4sq", "4-11/16", "oct3", "oct4", "round_box", "fan_box", "1g", "2g"):
                 return "gang"
     # Wallplate cutout vs wiring device style compatibility
-    t_is_plate = "Wallplates" in str(target.get(TAX_COL, "")) or "wallplate" in _text(target).lower()
-    c_is_plate = "Wallplates" in str(cand.get(TAX_COL, "")) or "wallplate" in _text(cand).lower()
+    t_is_plate = "Wallplates" in str(target.get(TAX_COL, "")) or "wallplate" in _text(target).lower() or box_component(target).endswith("cover")
+    c_is_plate = "Wallplates" in str(cand.get(TAX_COL, "")) or "wallplate" in _text(cand).lower() or box_component(cand).endswith("cover")
     if t_is_plate != c_is_plate:
         t_style = device_cutout(target)
         c_style = device_cutout(cand)
+        device = cand if t_is_plate else target
+        plate_style, device_style = (t_style, c_style) if t_is_plate else (c_style, t_style)
+        is_device = any(k in str(device.get(TAX_COL, "")) for k in ("Receptacles", "Switches", "GFCI", "Combination Devices"))
+        if is_device and plate_style == "blank":
+            return "cutout_mismatch"
+        if is_device and plate_style and not device_style:
+            return "unverified_device_cutout"
         if t_style and c_style:
             if t_style == "combo" or c_style == "combo":
-                pass
+                plate = target if t_is_plate else cand
+                device_style = c_style if t_is_plate else t_style
+                plate_text = _text(plate)
+                openings = set()
+                for style, pattern in (
+                    ("toggle", r"\b(?:toggle|tog)\b"),
+                    ("duplex", r"\b(?:duplex|dplx)\b"),
+                    ("decora", r"\b(?:decora|decorator|gfci|gfi)\b"),
+                    ("single_round", r"\b(?:single receptacle|single recp|1\.406|1\.59\d*)\b"),
+                    ("dryer_round", r"\b(?:2\.15|range/dryer)\b"),
+                ):
+                    if re.search(pattern, plate_text, re.I):
+                        openings.add(style)
+                if openings and device_style != "combo" and device_style not in openings:
+                    return "cutout_mismatch"
             elif t_style != c_style:
                 return "cutout_mismatch"
+    if (
+        "Dimmers/Dimming Controls" in str(target.get(TAX_COL, ""))
+        and "Dimmers/Dimming Controls" in str(cand.get(TAX_COL, ""))
+        and re.search(r"\bdimmer\b", _text(target), re.I)
+        and re.search(r"\bdimmer\b", _text(cand), re.I)
+        and not re.search(r"\b(?:companion|remote)\b", _text(target) + " " + _text(cand), re.I)
+    ):
+        return "dimmer_substitute"
+    if re.search(r"\bdvcl-153p\b", _text(target), re.I) and re.search(
+        r"\bpico\b|wireless controller|occupancy|vacancy|sensor switch|\b(?:light|steel) pole\b",
+        _text(cand),
+        re.I,
+    ):
+        return "dimmer_control_mismatch"
     is_t_ss = "Wallplates" in tparts[1:2] and bool(re.search(r"stainless|302ss|\bss\d\b", _text(target), re.I))
     is_c_ss = "Wallplates" in cparts[1:2] and bool(re.search(r"stainless|302ss|\bss\d\b", _text(cand), re.I))
     if tparts[0] == cparts[0] == "Wiring Devices" and not (is_t_ss or is_c_ss) and not any(
@@ -2087,7 +2440,7 @@ def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
                 return "fuse_amps"
 
     # Spa panels and AC disconnects do not take Emergency Service Disconnect labels
-    if re.search(r"\b(?:spa|pool|a/?c disconnect|air conditioning)\b", _text(target), re.I) and re.search(
+    if (is_hvac_disconnect(target) or re.search(r"\b(?:spa|pool)\b", _text(target), re.I)) and re.search(
         r"emergency service disconnect|service disconnect", _text(cand), re.I
     ):
         return "label_mismatch"
@@ -2213,6 +2566,7 @@ def _eligible_candidates(
         for candidate in by_group[group]:
             if (
                 not is_tool_group
+                and not (group in TAXONOMY_RULES and TAXONOMY_RULES[group].verified_fit)
                 and candidate.get(ORDERS_COL, MIN_CANDIDATE_ORDERS) < MIN_CANDIDATE_ORDERS
             ) or "obsolete" in candidate["PRODUCT"].lower():
                 continue
@@ -2482,6 +2836,8 @@ async def run(
     if missing:
         raise ValueError(f"{input_path} is missing columns: {sorted(missing)}")
     source = attach_taxonomy(source.drop_duplicates(subset=ID_COL, keep="first"))
+    curated = load_curated_accessories()
+    validate_curated_accessories(curated, set(source[ID_COL]))
     by_group = _candidate_indexes(source)
     if top_selling:
         source = source.sort_values(by=ORDERS_COL, ascending=False).iloc[top_offset : top_offset + top_selling]
@@ -2491,7 +2847,6 @@ async def run(
         sampled = pool.sample(n=min(sample * 3, len(pool)), random_state=seed)
         valid = [t for t in sampled.to_dict("records") if build_candidates(t, by_group)]
         source = pd.DataFrame(valid[:sample])
-    curated = load_curated_accessories()
     curated_ids = set(curated[OUTPUT_ID_COL])
     if pids_only:
         pending = source[source[ID_COL].isin(pids_only) & ~source[ID_COL].isin(curated_ids)]

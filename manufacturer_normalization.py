@@ -34,9 +34,11 @@ PREFIXES_TO_NORMALIZE = frozenset(
         "VC",
         "PNS",
         "DIO",
+        "MIN",
+        "CAR",
     }
 )
-AUTHORITATIVE_VENDOR_PREFIXES = frozenset({"CUL", "HDN", "POR", "GLA", "VC", "PNS", "DIO", "RAC"})
+AUTHORITATIVE_VENDOR_PREFIXES = frozenset({"CUL", "HDN", "POR", "GLA", "VC", "PNS", "DIO", "RAC", "MIN"})
 DBL_EXCEPTION = re.compile(r"^\s*DBL\s+23\s+CD\b", re.IGNORECASE)
 TEXT_FIELDS = (
     "manufacturer_part_number",
@@ -45,6 +47,66 @@ TEXT_FIELDS = (
     "short_description",
 )
 LIST_FIELDS = ("search_keywords", "common_misspellings")
+
+# Verified model corrections also apply when cached enrichment is reused.
+VERIFIED_METADATA = (
+    (r"^RAC\s+2104\b", {
+        "clean_title": "RACO 2104 1-Inch Squeeze Connector for Flexible Metal Conduit",
+        "normalized_specs": "1 Inch Trade Size, Squeeze Connector, Flexible Metal Conduit",
+        "short_description": "One-inch trade-size squeeze connector for flexible metal conduit; the raw catalog specifies 1 TS.",
+        "search_keywords": '["RACO 2104", "1 inch flex connector", "squeeze connector", "flexible metal conduit"]',
+    }),
+    (r"^CUL\s+52416J\b", {
+        "clean_title": "Cully 52416J 8-32 x 1-Inch Round Head Machine Screw, Slotted/Phillips Zinc",
+        "normalized_specs": "8-32 Thread, 1 Inch Length, Round Head, Slotted/Phillips, Zinc Plated",
+        "short_description": "Eight-32 machine screw with a one-inch length, as specified in the raw catalog description.",
+        "search_keywords": '["Cully 52416J", "8-32 machine screw", "1 inch", "round head", "slotted Phillips"]',
+    }),
+    (r"^ARL\s+38AST\b", {
+        "clean_title": "Arlington 38AST Snap-In AC/MC/FMC Connector, 3/8 Inch Trade Size, 1/2 Inch Knockout",
+        "normalized_specs": "3/8 Inch Trade Size, 1/2 Inch Knockout, Die Cast Zinc, Snap-In, AC/MC/FMC",
+        "short_description": "Snap-in connector for listed AC/MC cable and flexible metal conduit, using a 1/2-inch knockout.",
+        "primary_category": "Fittings", "sub_category": "MC, NMB, Liquidtight, Flex Fittings",
+        "search_keywords": '["Arlington 38AST", "snap-in connector", "AC/MC connector", "FMC connector", "1/2 inch knockout"]',
+    }),
+    (r"^PNS\s+664[- ]?WG\b", {
+        "clean_title": "Pass & Seymour 664-WG White Four-Way Toggle Switch, 15 Amp 120 Volt",
+        "normalized_specs": "15 Amp, 120 Volt, Four-Way, Toggle, White, Grounding Terminals",
+        "short_description": "Four-way toggle switch for multi-location lighting circuits, with grounding terminals.",
+        "search_keywords": '["664-WG", "four-way toggle switch", "4-way switch", "white switch", "15 amp"]',
+    }),
+    (r"^HDN\s+H-164-OSx10PG\b", {
+        "clean_title": "Haydon H-164-OS 13/16 Inch x 1-5/8 Inch Slotted Strut Channel, 10 Foot Pre-Galvanized",
+        "normalized_specs": "13/16 Inch Depth, 1-5/8 Inch Width, 10 Foot Length, 14 Gauge, Slotted, Pre-Galvanized",
+        "short_description": "Shallow 14-gauge H-164-OS channel; select channel nuts listed for H-164.",
+        "search_keywords": '["Haydon H-164-OS", "shallow strut", "13/16 inch channel", "14 gauge", "slotted strut"]',
+    }),
+    (r"^RAC\s+902C\b", {
+        "clean_title": "RACO 902C 4-Inch Square Duplex Receptacle Cover, 1/2-Inch Raised",
+        "normalized_specs": "4 Inch Square, 1/2 Inch Raised Depth, Duplex Receptacle Opening, Galvanized Steel",
+        "short_description": "Raised 4-inch square cover with a duplex receptacle opening; 1/2 inch describes the raised depth.",
+        "search_keywords": '["RACO 902C", "4 inch square cover", "duplex receptacle cover", "1/2 inch raised"]',
+    }),
+    (r"^MIN\s+BST\b", {
+        "clean_title": "Minerallac BST Box Mount Support",
+        "normalized_specs": "Box Mount Support",
+        "short_description": "Minerallac BST electrical box mounting support.",
+        "search_keywords": '["Minerallac BST", "box mount support", "electrical box support"]',
+    }),
+    (r"^CAR\s+VC9982\b", {
+        "clean_title": "Carlon/Kraloy PVC Quick-Set Solvent Cement, 1 Quart",
+        "normalized_specs": "1 Quart, Quick-Set, PVC Solvent Cement",
+        "short_description": "Quick-set PVC solvent cement for compatible PVC conduit and fittings.",
+        "primary_category": "Tools & Meters", "sub_category": "Paint, Chemicals, Cleaning Supplies",
+        "search_keywords": '["PVC solvent cement", "quick-set cement", "Carlon VC9982", "Kraloy CWC20", "quart"]',
+    }),
+    (r"^BPT\s+38ACDS\b", {
+        "primary_category": "Fittings", "sub_category": "MC, NMB, Liquidtight, Flex Fittings",
+    }),
+    (r"^MIN\s+121\b", {
+        "primary_category": "Fittings", "sub_category": "Clips, Clamps, Hangers",
+    }),
+)
 
 
 def _load_prefix_manufacturers(path: str) -> dict[str, str]:
@@ -143,6 +205,7 @@ def normalize_enriched_products(
 
         manufacturer = corrections[code]
         old_brand = str(row.get("brand_manufacturer", "")).strip()
+        brand_pattern = r"(?:L\.H\.\s*)?Dottie" if old_brand.casefold() == "l.h. dottie" else re.escape(old_brand)
 
         if manufacturer.casefold().endswith("generic"):
             generic_labels = {
@@ -211,7 +274,7 @@ def normalize_enriched_products(
                     items = json.loads(value)
                     changed = [
                         re.sub(
-                            re.escape(old_brand),
+                            brand_pattern,
                             manufacturer,
                             str(item),
                             flags=re.IGNORECASE,
@@ -224,7 +287,7 @@ def normalize_enriched_products(
                     normalized.at[index, field] = json.dumps(changed, ensure_ascii=False)
                 elif code in AUTHORITATIVE_VENDOR_PREFIXES or old_brand.casefold() not in raw_product.casefold():
                     normalized.at[index, field] = re.sub(
-                        re.escape(old_brand),
+                        brand_pattern,
                         manufacturer,
                         value,
                         flags=re.IGNORECASE,
@@ -244,6 +307,11 @@ def normalize_enriched_products(
                 )
             normalized.at[index, "clean_title"] = f"{manufacturer} {_clean_text(title)}".strip()
 
+    for pattern, fields in VERIFIED_METADATA:
+        mask = normalized[PRODUCT_COL].str.contains(pattern, regex=True, case=False, na=False)
+        if mask.any():
+            for field, value in fields.items():
+                normalized.loc[mask, field] = value
     return normalized
 
 

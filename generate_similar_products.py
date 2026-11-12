@@ -25,6 +25,9 @@ MIN_ORDERS = 1
 
 logger = logging.getLogger("generate_similar")
 
+# Saw blades for different tool platforms are never substitutes for each other or for non-blade tools
+_BLADE_TYPES = frozenset({"oscillating_blade", "sawzall_blade", "bandsaw_blade"})
+
 
 def _tool_type(text: str) -> str:
     """Identify tool sub-type to keep pliers with pliers, drivers with drivers, etc."""
@@ -32,6 +35,7 @@ def _tool_type(text: str) -> str:
         ("oscillating_blade", r"omt|oscillat|multi-tool blade|starlock|open-lok"),
         ("sawzall_blade", r"sawzall|recip.*blade|the torch|the ax|\btorch\b.*nitrus|nitrus.*carbide|demo demon.*recip|steel demon.*recip|super sawzall"),
         ("bandsaw_blade", r"band ?saw blade|compact.*band saw|deep cut.*band saw"),
+        ("driver_bit", r"power bit|insert bit|driver bit|drive guide|bit holder"),
         ("datacomm_tester", r"tone and probe|scout pro|vdv5|vdv-500|tone.*probe|wiremap|network tester"),
         ("punchdown_tool", r"punchdown|punch down|vdv427|66/110|110 blade|66 blade"),
         ("modular_crimper", r"modular.*crimp|vdv226|pass-thru crimp|compression crimper"),
@@ -251,8 +255,9 @@ def find_similar_products(
             if not re.search(r"\bwr\b|weather[- ]?resistant", c_text, re.I):
                 continue
 
-        if target_tool in {"oscillating_blade", "sawzall_blade"}:
-            if _tool_type(c_text) != target_tool:
+        if "Tools" in target_node:
+            c_tool = _tool_type(c_text)
+            if (target_tool in _BLADE_TYPES or c_tool in _BLADE_TYPES) and c_tool != target_tool:
                 continue
         if "GFCI" in target_node:
             t_dead_front = bool(re.search(r"dead[- ]front", target_text, re.I))

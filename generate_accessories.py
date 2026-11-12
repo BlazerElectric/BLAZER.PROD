@@ -2408,6 +2408,15 @@ def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
         if re.search(r"\b(?:plier|wrench|ratchet|saw|driver system|packout|stripper|crimper|bender|meter|tester|tracer|locator|multimeter|laser|camera|heat gun)\b", _text(cand), re.I):
             return "tool_mismatch"
 
+    # Panel gear (load centers, panelboards, breakers) is never an accessory for commodity fittings, conduit, or fasteners
+    if (
+        tparts[0] in ("Fittings", "Fasteners & Hardware", "Conduit, Strut & Raceways")
+        and cparts[0] == "Power Distribution"
+        and cparts[1:2]
+        and cparts[1] in ("Circuit Breakers", "Load Centers / Panelboards")
+    ):
+        return "panel_gear_mismatch"
+
     # Round/ceiling boxes do not accept rectangular wall switches or receptacles
     if box_kind(target) in ("round_box", "fan_box") and cparts[0] == "Wiring Devices" and cparts[1:2] and cparts[1] in ("Receptacles", "Switches", "Combination Devices", "GFCI Personnel Protection Devices", "Specialty Switches", "Straight Blade 10-20 Amp"):
         return "round_box_device"

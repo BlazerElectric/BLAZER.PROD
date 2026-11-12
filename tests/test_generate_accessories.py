@@ -412,6 +412,21 @@ class HardConflictTests(unittest.TestCase):
         saw = self._row("MIL M18 HACKZALL", "Tools & Meters > Cordless Tools")
         self.assertEqual(hard_conflict(blade, saw), "tool_mismatch")
 
+    def test_panel_gear_is_not_an_accessory_for_fittings_or_conduit(self):
+        from generate_accessories import hard_conflict
+
+        fitting = self._row("RAC 3414 LQTGHT CONNECT 3-1/2 TS STR", "Fittings > MC, NMB, Liquidtight, Flex Fittings")
+        conduit = self._row("CON EMT 3/4-EMT * CONDUIT EMT075", "Conduit, Strut & Raceways > Conduit - EMT")
+        breaker = self._row("Eaton Type BR 100 Amp 2-Pole Circuit Breaker", "Power Distribution > Circuit Breakers")
+        loadcenter = self._row("Eaton BR 100 Amp 20-Space Plug-On Neutral Load Center",
+                               "Power Distribution > Load Centers / Panelboards")
+        for target in (fitting, conduit):
+            for gear in (breaker, loadcenter):
+                with self.subTest(target=target["PRODUCT"], gear=gear["PRODUCT"]):
+                    self.assertEqual(hard_conflict(target, gear), "panel_gear_mismatch")
+        # The legitimate direction (panel gear getting breaker/bar accessories) is unaffected
+        self.assertEqual(hard_conflict(loadcenter, breaker), "")
+
     def test_verified_floor_box_and_lug_accessories_are_not_generic_parts(self):
         from generate_accessories import hard_conflict
 

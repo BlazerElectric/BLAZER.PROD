@@ -117,6 +117,19 @@ class SimilarProductScoringTests(unittest.TestCase):
         sawzall = _row("saw", "MIL NITRUS CARBIDE SAWZALL BLADE", node)
         self.assertEqual(find_similar_products(target, {node: [target, oscillating, sawzall]}, {}), ["omt"])
 
+    def test_driver_bits_do_not_match_saw_blades(self):
+        node = "Tools & Meters > Bits, Blades, Punches, Holesaws"
+        target = _row("target", "MIL 48-32-4805 SQ2 Power Bit", node)
+        insert = _row("insert", "MIL Shockwave Phillips #2 Insert Bit 5-Pack", node)
+        bandsaw = _row("bandsaw", "MIL Compact Band Saw Blade 35-3/8 Inch 18 TPI", node)
+        sawzall = _row("sawzall", "MIL Super Sawzall 6 Inch Reciprocating Saw Blade", node)
+        bandsaw["orders_6m"] = 2000
+        sawzall["orders_6m"] = 2000
+        result = find_similar_products(target, {node: [target, insert, bandsaw, sawzall]}, {})
+        self.assertNotIn("bandsaw", result)
+        self.assertNotIn("sawzall", result)
+        self.assertEqual(result[0], "insert")
+
     def test_renewal_coils_are_not_contactors_or_other_frame_coils(self):
         node = "Control & Automation > Starters & Contactors"
         target = _row("target", "SPS CA7-TD855 24V Renewal Coil", node)

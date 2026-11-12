@@ -1322,6 +1322,21 @@ TAXONOMY_OVERRIDES = (
         ("Lamps, Bulbs & Ballast > Bulbs - LED", "Lamps, Bulbs & Ballast > Bulbs - LED > LED - Tube Type"),
         "Lighting Fixtures, Control > Indoor Lighting",
     ),
+    (
+        r"^arl\s+fr420f\b",
+        ("Control & Automation > Terminal Blocks",),
+        "Boxes & Enclosures > Boxes - Weatherproof",
+    ),
+    (
+        r"\b66 block\b",
+        ("Control & Automation > Terminal Blocks",),
+        "Data & Telecom > Cross Connectors",
+    ),
+    (
+        r"\bvinyl spade\b|\bspade terminal\b",
+        ("Control & Automation > Terminal Blocks",),
+        "Connectors & Crimps > Small Terminals, Forks, Rings",
+    ),
 )
 RANK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "BLAZER.RANK.csv")
 ORDERS_COL = "orders_6m"
@@ -2255,6 +2270,18 @@ def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
         tseries, cseries = breaker_series(target), breaker_series(cand)
         if tseries and cseries and tseries != cseries:
             return "series"
+        # Panel hardware without a detectable series still pairs only within its brand family
+        if not (tseries and cseries):
+            t_is_breaker = "Circuit Breakers" in str(target.get(TAX_COL, ""))
+            c_is_breaker = "Circuit Breakers" in str(cand.get(TAX_COL, ""))
+            t_is_panel = "Load Centers / Panelboards" in str(target.get(TAX_COL, ""))
+            c_is_panel = "Load Centers / Panelboards" in str(cand.get(TAX_COL, ""))
+            if (t_is_breaker and c_is_panel) or (c_is_breaker and t_is_panel):
+                breaker = target if t_is_breaker else cand
+                if not re.search(r"\bclassified\b", _text(breaker), re.I):
+                    t_brand, c_brand = _brand(target), _brand(cand)
+                    if t_brand and c_brand and t_brand != c_brand:
+                        return "panel_brand"
     if tparts[0] == cparts[0] == "Boxes & Enclosures":
         tkind, ckind = box_kind(target), box_kind(cand)
         if tkind and ckind and tkind != ckind:

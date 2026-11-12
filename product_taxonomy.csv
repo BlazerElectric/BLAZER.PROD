@@ -1459,7 +1459,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 150580,Control & Automation,Disconnect Switches,Disconnect Switches,,,7.173,0.007,Control & Automation > Disconnect Switches > Disconnect Switches > Disconnect Switches
 15061,Wiring Devices,Receptacles,Receptacles - Residential,15 Amp,,3.52,0.232,Wiring Devices > Straight Blade 30-60 Amp > Straight Blade Receptacles > 30 Amp Receptacles
 150634,Data & Telecom,Workstation,,,,3.282,0.438,Data & Telecom > Workstation > Furniture Faceplates
-15076,Control & Automation,Terminal Blocks,,,,6.488,0.003,Control & Automation > Terminal Blocks > Terminal Blocks
+15076,Boxes & Enclosures,Boxes - Weatherproof,,,,9.99,3.505,Control & Automation > Terminal Blocks > Terminal Blocks
 150963,Power Distribution,Circuit Breakers,,,,4.462,0.029,Power Distribution > Circuit Breakers > Circuit Breakers Residential > Circuit Breaker Classified > 1-Pole Replacement Breakers
 15107,Fittings,PVC Fittings,,,,6.396,0.32,Fittings > PVC Fittings > PVC Meter Fittings
 15115,Data & Telecom,Workstation,Coaxial & Twinaxial Connectors,F-Connectors,,4.575,0.683,Data & Telecom > Workstation > Coaxial & Twinaxial Connectors > F-Connector Insert
@@ -2608,7 +2608,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 217526,Power Distribution,Circuit Breakers,,,,8.568,0.481,Power Distribution > Circuit Breakers > Circuit Breaker Accessories
 217528,Fittings,"MC, NMB, Liquidtight, Flex Fittings",,,,7.972,0.77,"Fittings > MC, NMB, Liquidtight, Flex Fittings > Liquidtight - Flex > Non-Metallic Straight Connector"
 217632,Boxes & Enclosures,Boxes - Metallic,4 Square Boxes,,,5.436,0.0,Boxes & Enclosures > Boxes - Metallic > 4-11/16 Square Boxes
-217771,Control & Automation,Terminal Blocks,,,,6.488,0.003,Control & Automation > Terminal Blocks > Terminal Blocks
+217771,Data & Telecom,Cross Connectors,,,,9.99,3.505,Control & Automation > Terminal Blocks > Terminal Blocks
 217853,Fittings,EMT Fittings,,,,8.47,1.206,Fittings > EMT Fittings > Steel > Compression Coupling
 217854,Fittings,EMT Fittings,,,,8.47,1.206,Fittings > EMT Fittings > Steel > Compression Coupling
 217865,Fittings,Rigid Fittings,Rigid Steel Fittings,,,8.82,0.404,Fittings > Rigid Fittings
@@ -3889,7 +3889,7 @@ BLAZER ID,Main Category,Subcategory 1,Subcategory 2,Subcategory 3,Subcategory 4,
 2846,Fasteners & Hardware,Screws,Wafer Head,Tek Screw,,6.293,0.193,Fasteners & Hardware > Screws
 284606,Fittings,Rigid Fittings,Rigid Steel Fittings,,,8.82,0.404,Fittings > Rigid Fittings
 284662,Power Distribution,Transformers,,,,5.196,0.306,Power Distribution > Transformers > Control Transformer
-284725,Control & Automation,Terminal Blocks,,,,5.845,0.011,Control & Automation > Terminal Blocks > Terminal Blocks
+284725,Connectors & Crimps,"Small Terminals, Forks, Rings",,,,9.99,4.156,Control & Automation > Terminal Blocks > Terminal Blocks
 284780,"Lighting Fixtures, Control",Outdoor Lighting,,,,6.447,1.702,"Lighting Fixtures, Control"
 284784,"Lighting Fixtures, Control",Indoor Lighting,,,,6.592,0.524,"Lighting Fixtures, Control > Indoor Lighting > LED"
 284785,Data & Telecom,Video & Surveillance Equipment,Camera - Dome,,,5.693,0.409,Data & Telecom > Video & Surveillance Equipment

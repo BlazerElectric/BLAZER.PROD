@@ -348,6 +348,25 @@ class HardConflictTests(unittest.TestCase):
         with patch("generate_accessories._raw_taxonomy_paths", return_value=pd.Series(["Boxes & Enclosures > Boxes - Metallic"])):
             self.assertEqual(_taxonomy_paths(products, "unused").tolist(), ["Boxes & Enclosures > Boxes - Metallic"])
 
+    def test_siding_blocks_and_datacom_blocks_are_not_terminal_blocks(self):
+        from generate_accessories import _taxonomy_paths
+        from unittest.mock import patch
+
+        products = pd.DataFrame([
+            {"BLAZER ID": "siding", "PRODUCT": "ARL FR420F REV STUCCO BOX W/FLG", "clean_title": ""},
+            {"BLAZER ID": "punch", "PRODUCT": "PRE 66M1-50 PREMIER 66 BLOCK 50PR CAT5E W/O COVER", "clean_title": ""},
+            {"BLAZER ID": "spade", "PRODUCT": "NSI S12-10V 12-10 Vinyl Spade #10 Stud", "clean_title": ""},
+            {"BLAZER ID": "block", "PRODUCT": "IDE 89-212 TERMINAL STRIP 12-CIRCUIT", "clean_title": ""},
+        ])
+        node = "Control & Automation > Terminal Blocks"
+        with patch("generate_accessories._raw_taxonomy_paths", return_value=pd.Series([node] * 4)):
+            self.assertEqual(_taxonomy_paths(products, "unused").tolist(), [
+                "Boxes & Enclosures > Boxes - Weatherproof",
+                "Data & Telecom > Cross Connectors",
+                "Connectors & Crimps > Small Terminals, Forks, Rings",
+                node,
+            ])
+
     def test_mapper_does_not_reclassify_mc_clips_as_cable(self):
         import contextlib
         import io
@@ -426,6 +445,22 @@ class HardConflictTests(unittest.TestCase):
                     self.assertEqual(hard_conflict(target, gear), "panel_gear_mismatch")
         # The legitimate direction (panel gear getting breaker/bar accessories) is unaffected
         self.assertEqual(hard_conflict(loadcenter, breaker), "")
+
+    def test_panel_hardware_without_series_requires_matching_brand(self):
+        from generate_accessories import hard_conflict
+
+        siemens_breaker = self._row("Siemens Q120 20 Amp Single Pole Circuit Breaker",
+                                    "Power Distribution > Circuit Breakers")
+        siemens_breaker["brand_manufacturer"] = "siemens industry, inc."
+        eaton_breaker = self._row("Eaton Type BR120 20 Amp Circuit Breaker",
+                                  "Power Distribution > Circuit Breakers")
+        eaton_breaker["brand_manufacturer"] = "eaton"
+        ground_bar = self._row("GBK10 Ground Bar Kit - 10 Terminal",
+                               "Power Distribution > Load Centers / Panelboards")
+        ground_bar["brand_manufacturer"] = "eaton"
+        self.assertEqual(hard_conflict(siemens_breaker, ground_bar), "panel_brand")
+        self.assertEqual(hard_conflict(ground_bar, siemens_breaker), "panel_brand")
+        self.assertEqual(hard_conflict(eaton_breaker, ground_bar), "")
 
     def test_verified_floor_box_and_lug_accessories_are_not_generic_parts(self):
         from generate_accessories import hard_conflict

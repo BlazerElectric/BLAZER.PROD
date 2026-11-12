@@ -16,6 +16,8 @@ from collections import Counter
 
 import pandas as pd
 
+import generate_accessories as ga
+
 ID_COL = "BLAZER ID"
 LEVELS = ["Main Category", "Subcategory 1", "Subcategory 2", "Subcategory 3", "Subcategory 4"]
 _TOKEN = re.compile(r"[a-z0-9]+")
@@ -100,6 +102,15 @@ def main() -> None:
         matches = best_matches(row, paths, documents, idf)
         best_score, best_path = matches[0] if matches else (0.0, ())
         second_score = matches[1][0] if len(matches) > 1 else 0.0
+
+        current_node = " > ".join(best_path[:2])
+        text = (str(row.get("PRODUCT", "")) + " " + str(row.get("clean_title", ""))).lower()
+        for pattern, from_nodes, to_node in ga.TAXONOMY_OVERRIDES:
+            if (not from_nodes or current_node in from_nodes) and re.search(pattern, text, re.I):
+                best_path = tuple(p.strip() for p in to_node.split(">"))
+                best_score = 9.99
+                break
+
         rows.append(
             {
                 ID_COL: row[ID_COL],

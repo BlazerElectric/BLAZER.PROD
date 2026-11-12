@@ -258,6 +258,33 @@ class HardConflictTests(unittest.TestCase):
         plate = self._row("PNS TP8-W 1 Gang WALLPLATE WHITE", "Wiring Devices > Wallplates")
         self.assertEqual(hard_conflict(box, plate), "gang")
 
+        # 1-gang device rejects 4-gang box
+        recp_1g = self._row("PNS 3232-I 15A DUPLEX RECEPTACLE", "Wiring Devices > Receptacles")
+        box_4g = self._row("ALL P-764B 74.8 CI 4G DVC BOX", "Boxes & Enclosures > Boxes - Non-Metallic")
+        self.assertEqual(hard_conflict(recp_1g, box_4g), "gang")
+
+    def test_cutout_mismatch_is_dropped(self):
+        from generate_accessories import hard_conflict
+
+        duplex_recp = self._row("PNS 3232-I 15A IVORY RESI DUPLEX RECEPTACLE", "Wiring Devices > Receptacles")
+        single_round_plate = self._row("PNS TP7-I 1G SINGLE RECEPTACLE PLATE 1.406", "Wiring Devices > Wallplates")
+        toggle_plate = self._row("PNS TP1-I 1G TOGGLE SWITCH PLATE", "Wiring Devices > Wallplates")
+        duplex_plate = self._row("PNS TP8-I 1G DUPLEX RECEPTACLE PLATE", "Wiring Devices > Wallplates")
+
+        self.assertEqual(hard_conflict(duplex_recp, single_round_plate), "cutout_mismatch")
+        self.assertEqual(hard_conflict(duplex_recp, toggle_plate), "cutout_mismatch")
+        self.assertEqual(hard_conflict(duplex_recp, duplex_plate), "")
+
+    def test_commodity_wiring_device_rejects_heavy_tools(self):
+        from generate_accessories import hard_conflict
+
+        recp = self._row("PNS 3232-I 15A RESI DUPLEX RECEPTACLE", "Wiring Devices > Receptacles")
+        stripper = self._row("KLE K1412 KURVED ROMEX WIRE STRIPPER", "Tools & Meters > Hand Tools")
+        meter = self._row("KLE RT210 GFCI RECEPTACLE TESTER", "Tools & Meters > Meters - Test Equipment - Calculators")
+
+        self.assertEqual(hard_conflict(recp, stripper), "tool_mismatch")
+        self.assertEqual(hard_conflict(recp, meter), "tool_mismatch")
+
     def test_conduit_material_and_size_conflicts(self):
         from generate_accessories import hard_conflict
 
@@ -277,6 +304,27 @@ class HardConflictTests(unittest.TestCase):
         plug = self._row("HUB PLUG BLACK", "Wiring Devices > Straight Blade 10-20 Amp")
         self.assertEqual(hard_conflict(gfci, switch), "color")
         self.assertEqual(hard_conflict(gfci, plug), "")
+
+    def test_spa_panel_rejects_emergency_service_disconnect_label(self):
+        from generate_accessories import hard_conflict
+
+        spa = self._row("Eaton 60A Spa Panel GFCI", "Power Distribution > Safety Switches / Disconnects")
+        label = self._row("Emergency Service Disconnect Label", "Tools & Meters > Marking & Labeling")
+        self.assertEqual(hard_conflict(spa, label), "label_mismatch")
+
+    def test_fuse_class_voltage_and_amp_conflicts(self):
+        from generate_accessories import hard_conflict
+
+        fuse_70a_600v = self._row("Mersen AJT 70 Amp 600 Volt Class J Fuse", "Fuses & Accessories > Power Fuses")
+        reducer_class_r = self._row("Bussmann 60-100A 600V Class R Fuse Reducer", "Fuses & Accessories > Fuse Blocks, Holders & Accessories")
+        block_class_cc = self._row("Ferraz Shawmut 600V 30A Class CC Fuse Block", "Fuses & Accessories > Fuse Blocks, Holders & Accessories")
+        reducer_250v = self._row("Bussmann 250V 30A Fuse Reducer", "Fuses & Accessories > Fuse Blocks, Holders & Accessories")
+        puller = self._row("Ferraz Shawmut Plastic Fuse Puller", "Fuses & Accessories > Fuse Blocks, Holders & Accessories")
+
+        self.assertEqual(hard_conflict(fuse_70a_600v, reducer_class_r), "fuse_class")
+        self.assertEqual(hard_conflict(fuse_70a_600v, block_class_cc), "fuse_class")
+        self.assertEqual(hard_conflict(fuse_70a_600v, reducer_250v), "fuse_voltage")
+        self.assertEqual(hard_conflict(fuse_70a_600v, puller), "")
 
 
 class TopUpTests(unittest.TestCase):

@@ -2,6 +2,25 @@
 
 Recommendation and catalog enrichment engine for electrical wholesale e-commerce.
 
+## Setup
+
+Install the Python dependencies with:
+```sh
+python3 -m pip install -r requirements.txt
+```
+
+`enrich_catalog.py` and Gemini-backed accessory generation require `GEMINI_API_KEY` in the environment or a local `.env` file. Keep API keys out of Git. Taxonomy mapping, similarity generation, auditing, and JSON export are deterministic and do not require the key.
+
+For optional per-script command-line arguments, run the script with `--help`.
+
+### Checkpoint and Export Safety
+
+The canonical `enriched_products.checkpoint.csv`, `product_accessories.csv`, and `similar_products.csv` are tracked in Git as recovery data. Commit and push updated copies after a catalog refresh. Other checkpoints and sample files remain Git-ignored, including the default `product_accessories.v6.checkpoint.csv`; back up any other checkpoint you rely on separately.
+
+If a checkpoint is missing, Gemini-backed commands stop before making API calls. Restore the matching checkpoint or pass `--allow-new-checkpoint` to deliberately start a new one. Starting over may regenerate many products and incur Gemini costs; for `--sample` and `--top-selling`, the separate sample checkpoint also requires this option on its first run.
+
+The JSON exporter requires both carousel CSVs by default. Restore or regenerate missing files before exporting. Use `--allow-partial` only for an intentional partial export: missing carousel files will produce empty recommendation arrays and a warning. The audit's automatic export uses the strict default.
+
 ## Dual-Carousel Architecture
 
 The storefront recommendation engine uses two distinct, complementary carousels:
@@ -10,18 +29,17 @@ The storefront recommendation engine uses two distinct, complementary carousels:
    - **Purpose:** Surfaces what an electrician physically needs to install and complete the assembly on the job. Includes mating connectors, rough-in boxes, covers, mounting hardware, fasteners, grounding electrodes, wire, and installation consumables.
    - **Engine:** `generate_accessories.py` powered by `accessory_rules.csv`, `job_kits.csv`, and Google Gemini (`gemini-3.1-flash-lite`).
    - **Format:** `PROD_ID`, `PROD_ID_REL1` through `PROD_ID_REL10`.
-   - **Ordering Principle:** Strictly ordered by installation workflow:
-     * **Slot 1 (`REL1`):** Direct mating part or required electrical connection (e.g. mating plug/receptacle, lamp, conduit connector, fuse, ground rod).
-     * **Slot 2 (`REL2`):** Mounting hardware, rough-in box, or enclosure.
-     * **Slot 3 (`REL3`):** Wire, cable, straps, or fasteners to route and secure the assembly.
-     * **Slots 4–10 (`REL4`–`REL10`):** Finishing plates, safety tags/labels, anti-oxidant, tape, wire nuts.
+   - **Ordering Principle:** Hybrid popularity-weighted installation workflow:
+     * **Slots 1–3 (`REL1`–`REL3`):** High-demand core installation essentials (e.g. top-selling matching connectors, couplings, matching wallplates, primary mounting rough-in boxes/enclosures, or mating plugs). Proven high-volume workhorses take priority over obscure low-demand mating parts.
+     * **Slots 4–7 (`REL4`–`REL7`):** High-utility installation complements and routing/securing hardware (e.g. conduit straps, hangers, fittings, wire, cable, mud rings, grounding pigtails, clamps).
+     * **Slots 8–10 (`REL8`–`REL10`):** Finishing items, trade consumables, and staples (e.g. locknuts, electrical tape, wire nuts, pulling lube, covers, labels, duct seal).
 
 2. **Carousel 2: Similar & Alternative Products (`similar_products.csv`)**
    - **Purpose:** Surfaces direct substitutes, sibling ratings, alternative sizes, and color variants (e.g. 15A vs 20A breaker, 12/2 vs 12/3 MC cable, White vs Gray receptacle, 3/4" vs 1" conduit body).
-   - **Engine:** `generate_similar_products.py` (100% deterministic, 0 API tokens, ~30s execution).
+   - **Engine:** `generate_similar_products.py` (100% deterministic, 0 API tokens).
    - **Format:** `PROD_ID`, `SIMILAR_ID_1` through `SIMILAR_ID_10`.
    - **Ordering Principle:** Scored by compatibility dimensions (exact series match, tool sub-type, fixture sub-type, brand, color/finish, wire construction), then sorted descending by:
-     $$\text{Compatibility Score} \longrightarrow \text{6-Month Sales Volume} \longrightarrow \text{Product ID}$$
+     Compatibility dimensions include series, ratings, phase/pole, trade size, tool or fixture subtype, color/finish, and cable or conduit construction. Ties are broken by 6-month sales volume and product ID.
      Slot 1 (`SIMILAR_ID_1`) is always the #1 closest matching, highest-selling alternative.
 
 ---
@@ -52,6 +70,16 @@ python -m unittest discover tests
 
 ---
 
+## Website Taxonomy Mapping (`map_taxonomy.py`)
+
+```sh
+python3 map_taxonomy.py
+```
+
+Maps enriched product descriptions to paths in `CATEGORY.csv` using IDF-weighted token overlap, then applies explicit product-pattern overrides from `generate_accessories.py`. Writes the best taxonomy path, confidence information, and runner-up to `product_taxonomy.csv` without API calls. The web JSON currently takes its `category` and `subcategory` fields from `enriched_products.csv`; it does not merge the deeper paths in `product_taxonomy.csv`.
+
+---
+
 ## Carousel 1 Workflow (`generate_accessories.py`)
 
 ### 1. Preview Candidate Pools (Zero API Cost)
@@ -63,20 +91,28 @@ Reports candidate pool health, identifies thin or zero pools, and displays top c
 ### 2. Taxonomy Rules & Subcategory Interleaving
 * Rules live in `accessory_rules.csv`. Each row maps a target `Main Category > Subcategory 1` to an accessory node.
 * **Bidirectional Relationships:** Key trade relationships are wired bidirectionally (Boxes $\leftrightarrow$ Devices, Disconnects $\leftrightarrow$ Emergency Warning Labels, Conduit $\leftrightarrow$ Fittings, Strut $\leftrightarrow$ Threaded Rod, Solar Wire $\leftrightarrow$ MC4 Connectors, Fuses $\leftrightarrow$ Disconnects).
-* **Always-Interleaved Balancing:** `build_candidates()` round-robins across distinct subcategories before presenting candidates to Gemini, preventing a single category (e.g. bare copper wire) from dominating the top candidate slots.
+* **Subcategory Interleaving:** Candidate pools are interleaved across distinct subcategories, with subcategories ordered by their strongest sales volume, so one subcategory cannot dominate the early candidate slots.
 * **Capacity:** `MIN_SUGGESTIONS = 10` and `FALLBACK_FILL = 12` ensure carousels are populated up to 10 items. If Gemini returns 5–7 items, balanced subcategory top-up seamlessly completes slots 8–10 from the candidate pool.
 
 ### 3. Testing with a Sample
 ```sh
-python generate_accessories.py --sample 20 --seed 42
+python generate_accessories.py --sample 20 --seed 42 --allow-new-checkpoint
 ```
 Samples 20 active products, calls Gemini, and writes output to `product_accessories.sample.csv` with a dedicated sample checkpoint.
+
+Other targeted options:
+```sh
+python generate_accessories.py --dry-run
+python generate_accessories.py --top-selling 100 --top-offset 50 --allow-new-checkpoint
+python generate_accessories.py --rebuild-rules
+```
+`--dry-run` previews candidate eligibility without API calls or output writes. `--top-selling` processes the top N products by order volume; `--top-offset` selects a later slice. `--rebuild-rules` reprocesses products affected by rules 560–879.
 
 ### 4. Full Catalog Generation
 ```sh
 python generate_accessories.py
 ```
-Generates all 8,477 products into `product_accessories.csv` using checkpointing (`product_accessories.v5.checkpoint.csv`). Automatically resumes if interrupted.
+Generates all 8,477 products into `product_accessories.csv` using checkpointing (`product_accessories.v6.checkpoint.csv`). Automatically resumes if interrupted.
 
 ---
 
@@ -94,40 +130,96 @@ python generate_similar_products.py \
 * Enforces breaker series compatibility (Eaton BR with BR, Homeline with Homeline).
 * Keeps tool sub-types aligned (screwdrivers with screwdrivers, strippers with strippers).
 * Separates heavy-duty wiring devices (dryer/range 30A/50A) from standard 15A duplex receptacles.
-* Aligns wire construction (Romex with Romex, THHN with THHN, Aluminum with Aluminum).
+* Checks compatibility across product ratings and construction details, including wire type, voltage, phase/pole count, trade size, and conduit schedule.
 * Ranks results by 6-month sales order volume.
+* Runtime varies by environment; the current 8,477-product catalog takes about 2 minutes.
 
 ---
 
 ## Rule Diagnostics & Quality Tools
 
+* `audit_and_fix_accessories.py`: Deterministic catalog-wide quality audit and fixer (0 API cost; runtime varies by environment):
+  - Preserves all 57+ locked hero packages in `curated_accessories.csv`.
+  - Guarantees 100% full 10/10 slot capacity across all 8,477 catalog items (0 short rows).
+  - Enforces trade sanity guardrails:
+    * Cutout style compatibility: Duplex vs Toggle vs Decora vs Single Round vs 2.15" Range/Dryer vs Blank.
+    * Multi-gang limits (blocks multi-gang 3G/4G boxes on 1G devices).
+    * Eliminates tool mismatches (no heavy strippers, crimpers, meters, or power tools on small commodity wiring devices, fasteners, or small hardware).
+    * Box redundancy cap (maximum 2 rough-in boxes per wiring device).
+    * Wire nut deduplication (maximum 1 standard twist-on nut per carousel).
+    * Optical fiber mode barriers (Single-Mode 9/125 vs Multimode 50/125 & 62.5/125).
+    * Network switch vs wall switch disambiguation.
+    * Surveillance hard drive vs tool storage disambiguation.
+  - Automatically triggers `export_web_catalog.py` as its final step to keep the storefront JSON synchronized.
+* `export_web_catalog.py`: Exports `products.csv`, `enriched_products.csv`, `BLAZER.RANK.csv`, `product_accessories.csv`, and `similar_products.csv` to the storefront master JSON (0 API cost). The JSON's category and subcategory fields come from `enriched_products.csv`.
 * `check_pools.py`: Audits candidate pools for gang, color, trade size, and saturation conflicts.
-* `job_kits.csv`: Defines multi-trade assembly scenarios (EV charger, Service upgrade, Hot tub, Rough-in).
-* `tests/`: Unit test suite covering prefix normalization, trade size extraction, and conflict detection. Run via:
+* `job_kits.csv`: Defines multi-trade assembly scenarios (EV charger, Service upgrade, Hot tub, Rough-in, Network/Data install).
+* `tests/`: Unit tests covering manufacturer normalization, accessory rules and audit behavior, similar-product scoring, and web catalog export. Run via:
   ```sh
   python -m unittest discover tests
   ```
 
 ---
 
-## Future Updates: Adding New Products or Dropping Discontinued SKUs
+## Web Catalog JSON Export (`export_web_catalog.py`)
 
-When receiving a new `products.csv` or updated `BLAZER.RANK.csv`, run this 5-step sequence:
+`export_web_catalog.py` compiles the entire product catalog into a high-performance, minified master JSON file named `blazer_web_catalog.json`.
+
+### Single Source of Truth Data Bridge
+This file serves as the unified data bridge between the data processing pipeline in this repository and our **Vercel-hosted frontend ordering app**. The frontend consumes `blazer_web_catalog.json` directly to drive instant search, product detail pages, and dual recommendation carousels without database latency or runtime external API dependencies.
+
+### Merged Data Sources & Mapping Logic
+The export pipeline stitches together five distinct datasets across all 8,477 catalog products:
+* **`products.csv`**: Source of truth for product descriptions. Extracts `BLAZER ID` (SKU) and maps the exact `PRODUCT` description string to the primary `title` property so electricians see the exact catalog descriptions they know.
+* **`enriched_products.csv`**: Extracts `brand_manufacturer` (`brand`), `manufacturer_part_number` (`mpn`), `primary_category` (`category`), `sub_category` (`subcategory`), `normalized_specs` (`specs`), and JSON-parsed string arrays for `search_keywords` and `common_misspellings`.
+* **`BLAZER.RANK.csv`**: Popularity rankings derived from 6-month sales order volume. Products are ranked so lower numbers equal higher sales rank (#1 is top seller). Unranked products fall back to `999999`.
+* **`product_accessories.csv`**: Preserves the strict 1-to-10 complementary installation accessory tiers (`PROD_ID_REL1` through `PROD_ID_REL10`) into an `accessories` array per product.
+* **`similar_products.csv`**: Extracts the top alternative and direct substitute products (`SIMILAR_ID_1` through `SIMILAR_ID_10`) into a `similar` array per product.
+
+### Manual Execution
+To manually regenerate `blazer_web_catalog.json` at any time:
+```sh
+python export_web_catalog.py
+```
+
+Options:
+* `--products`: Custom path to `products.csv` (default: `products.csv`)
+* `--enriched`: Custom path to `enriched_products.csv` (default: `enriched_products.csv`)
+* `--rank`: Custom path to `BLAZER.RANK.csv` (default: `BLAZER.RANK.csv`)
+* `--accessories`: Custom path to `product_accessories.csv` (default: `product_accessories.csv`)
+* `--similar`: Custom path to `similar_products.csv` (default: `similar_products.csv`)
+* `--output`: Output destination (default: `blazer_web_catalog.json`)
+* `--pretty`: Output human-readable indented JSON instead of minified JSON
+* `--allow-partial`: Allow missing carousel CSVs, with a warning and empty arrays for missing recommendations.
+
+Execution completes in under 1 second with 0 external API calls.
+
+---
+
+## Catalog Refresh Workflow
+
+When `products.csv` or `BLAZER.RANK.csv` changes, run this sequence:
 
 ```sh
-# 1. Enrich only the new SKUs (existing products load from checkpoint in seconds)
+# 1. Enrich new SKUs (successful rows are reused from the checkpoint)
 python3 enrich_catalog.py
 
-# 2. Automatically map website categories (runs locally in ~2 seconds, 0 API cost)
+# 2. Map website taxonomy, including deeper paths used by similar-product scoring
 python3 map_taxonomy.py
 
-# 3. Regenerate Similar Products (Carousel 2, runs locally in ~45s, 0 API cost)
+# 3. Regenerate Similar Products (Carousel 2, deterministic and 0 API cost)
+# The current 8,477-product catalog takes about 2 minutes; runtime varies by environment.
 python3 generate_similar_products.py
 
 # 4. Generate Accessories (Carousel 1, processes only new SKUs using checkpoint)
 python3 generate_accessories.py --checkpoint product_accessories.csv
 
 # 5. Deterministic Quality Audit & Fill (0 API cost, guarantees 10/10 slots & preserves curated items)
+# Automatically triggers export_web_catalog.py upon completion
 python3 audit_and_fix_accessories.py
+
+# 6. (Optional) Standalone Web Catalog Export
+# Step 5 runs this automatically, but it can be rerun manually at any time:
+python3 export_web_catalog.py
 ```
 

@@ -51,7 +51,7 @@ Network / data install,rack or cabinet,Data & Telecom > Cabinets,rack|cabinet|en
 Network / data install,patch panel,Data & Telecom,patch panel|keystone panel,3
 Network / data install,voice data cable,,\bcat.?[56]|\butp\b|ethernet,3
 Network / data install,keystone / jack,Data & Telecom,keystone|\bjack\b|RJ.?45,3
-Network / data install,low voltage plate,Data & Telecom,faceplate|wall.?plate|frame|\bplate\b|surface mount box,3
+Network / data install,low voltage plate,,faceplate|wall.?plate|frame|\bplate\b|surface mount box|low voltage.*bracket|\blv[1-4]\b|\blvn[1-4]\b,3
 Network / data install,cable management,Fasteners & Hardware > Cable Management,.,3
 Network / data install,patch cords,Data & Telecom,patch cord|patch cable|\bcat.?[56]e?\b.*(ft|'|foot),3
 Network / data install,firestop,,fire.?stop|putty|caulk,2
@@ -123,7 +123,7 @@ Fire alarm install,fire alarm devices,Fire Alarm,horn|strobe|pull station|detect
 Fire alarm install,FPL cable,Wire,\bFPLP?\b|fire alarm,2
 Fire alarm install,back box,Boxes & Enclosures,4.?sq|1900|\bring\b|plate|\bbox\b,2
 Fire alarm install,firestop,,fire.?stop|putty|caulk|intumescent|pillow,1
-Fire alarm install,labels,,label|marker|tag,1
+Fire alarm install,labels,,label|marker|\btag\b,1
 Fire alarm install,power supply / battery,,power supply|battery|12V|24V|NAC,2
 Floor box / data power,floor box,Boxes & Enclosures,floor box|floor,3
 Floor box / data power,receptacle,Wiring Devices,duplex|receptacle|recp|rcpt,1
@@ -153,7 +153,7 @@ Strut / hanger run,threaded rod,Fasteners,threaded rod|all.?thread|rod,2
 Strut / hanger run,spring nuts / hex hardware,Fasteners,spring nut|channel nut|hex nut|\bbolt\b|washer,3
 Strut / hanger run,pipe/conduit clamps,,clamp|strap|pipe hanger|one.?hole|two.?hole|beam clamp,3
 Strut / hanger run,anchors,Fasteners,anchor|tapcon|wedge|drop.?in|lag|toggle|strike,2
-Strut / hanger run,hand tools,Tools & Meters,strut|channel|cutter|hacksaw|bolt|saw,1
+Strut / hanger run,hand tools,Tools & Meters,strut cutter|strut shear|hacksaw|band ?saw|bolt cutter,1
 Wireway / cable tray,wireway,"Conduit, Strut & Raceways > Wire Duct",wireway|trough|gutter|lay.?in,2
 Wireway / cable tray,wireway fittings,"Conduit, Strut & Raceways > Wire Duct",elbow|connector|coupling|cover|hanger|end cap|tee|flange|nipple,3
 Wireway / cable tray,cable tray,Data & Telecom > Cable Tray,.,2
@@ -173,7 +173,7 @@ Power distribution,fuses and holders,Fuses,fuse|holder|block,2
 Power distribution,lugs and splices,Connectors & Crimps,lug|split bolt|compression|crimp|splice|terminal,3
 Power distribution,feeder wire,Wire,THHN|THWN|XHHW|\bTHHN\b|\bCU\b.*\b(1/0|2/0|3/0|4/0|250|350|500)\b,2
 Power distribution,conduit and fittings,Fittings,RGS|rigid|\bGRC\b|\bEMT\b|conduit|hub|locknut|bushing|nipple,2
-Power distribution,labels / lockout,,label|lockout|arc flash|tag|danger|warning,1
+Power distribution,labels / lockout,,label|lockout|arc flash|\btag\b|danger|warning,1
 Security / camera install,camera,Data & Telecom > Video & Surveillance,camera|dome|bullet|fisheye|PTZ|turret|\bFD\d|\bMS\d|\bIB\d,3
 Security / camera install,NVR / recorder,Data & Telecom > Video & Surveillance,NVR|recorder|DVR|hard drive|\bHDD\b|\bND\d,2
 Security / camera install,mount / bracket,Data & Telecom > Video & Surveillance,mount|bracket|adapter|gooseneck|pendant|\bAM-|junction,3

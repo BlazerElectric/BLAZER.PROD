@@ -3,7 +3,7 @@
 Usage:
     python generate_accessories.py [--input enriched_products.csv]
         [--output product_accessories.csv]
-        [--checkpoint product_accessories.v3.checkpoint.csv]
+        [--checkpoint product_accessories.v6.checkpoint.csv]
 
 Requires GEMINI_API_KEY in the environment or a .env file. Successful rows are
 checkpointed every 100 products so an interrupted run can be resumed.
@@ -35,6 +35,8 @@ from tenacity import (
 )
 from tqdm.asyncio import tqdm
 
+from checkpoint_safety import require_checkpoint
+
 MODEL = "gemini-3.1-flash-lite"
 CONCURRENCY = 12
 CHECKPOINT_EVERY = 100
@@ -52,7 +54,7 @@ REQUIRED_COLUMNS = {
     "sub_category",
 }
 MAX_CANDIDATES = 150
-CHECKPOINT_VERSION = "v5"
+CHECKPOINT_VERSION = "v6"
 SIZE_MATCHED_GROUPS = frozenset({"conduit", "conduit_fittings", "weatherheads"})
 # Candidates without a parseable size are dropped in these groups.
 STRICT_SIZE_GROUPS = frozenset({"conduit_fittings"})
@@ -372,17 +374,21 @@ termination, or installation consumables. Do not select direct substitutes,
 another color/brand/size version of the target, unrelated products, or items
 that merely belong to the same broad category. Use only IDs in the candidate
 list. Select diverse accessories (e.g. choose at most one size/variant of a
-ground bar, enclosure, or connector rather than multiple sizes of the same part)
+ground bar, enclosure, or connector, and at most one tester or meter, rather than multiple models of the same part)
 so the customer sees a well-rounded installation package. It is valid to return an empty list when no candidate is clearly
 compatible. If the target lists install_jobs, favor candidates an electrician
 would need for the same job. Consider the target's size, material, voltage, wiring method, and
 other specifications before selecting an accessory.
 
-Order selected candidate IDs by installation priority (from first needed to finishing):
-1st: Direct mating part or required electrical connection (e.g. mating plug/receptacle, matching bulb, conduit connector, fuse, ground rod).
-2nd: Mounting hardware, rough-in box, or enclosure.
-3rd: Wire, cable, straps, or fasteners to secure and connect the assembly.
-4th: Finishing, weatherproofing, labels, or consumables (e.g. wallplate, tape, joint compound/deox, wire nuts).
+Each candidate includes its recent order volume ("popularity"). Strongly prefer candidates
+with proven high sales volume over low-volume or obscure SKUs. Never pick a rarely bought SKU
+when a high-volume trade staple serves the job.
+
+Order selected candidate IDs (Slots 1 to 10) balancing installation necessity with popularity:
+- Slots 1-3: The most critical, high-demand core installation essentials that electricians routinely buy to install this item (e.g. top-selling connectors, couplings, matching wallplates, primary mounting rough-in boxes/enclosures, or mating plugs). For fuses, prioritize the core equipment they are installed into (matching fusible safety switches, fused disconnect switches, fuse blocks, or fuse holders). Do NOT force low-volume or niche items into slots 1-3 just because they are technically a mating part; favor proven, high-order workhorses.
+- Slots 4-7: High-utility installation complements and routing/securing hardware (e.g. conduit straps, hangers, fittings, wire, cable, mud rings, grounding pigtails, clamps, fuse pullers, lockout/tagout devices).
+- Slots 8-10: Practical finishing items, trade consumables, and staples (e.g. locknuts, electrical tape, wire nuts, pulling lube, covers, labels, duct seal, continuity/voltage testers).
+Within each group, prioritize higher popularity candidates.
 """
 
 
@@ -487,7 +493,7 @@ TAXONOMY_OVERRIDES = (
         "Wire, Cable & Cord > Building Wire",
     ),
     (
-        r"\b(?:jack|keystone|patch panel)\b",
+        r"^(?!.*(?:lamp|bulb|ex39|mogul|g24|t8|t5)).*\b(?:jack|keystone|patch panel)\b",
         ("Lighting Fixtures, Control > Bulbs - LED", "Lamps, Bulbs & Ballast > Bulbs - LED"),
         "Data & Telecom > Workstation",
     ),
@@ -507,7 +513,7 @@ TAXONOMY_OVERRIDES = (
         "Fire Alarm, Safety, Security > Doorbell Camera",
     ),
     (
-        r"\b(?:40ast|ast)\b|\bconduit connector\b|flexible metal conduit connector|connector for flexible metal|squeeze connector",
+        r"^(?!.*con\s+(?:emt|imc|rigid|grc)\s+.*conduit).*(?:\b(?:40ast|ast)\b|\bconduit connector\b|flexible metal conduit connector|connector for flexible metal|squeeze connector)",
         ("Conduit, Strut & Raceways > Conduit - Metallic", "Conduit, Strut & Raceways > Conduit - Flexible"),
         "Fittings > MC, NMB, Liquidtight, Flex Fittings",
     ),
@@ -537,12 +543,13 @@ TAXONOMY_OVERRIDES = (
         "Tools & Meters > Bits, Blades, Punches, Holesaws",
     ),
     (
-        r"screw cover.*(?:enclosure|box|pull box)|nema 1.*screw cover|nema 3r.*screw cover|n1.*screw cover",
+        r"screw cover.*(?:enclosure|box|pull box)|nema 1.*screw cover|nema 3r.*screw cover|n1.*screw cover|rsc\d+",
         (
             "Boxes & Enclosures > FS & FD Devices",
             "Boxes & Enclosures > Boxes - Non-Metallic",
             "Data & Telecom > Audio Video Equipment",
             "Boxes & Enclosures > Underground Pull Boxes",
+            "Fasteners & Hardware > Screws",
         ),
         "Boxes & Enclosures > Enclosures - Commercial Type",
     ),
@@ -1042,8 +1049,32 @@ TAXONOMY_OVERRIDES = (
         r"modular crimp|vdv226|punchdown|punch down|scout.*tester|vdv\d{3}",
         (
             "Tools & Meters > Hand Tools",
+            "Tools & Meters > Datacomm Tools",
         ),
         "Data & Telecom > Tools",
+    ),
+    (
+        r"low voltage.*(?:bracket|mounting plate|mounting frame|device)|\blv[1-4]\b|\blvn[1-4]\b",
+        (
+            "Data & Telecom > Low Voltage Cable",
+            "Boxes & Enclosures > Boxes - Non-Metallic",
+        ),
+        "Caddy > Datacom/Low Voltage",
+    ),
+    (
+        r"access control.*cable|composite.*cable",
+        ("Data & Telecom > Workstation",),
+        "Data & Telecom > Low Voltage Cable",
+    ),
+    (
+        r"\b(?:24t8|36t8|48t8|96t8)\b|\bt8.*(?:hybrid|bypass|duoconnect|linear tube|led lamp)\b",
+        (
+            "Lamps, Bulbs & Ballast > Bulbs - LED > LED - Traditional > Lamps - A-type",
+            "Lamps, Bulbs & Ballast > Bulbs - LED",
+            "Lighting Fixtures, Control > Indoor Lighting > LED",
+            "Lighting Fixtures, Control > Indoor Lighting",
+        ),
+        "Lamps, Bulbs & Ballast > Bulbs - LED > LED - Tube Type",
     ),
     (
         r"s384-c|range/dryer plate|flush range dryer plate|tp703|ss703|p703w",
@@ -1051,6 +1082,180 @@ TAXONOMY_OVERRIDES = (
             "Boxes & Enclosures > Boxes - Non-Metallic",
         ),
         "Wiring Devices > Wallplates",
+    ),
+    (
+        r"lever[- ]nut|wago.*221|\b221[- ](?:41[235]|61[235]|2401)",
+        (
+            "Control & Automation > Terminal Blocks",
+            "Wiring Devices > Terminal Blocks & Connectors",
+        ),
+        "Connectors & Crimps > Wire Connectors",
+    ),
+    (
+        r"weatherhead|service entrance cap|service cap",
+        ("Wire, Cable & Cord > Service Wire", "Fittings > PVC Fittings"),
+        "Fittings > Flashings, Weatherhead",
+    ),
+    (
+        r"glass.*fuse|fuse.*glass|\bagc[- ]?\d|\bagx\b|\bagc\b|\bmdl\b",
+        ("Tools & Meters > Paint, Chemicals, Cleaning Supplies",),
+        "Fuses & Accessories > General Purpose Fuses",
+    ),
+    (
+        r"blank.*(?:wall\s*plate|wallplate|box mount|switch plate)|(?:wall\s*plate|wallplate).*blank",
+        ("Data & Telecom > Audio Video Equipment", "Lighting Fixtures, Control > Occupancy Sensors"),
+        "Wiring Devices > Wallplates",
+    ),
+    (
+        r"photocontrol|photo control|photocell",
+        (
+            "Caddy > Ceiling/Acoustical",
+            "Data & Telecom > Cable Tray",
+            "Data & Telecom > Audio Video Equipment",
+            "Boxes & Enclosures > Enclosures - Commercial Type",
+            "Lamps, Bulbs & Ballast > Bulbs - Fluorescent",
+        ),
+        "Lighting Fixtures, Control > Photocells",
+    ),
+    (
+        r"squeeze connector|\bsqz conn\b|flexible.*connector|connector.*flexible",
+        ("Conduit, Strut & Raceways > Conduit - Flexible",),
+        "Fittings > MC, NMB, Liquidtight, Flex Fittings",
+    ),
+    (
+        r"warning sign|danger.*sign|pressure sensitive.*sign|voltage.*sign|marking sign",
+        ("Lighting Fixtures, Control > Emergency Lighting & Signs",),
+        "Tools & Meters > Marking & Labeling",
+    ),
+    (
+        r"\b(?:lamp|bulb|t8|t5|t5ho|led tube|led lamp|omni-directional|g24d?)\b",
+        ("Data & Telecom > Workstation", "Data & Telecom > Low Voltage Cable"),
+        "Lamps, Bulbs & Ballast > Bulbs - LED",
+    ),
+    (
+        r"gigabit.*switch|poe.*switch|network.*switch|greennet.*switch|managed.*switch|unmanaged.*switch",
+        ("Wiring Devices > Switches",),
+        "Data & Telecom > Distribution Devices",
+    ),
+    (
+        r"hard drive|purple.*drive|\bhdd\b|sata.*drive",
+        ("Tools & Meters > Storage",),
+        "Data & Telecom > Video & Surveillance Equipment",
+    ),
+    (
+        r"\bgbk\d{1,2}\b|ground bar kit|grounding bar kit",
+        ("Fasteners & Hardware > Anchors", "Fasteners & Hardware > Hardware"),
+        "Power Distribution > Load Centers / Panelboards",
+    ),
+    (
+        r"brnsurge|brpsurge|clnsurge|chsurge",
+        ("Power Distribution > Power Quality/Protection",),
+        "Power Distribution > Circuit Breakers",
+    ),
+    (
+        r"minuteman|stand-by ups|online ups|line interactive ups",
+        ("Power Distribution > Power Quality/Protection",),
+        "Data & Telecom > Cabinets, Racks & Wire Management",
+    ),
+    (
+        r"rac\s*72[24]|rac\s*73[17]|oct(?:agon)?\s*(?:box\s*)?cover|4o\s*(?:flat\s*)?cover",
+        ("Boxes & Enclosures > Boxes - Weatherproof",),
+        "Boxes & Enclosures > Mud Rings / Covers",
+    ),
+    (
+        r"\b(?:nec|ugly'?s)\b.*(?:code\s*book|tabs|handbook|reference)|code\s*book",
+        (
+            "Connectors & Crimps > Welded Connections",
+            "Data & Telecom > Cabinets, Racks & Wire Management",
+            "Data & Telecom > Low Voltage Cable",
+            "Fasteners & Hardware > ",
+        ),
+        "Tools & Meters > Books",
+    ),
+    (
+        r"hammer drill|impact driver|drill/driver|cordless drill|combo kit|m18 fuel.*kit",
+        ("Data & Telecom > Tools", "Data & Telecom > Workstation"),
+        "Tools & Meters > Cordless Tools",
+    ),
+    (
+        r"packout.*(?:chest|box|tray|organizer)|tool tray|tool chest",
+        ("Data & Telecom > Tools", "Data & Telecom > Workstation"),
+        "Tools & Meters > Storage",
+    ),
+    (
+        r"driller'?s dust bowl",
+        ("Data & Telecom > Cabinets, Racks & Wire Management",),
+        "Tools & Meters > Bits, Blades, Punches, Holesaws",
+    ),
+    (
+        r"angler.*fish tape|pulling fish tape",
+        ("Data & Telecom > Tools",),
+        "Tools & Meters > Cable Pulling & Hoist",
+    ),
+    (
+        r"transducer|pressure sensor",
+        ("Lamps, Bulbs & Ballast > Ballast -HID", "Lamps, Bulbs & Ballast > Ballast - Fluorescent"),
+        "Control & Automation > Drives",
+    ),
+    (
+        r"\bvfd\b|variable frequency drive",
+        ("Power Distribution > Load Centers / Panelboards",),
+        "Control & Automation > Drives",
+    ),
+    (
+        r"socket adapter|hex socket adapter|drive guide|bit tip holder",
+        ("Wiring Devices > Switches", "Wiring Devices"),
+        "Tools & Meters > Bits, Blades, Punches, Holesaws",
+    ),
+    (
+        r"\byghp\w*|hyground|c-tap|grounding c-tap",
+        ("Fittings > EMT Fittings", "Fittings"),
+        "Connectors & Crimps > Grounding Products",
+    ),
+    (
+        r"\b(?:uny|unf|eyk|eys|eaf|gun|unl)\d*|conduit union\b",
+        ("Fittings > NM Cable Fittings", "Fittings > EMT Fittings"),
+        "Fittings > Explosionproof Fittings",
+    ),
+    (
+        r"wp34\d{2}\b|keystone.*wall\s*plate|\b(?:1|2|3|4|6)\s*port\s*(?:wall\s*plate|faceplate|plate)\b",
+        ("Wiring Devices > Wallplates",),
+        "Data & Telecom > Workstation",
+    ),
+    (
+        r"fishing pole|tuff-rod|glow rod|fish rod|wire fishing",
+        ("Caddy > Cable/Conduit", "Caddy > Datacom/Low Voltage"),
+        "Tools & Meters > Cable Pulling & Hoist",
+    ),
+    (
+        r"\bwie\b.*(?:cont hinge|screw cvr|rsc\d|sc\d|b\d{6})\b|continuous hinge.*(?:enclosure|box)",
+        ("Data & Telecom > Audio Video Equipment", "Data & Telecom > Cabinets, Racks & Wire Management"),
+        "Boxes & Enclosures > Enclosures - Commercial Type",
+    ),
+    (
+        r"\bezt\d{4}\w*|\bezb\d{4}\w*|pow-r-(?:stock|xpress).*(?:trim|door|box)",
+        ("Boxes & Enclosures > Enclosure Accessories", "Boxes & Enclosures > Enclosures - Commercial Type"),
+        "Power Distribution > Load Centers / Panelboards",
+    ),
+    (
+        r"quick set cement|pvc cement|cwc\d{2}|solvent cement",
+        ("Caddy > Cable/Conduit", "Caddy"),
+        "Tools & Meters > Paint, Chemicals, Cleaning Supplies",
+    ),
+    (
+        r"rac\s*902c|rac\s*808c|rac\s*810c|rac\s*811c|cc cover 4sq",
+        ("Boxes & Enclosures > Boxes - Weatherproof",),
+        "Boxes & Enclosures > Mud Rings / Covers",
+    ),
+    (
+        r"\bcar\s+b\d{3}[a-z]*\b|carlon.*box|\ball\s+p-\d{3}[a-z]*\b|allied moulded|non[- ]metallic.*box",
+        ("Boxes & Enclosures > Boxes - Metallic",),
+        "Boxes & Enclosures > Boxes - Non-Metallic",
+    ),
+    (
+        r"strip.*(?:wired for directdrive|directdrive|type b)|kt-ddsledt8",
+        ("Lamps, Bulbs & Ballast > Bulbs - LED", "Lamps, Bulbs & Ballast > Bulbs - LED > LED - Tube Type"),
+        "Lighting Fixtures, Control > Indoor Lighting",
     ),
 )
 RANK_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "BLAZER.RANK.csv")
@@ -1096,6 +1301,14 @@ def attach_orders(source: pd.DataFrame, path: str = RANK_PATH) -> pd.DataFrame:
 def attach_taxonomy(source: pd.DataFrame, path: str = TAXONOMY_PATH) -> pd.DataFrame:
     source = attach_orders(source)
     source = source.assign(**{TAX_COL: _taxonomy_paths(source, path)})
+    if os.path.exists(path):
+        tax_df = pd.read_csv(path, dtype=str, keep_default_na=False)
+        if ID_COL in tax_df.columns:
+            tax_indexed = tax_df.drop_duplicates(subset=ID_COL, keep="first").set_index(ID_COL)
+            if "Subcategory 2" in tax_indexed.columns:
+                source = source.assign(tax_sub2=source[ID_COL].map(tax_indexed["Subcategory 2"]).fillna(""))
+            if "Subcategory 3" in tax_indexed.columns:
+                source = source.assign(tax_sub3=source[ID_COL].map(tax_indexed["Subcategory 3"]).fillna(""))
     return source
 
 
@@ -1201,7 +1414,7 @@ def breaker_series(row: dict[str, str]) -> str:
 
 
 _THREAD = re.compile(
-    r"#\s?(\d{1,2})\b|\b(\d{1,2}/\d{1,2})\s*(?:inch|in\b|-\s?\d|\")|\b(\d{1,2})-(?:32|24|20|16|13|11|10)\b",
+    r"#\s?(\d{1,2})\b|\b(\d{1,2}/\d{1,2})\b|\b(\d{1,2})-(?:32|24|20|16|13|11|10)\b",
     re.I,
 )
 
@@ -1212,13 +1425,19 @@ def box_kind(row: dict[str, str]) -> str:
         return "fan_box"
     if re.search(r"4-11/16|4\.6875|4 11/16", text):
         return "4-11/16"
-    if re.search(r"\bsquare\b.*\b4\b|\b4\b.*\bsquare\b|\b4(?:-| )?(?:inch|in)\b.*square|\b4s\b|\b4 ?sq", text):
+    if re.search(r"\bsquare\b.*\b4\b|\b4\b.*\bsquare\b|\b4(?:-| )?(?:inch|in)\b.*square|\b4s\b|\b4 ?sq\b", text):
         return "4sq"
+    if re.search(r"\b(?:round|rnd)\b|ceiling box|pancake|fixture (?:mounting )?box|\b3-1/2\b.*\bbox\b|\b4-inch round\b", text) and not re.search(r"floor box", text):
+        return "round_box"
     if re.search(r"\boct|\b[34]o(?:box|ext)?\b", text):
         return "oct3" if re.search(r"3-1/2|\b3o|\b30\b", text) else "oct4"
-    if re.search(r"\b(?:2|two)[- ]gang", text):
+    if re.search(r"\b(?:4|four)[- ]gang|\b4g\b", text):
+        return "4g"
+    if re.search(r"\b(?:3|three)[- ]gang|\b3g\b", text):
+        return "3g"
+    if re.search(r"\b(?:2|two)[- ]gang|\b2g\b", text):
         return "2g"
-    if re.search(r"single[- ]gang|\b1[- ]gang|handy|switch box|device", text):
+    if re.search(r"single[- ]gang|\b1[- ]gang|\b1g\b|handy|switch box", text):
         return "1g"
     return ""
 
@@ -1294,6 +1513,22 @@ def gauge_range(row: dict[str, str]) -> tuple[float, float] | None:
     return min(values), max(values)
 
 
+def fuse_frame_amperage(amp: int) -> int:
+    if amp <= 30:
+        return 30
+    elif amp <= 60:
+        return 60
+    elif amp <= 100:
+        return 100
+    elif amp <= 200:
+        return 200
+    elif amp <= 400:
+        return 400
+    elif amp <= 600:
+        return 600
+    return amp
+
+
 def _extra_match_ok(
     rule: TaxonomyRule, target: dict[str, str], candidate: dict[str, str]
 ) -> bool:
@@ -1310,7 +1545,25 @@ def _extra_match_ok(
         a, b = fastener_diameter(target), fastener_diameter(candidate)
         return bool(a) and a == b
     if rule.match == "amps":
-        return bool(amp_ratings(target) & amp_ratings(candidate))
+        t_amps = amp_ratings(target)
+        c_amps = amp_ratings(candidate)
+        if not t_amps or not c_amps:
+            return False
+        if t_amps & c_amps:
+            return True
+        t_text = _text(target).lower()
+        c_text = _text(candidate).lower()
+        t_is_fuse = "fuse" in t_text and not any(k in t_text for k in ("block", "holder", "reducer", "puller", "clip", "switch", "disconnect"))
+        c_is_fuse = "fuse" in c_text and not any(k in c_text for k in ("block", "holder", "reducer", "puller", "clip", "switch", "disconnect"))
+        if t_is_fuse and c_amps:
+            frames = {fuse_frame_amperage(a) for a in t_amps}
+            if frames & c_amps:
+                return True
+        if c_is_fuse and t_amps:
+            frames = {fuse_frame_amperage(a) for a in c_amps}
+            if frames & t_amps:
+                return True
+        return False
     if rule.match == "gauge":
         wanted = gauge_range(target)
         if wanted is None:
@@ -1357,7 +1610,7 @@ def _matching_groups(row: dict[str, str]) -> list[str]:
     groups.extend(
         name
         for name, rule in TAXONOMY_RULES.items()
-        if tax_path == rule.target_path
+        if (tax_path == rule.target_path or tax_path.startswith(rule.target_path + " >"))
         and (not rule.target_keywords or rule.target_keywords.search(_text(row)))
     )
     return groups
@@ -1407,6 +1660,7 @@ NO_SIBLING_FALLBACK = (
     "Lamps, Bulbs & Ballast > Drivers - LED",
     "Lamps, Bulbs & Ballast > Bulbs - ",
     "Boxes & Enclosures > Boxes - ",
+    "Fuses & Accessories > ",
 )
 ONLY_WITH = {
     "Lighting Fixtures, Control > Outdoor Lighting": (
@@ -1532,7 +1786,8 @@ def _candidate_indexes(
             if candidate_subcategory in allowed_subcategories:
                 by_group[group].append(candidate)
         for group, rule in TAXONOMY_RULES.items():
-            if candidate.get(TAX_COL, "") == rule.accessory_path:
+            c_tax = candidate.get(TAX_COL, "")
+            if c_tax == rule.accessory_path or c_tax.startswith(rule.accessory_path + " >"):
                 by_group[group].append(candidate)
         by_group[_node_key(candidate)].append(candidate)
     ranked = sorted(rows, key=lambda c: (-c.get(ORDERS_COL, 0), c[ID_COL]))
@@ -1555,13 +1810,47 @@ _GANG_WORDS = (("single", 1), ("two", 2), ("three", 3), ("four", 4))
 
 def gang_count(row: dict[str, str]) -> int:
     text = _text(row).lower()
-    match = re.search(r"\b([1-9])[- ]?(?:g\b|gang)", text)
+    match = re.search(r"\b([1-9])[- ]?(?:g\b|gang|dvc\b|device\b|dev\b)", text)
     if match:
         return int(match.group(1))
     for word, number in _GANG_WORDS:
-        if re.search(rf"\b{word}[- ]gang", text):
+        if re.search(rf"\b{word}[- ](?:gang|device|dvc)", text):
             return number
+    # Handy boxes and standard 3x2 switch boxes are 1-gang
+    if re.search(r"\b(?:handy box|switch box 3\s*x\s*2|3\s*x\s*2\s*switch box)\b", text):
+        return 1
+    # Standard wiring devices (receptacles, switches, dimmers, GFCIs) are 1-gang unless specified
+    tax = str(row.get(TAX_COL, ""))
+    if "Wiring Devices" in tax:
+        if any(w in text for w in ["duplex", "receptacle", "recp", "toggle", "switch", "decora", "decorator", "dimmer", "outlet", "gfci"]):
+            return 1
     return 0
+
+
+def device_cutout(row: dict[str, str]) -> str:
+    text = (str(row.get("clean_title", "")) + " " + str(row.get("PRODUCT", ""))).lower()
+    tax = str(row.get(TAX_COL, ""))
+    is_wallplate = "Wallplates" in tax or "wallplate" in text or "wall plate" in text
+    is_device = any(k in tax for k in ["Receptacles", "Switches", "GFCI", "Combination Devices", "Specialty Switches", "Straight Blade 10-20 Amp"]) or any(k in text for k in ["receptacle", "switch", "outlet", "dimmer"])
+
+    if not (is_wallplate or is_device):
+        return ""
+
+    if re.search(r"\b(?:tp703|ss703|ss701|s384|2\.15|range/dryer plate|dryer plate|power outlet plate)\b", text):
+        return "dryer_round"
+    if re.search(r"\b(?:tp126|tp826|tp226|combo|combination)\b", text):
+        return "combo"
+    if re.search(r"\b(?:blank|tp13|p13|tp23|ss23|p23|tp33|p33|tp43)\b", text):
+        return "blank"
+    if re.search(r"\b(?:decora|decorator|rocker|gfci|gfi|paddle|slide dimmer|tp26|p26|2604)\b", text):
+        return "decora"
+    if re.search(r"\b(?:toggle|tp[1-6]\b|p[1-6]\b|ss[1-6]\b|1201|1221|cs120|csb120|cs115)\b", text):
+        return "toggle"
+    if re.search(r"\b(?:single receptacle|single recp|tp7\b|p7\b|1\.406|1\.59)\b", text) and not re.search(r"\bduplex\b", text):
+        return "single_round"
+    if re.search(r"\b(?:duplex|dplx|tp8\b|p8\b|tp82\b|p82\b|3232|5362|5262|cr20|cr15|br20|br15|8300)\b", text):
+        return "duplex"
+    return ""
 
 
 def _path_parts(row: dict[str, str]) -> list[str]:
@@ -1571,7 +1860,8 @@ def _path_parts(row: dict[str, str]) -> list[str]:
 _CONDUIT_MAINS = frozenset({"Conduit, Strut & Raceways", "Fittings"})
 _MATERIALS = (
     ("pvc", re.compile(r"\bpvc\b|sch(?:edule)? ?(?:40|80)|kraloy", re.I)),
-    ("flex", re.compile(r"liquid|lqt|sealtight|\blt\b|\bnmlt|\bflex|\bfmc\b|greenfield", re.I)),
+    ("liquidtight", re.compile(r"liquid|lqt|sealtight|\blt\b|\bnmlt|lfmc", re.I)),
+    ("dry_flex", re.compile(r"\b(?:fmc|greenfield|reduced wall flex|steel flex|aluminum flex|sqz flex|screw in flex)\b|\bflx\b", re.I)),
     ("emt", re.compile(r"\bemt\b", re.I)),
     ("rigid", re.compile(r"\brgd\b|rigid|\bgrc\b|\brmc\b|\bimc\b|\brgs\d", re.I)),
 )
@@ -1596,15 +1886,44 @@ _BODY_PART = re.compile(r"\b(?:cover|cvr|gasket|gask\w*|gk\w*)\b", re.I)
 
 
 def conduit_materials(row: dict[str, str]) -> set[str]:
-    text = _text(row)
-    found = {name for name, pattern in _MATERIALS if pattern.search(text)}
+    text = _text(row).lower()
+    found = set()
+    if re.search(r"\bpvc\b|sch(?:edule)? ?(?:40|80)|kraloy", text):
+        found.add("pvc")
+    if re.search(r"liquid|lqt|sealtight|\blt\b|\bnmlt|lfmc", text):
+        found.add("liquidtight")
+    if re.search(r"\b(?:fmc|greenfield|reduced wall flex|steel flex|aluminum flex|sqz.*flex|screw in.*flex|flx)\b", text) and not re.search(r"liquid|lqt|sealtight|\bnmlt\b", text):
+        found.add("dry_flex")
+    if re.search(r"\bemt\b", text):
+        found.add("emt")
+    if re.search(r"\brgd\b|rigid|\bgrc\b|\brmc\b|\bimc\b|\brgs\d", text):
+        found.add("rigid")
     if not found:
         node = _path_parts(row)[1:2]
         if node and node[0] == "EMT Fittings":
             found = {"emt"}
         elif node and node[0] == "Rigid Fittings":
             found = {"rigid"}
+        elif node and node[0] == "PVC Fittings":
+            found = {"pvc"}
     return found
+
+
+def fuse_class(row: dict[str, str]) -> str:
+    text = _text(row).lower()
+    if re.search(r"\bclass[- ]?j\b|\bajt\b|\bjdl\b|\bjks\b|\blpj\b", text):
+        return "class_j"
+    if re.search(r"\bclass[- ]?cc\b|\batdr\b|\batqr\b|\bccmr\b|\bfnq-r\b|\bktk-r\b|\blp-cc\b", text):
+        return "class_cc"
+    if re.search(r"\bclass[- ]?r(?:k[15])?\b|\brk[15]\b|\btrs\b|\btr\d+r\b|\bfrsr\b|\bfrnr\b|\bflsr\b|\bflnr\b|\blpn-rk\b|\blps-rk\b", text):
+        return "class_r"
+    if re.search(r"\bclass[- ]?[hk]\b|\bnos\b|\bnon\b|\brkn\b", text):
+        return "class_hk"
+    if re.search(r"\bmidget\b|\b10x38\b|13/32|\bktk\b|\bfnq\b|\bbln\b|\bblf\b|\bflq\b|\bflm\b|\bklk\b|\bheb\b", text):
+        return "midget"
+    if re.search(r"plug fuse|box cover unit|type s\b|type t\b|type w\b|type sl\b|type tl\b|\bsou\b|\bsof\b|\bsox\b|\bsog\b", text):
+        return "plug"
+    return ""
 
 
 _GAUGE_MAINS = frozenset({"Wire, Cable & Cord", "Connectors & Crimps"})
@@ -1639,6 +1958,10 @@ def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
         if tparts[1].startswith("Conduit - ") and _REDUCER.search(str(cand.get("PRODUCT", ""))):
             return "part"
         tmat, cmat = conduit_materials(target), conduit_materials(cand)
+        if "dry_flex" in tmat and "liquidtight" in cmat and "dry_flex" not in cmat:
+            return "material"
+        if "liquidtight" in tmat and "dry_flex" in cmat and "liquidtight" not in cmat:
+            return "material"
         if len(tmat) == 1 and cmat and not tmat & cmat:
             return "material"
         if (
@@ -1659,23 +1982,160 @@ def hard_conflict(target: dict[str, str], cand: dict[str, str]) -> str:
         trange, crange = gauge_range(target), gauge_range(cand)
         if trange and crange and not (crange[0] * 0.999 <= trange[1] and trange[0] <= crange[1] * 1.001):
             return "gauge"
-    if tparts[0] not in GANG_MAINS or cparts[0] not in GANG_MAINS:
-        return ""
-    tgang, cgang = gang_count(target), gang_count(cand)
-    if tgang and cgang and tgang != cgang:
-        return "gang"
-    if tparts[0] == cparts[0] == "Wiring Devices" and not any(
+    if tparts[0] in GANG_MAINS and cparts[0] in GANG_MAINS:
+        tgang, cgang = gang_count(target), gang_count(cand)
+        t_is_plate = "Wallplates" in tparts[1:2]
+        c_is_plate = "Wallplates" in cparts[1:2]
+        t_is_dev = any(k in tparts[1:2] for k in ["Receptacles", "Switches", "GFCI Personnel Protection Devices", "Specialty Switches", "Combination Devices", "Straight Blade 10-20 Amp"])
+        c_is_dev = any(k in cparts[1:2] for k in ["Receptacles", "Switches", "GFCI Personnel Protection Devices", "Specialty Switches", "Combination Devices", "Straight Blade 10-20 Amp"])
+
+        # Multi-gang wallplates accept 1-gang wiring devices (e.g. 5-gang plate takes 1-gang Decora devices)
+        if (t_is_plate and c_is_dev and cgang == 1) or (c_is_plate and t_is_dev and tgang == 1):
+            pass
+        elif tgang == 1 and cgang >= 3:
+            return "gang"
+        elif cgang == 1 and tgang >= 3:
+            return "gang"
+        elif tgang >= 3 and cgang in (1, 2):
+            return "gang"
+        elif cgang >= 3 and tgang in (1, 2):
+            return "gang"
+        elif tgang and cgang and tgang != cgang:
+            if t_is_plate or c_is_plate:
+                return "gang"
+            if abs(tgang - cgang) > 1:
+                return "gang"
+        # 3+ gang wallplates cannot take 4" square boxes or 4" square mud rings (which are max 2-gang)
+        if t_is_plate and tgang >= 3:
+            if box_kind(cand) in ("4sq", "4-11/16", "oct3", "oct4", "round_box", "fan_box", "1g", "2g"):
+                return "gang"
+    # Wallplate cutout vs wiring device style compatibility
+    t_is_plate = "Wallplates" in str(target.get(TAX_COL, "")) or "wallplate" in _text(target).lower()
+    c_is_plate = "Wallplates" in str(cand.get(TAX_COL, "")) or "wallplate" in _text(cand).lower()
+    if t_is_plate != c_is_plate:
+        t_style = device_cutout(target)
+        c_style = device_cutout(cand)
+        if t_style and c_style:
+            if t_style == "combo" or c_style == "combo":
+                pass
+            elif t_style != c_style:
+                return "cutout_mismatch"
+    is_t_ss = "Wallplates" in tparts[1:2] and bool(re.search(r"stainless|302ss|\bss\d\b", _text(target), re.I))
+    is_c_ss = "Wallplates" in cparts[1:2] and bool(re.search(r"stainless|302ss|\bss\d\b", _text(cand), re.I))
+    if tparts[0] == cparts[0] == "Wiring Devices" and not (is_t_ss or is_c_ss) and not any(
         node.startswith(_COLOR_SKIP_NODES)
         for node in tparts[1:2] + cparts[1:2]
     ):
         tcolor, ccolor = _color(target), _color(cand)
         if tcolor and ccolor and tcolor != ccolor:
             return "color"
-    # Never suggest power tools or heavy hand tools on small commodity fasteners
-    if tparts[0] == "Fasteners & Hardware" and cparts[0] == "Tools & Meters":
-        if re.search(r"\b(?:washer|hex nut|locknut|lock nut|machine screw|drywall screw)\b", _text(target), re.I):
-            if re.search(r"\b(?:plier|wrench|ratchet|saw|driver system|packout)\b", _text(cand), re.I):
-                return "tool_mismatch"
+    # Wiring devices: voltage mismatches (e.g. 480V/600V vs 125V/250V)
+    if tparts[0] == cparts[0] == "Wiring Devices":
+        t_text = _text(target).lower()
+        c_text = _text(cand).lower()
+        t_is_hi_v = bool(re.search(r"\b(?:480\s*v|600\s*v|480\s*volt|600\s*volt)\b", t_text))
+        c_is_hi_v = bool(re.search(r"\b(?:480\s*v|600\s*v|480\s*volt|600\s*volt)\b", c_text))
+        t_is_std_v = bool(re.search(r"\b(?:120\s*v|125\s*v|240\s*v|250\s*v|125/250\s*v)\b", t_text))
+        c_is_std_v = bool(re.search(r"\b(?:120\s*v|125\s*v|240\s*v|250\s*v|125/250\s*v)\b", c_text))
+        if (t_is_hi_v and c_is_std_v) or (t_is_std_v and c_is_hi_v):
+            return "voltage_mismatch"
+    # Standard wallplates do not accept floor boxes
+    if "Wallplates" in str(target.get(TAX_COL, "")) and "Floor Boxes" in str(cand.get(TAX_COL, "")) and not re.search(r"floor", _text(target), re.I):
+        return "floor_box_mismatch"
+    if "Floor Boxes" in str(target.get(TAX_COL, "")) and "Wallplates" in str(cand.get(TAX_COL, "")) and not re.search(r"floor", _text(cand), re.I):
+        return "floor_box_mismatch"
+
+    # Never suggest power tools or heavy hand tools on commodity items (fasteners, wiring devices, small hardware)
+    is_comm_target = (
+        (tparts[0] in ("Fasteners & Hardware", "Wiring Devices", "Connectors & Crimps")
+         or bool(re.search(r"\b(?:receptacle|switch|wallplate|outlet|plug|washer|hex nut|locknut|machine screw)\b", _text(target), re.I)))
+        and not bool(re.search(r"pop-up|countertop|floor box|flb\d", _text(target), re.I))
+    )
+    if is_comm_target and cparts[0] == "Tools & Meters":
+        if re.search(r"\b(?:plier|wrench|ratchet|saw|driver system|packout|stripper|crimper|bender|meter|tester|tracer|locator|multimeter|laser|camera|heat gun)\b", _text(cand), re.I):
+            return "tool_mismatch"
+
+    # Round/ceiling boxes do not accept rectangular wall switches or receptacles
+    if box_kind(target) in ("round_box", "fan_box") and cparts[0] == "Wiring Devices" and cparts[1:2] and cparts[1] in ("Receptacles", "Switches", "Combination Devices", "GFCI Personnel Protection Devices", "Specialty Switches", "Straight Blade 10-20 Amp"):
+        return "round_box_device"
+
+    # Fuse class, voltage, and amperage compatibility
+    if tparts[0] == "Fuses & Accessories" or cparts[0] == "Fuses & Accessories":
+        t_text = _text(target).lower()
+        c_text = _text(cand).lower()
+        t_is_fuse = bool(re.search(r"\bfuse\b", t_text)) and not bool(re.search(r"block|holder|reducer|puller|clip|cover unit", t_text))
+        c_is_fuse = bool(re.search(r"\bfuse\b", c_text)) and not bool(re.search(r"block|holder|reducer|puller|clip|cover unit", c_text))
+        if t_is_fuse and c_is_fuse:
+            return "fuse_substitute"
+        c_is_fuse_acc = bool(re.search(r"block|holder|reducer|clip|box cover unit", c_text))
+        if t_is_fuse and c_is_fuse_acc:
+            t_cls = fuse_class(target)
+            c_cls = fuse_class(cand)
+            if t_cls and c_cls and t_cls != c_cls:
+                return "fuse_class"
+            if c_cls and not t_cls:
+                return "fuse_class"
+            if t_cls and not c_cls and re.search(r"class [a-z]|midget|plug fuse", c_text):
+                return "fuse_class"
+            t_is_600 = bool(re.search(r"600\s*v", t_text))
+            c_is_250 = bool(re.search(r"250\s*v|125\s*v", c_text)) and not bool(re.search(r"600\s*v", c_text))
+            if t_is_600 and c_is_250:
+                return "fuse_voltage"
+            t_amps = amp_ratings(target)
+            c_amps = amp_ratings(cand)
+            if t_amps and c_amps and max(t_amps) > max(c_amps):
+                return "fuse_amps"
+
+    # Spa panels and AC disconnects do not take Emergency Service Disconnect labels
+    if re.search(r"\b(?:spa|pool|a/?c disconnect|air conditioning)\b", _text(target), re.I) and re.search(
+        r"emergency service disconnect|service disconnect", _text(cand), re.I
+    ):
+        return "label_mismatch"
+
+    # Low voltage brackets (Arlington LV1/LV2/LV3) do not take smoke alarms, exit signs, or heavy metal electrical junction boxes
+    if re.search(r"low voltage.*(?:bracket|device|plate|frame)|\blv[1-4]\b|\blvn[1-4]\b", _text(target), re.I):
+        if re.search(r"smoke|carbon monoxide|detector|fire alarm|exit sign|emergency light|\b4sq\b|4-11/16|square box", _text(cand), re.I):
+            return "lv_bracket_mismatch"
+
+    # Box mounting brackets and stud supports do not take smoke alarms or exit signs
+    if re.search(r"box mount support|stud bracket|box bracket", _text(target), re.I):
+        if re.search(r"smoke|carbon monoxide|alarm|detector|exit sign|emergency light", _text(cand), re.I):
+            return "bracket_trade"
+
+    # Fiber optics: Single-Mode vs Multimode conflict
+    if "Fiber Optic" in str(target.get(TAX_COL, "")) or "Fiber Optic" in str(cand.get(TAX_COL, "")):
+        t_sm = bool(re.search(r"single[- ]?mode|\b9/125\b|\b8\.3/125\b|\bsm\b|os[12]\b", _text(target), re.I))
+        c_sm = bool(re.search(r"single[- ]?mode|\b9/125\b|\b8\.3/125\b|\bsm\b|os[12]\b", _text(cand), re.I))
+        t_mm = bool(re.search(r"multi[- ]?mode|\b50/125\b|\b62\.5/125\b|\bmm\s*fiber\b|om[1-4]\b", _text(target), re.I))
+        c_mm = bool(re.search(r"multi[- ]?mode|\b50/125\b|\b62\.5/125\b|\bmm\s*fiber\b|om[1-4]\b", _text(cand), re.I))
+        if (t_sm and c_mm) or (t_mm and c_sm):
+            return "fiber_mode"
+
+    # Datacomm / Low Voltage tools & equipment: reject high-voltage power distribution (breakers, load centers, transformers), conduit fittings, and light bulbs
+    if tparts[0] == "Data & Telecom" or "Datacomm" in tparts[0]:
+        if cparts[0] in ("Power Distribution", "Fuses & Accessories", "Lamps, Bulbs & Ballast") or (cparts[0] in ("Fittings", "Conduit, Strut & Raceways") and "Low Voltage" not in str(cand.get(TAX_COL, "")) and "Raceway" not in str(cand.get(TAX_COL, ""))):
+            return "trade_mismatch"
+        if re.search(r"staple|wireway|under.?cab|vanity|light switch|\bbr\d{2,3}\b|breaker|panelboard|rolling.*box|work belt|tool belt", _text(cand), re.I):
+            return "trade_mismatch"
+
+    # Commercial bolt-on panelboard breakers (GHB, BAB, BQD, 277/480V) reject residential Romex wire and residential range/dryer hookups
+    if tparts[0] == "Power Distribution" and "Circuit Breakers" in tparts[1:2]:
+        t_is_comm_breaker = bool(re.search(r"\b(?:ghb|bab|bqd|prl|bolt-on|277/480|480v|277v)\b", _text(target), re.I))
+        if t_is_comm_breaker:
+            c_text = _text(cand).lower()
+            if re.search(r"nm-b|romex|dryer|range recp|range receptacle|flush range|ac disconnect|air conditioning disconnect", c_text):
+                return "breaker_trade"
+
+    # LED linear tubes (T8, T5, T12) reject fluorescent ballasts (if ballast bypass / type B), ceiling fan boxes, and exhaust fans; linear tubes are substitutes
+    if "Bulbs - LED" in str(target.get(TAX_COL, "")) and re.search(r"\b(?:t8|t5|t12|linear tube)\b", _text(target), re.I):
+        c_text = _text(cand).lower()
+        if re.search(r"exhaust fan|ventilation fan|bath fan|\bcfm\b|fan box|ceiling fan|paddle fan", c_text):
+            return "lighting_mismatch"
+        if re.search(r"\b(?:t8|t5|t12|linear tube)\b", c_text) and "Bulbs - LED" in str(cand.get(TAX_COL, "")):
+            return "tube_substitute"
+        if re.search(r"\b(?:byp\b|ballast bypass|type b\b|directdrive)\b", _text(target), re.I) and re.search(r"\bballast\b", c_text) and not re.search(r"bypass", c_text):
+            return "ballast_bypass_conflict"
+
     return ""
 
 
@@ -1709,13 +2169,16 @@ def build_candidates(
 
     by_subcategory: dict[str, list[dict[str, str]]] = defaultdict(list)
     for candidate in candidates:
-        key = candidate.get("sub_category") or candidate.get(TAX_COL, "")
+        key = candidate.get("tax_sub2") or candidate.get("sub_category") or candidate.get(TAX_COL, "")
         by_subcategory[key].append(candidate)
     for subcategory_candidates in by_subcategory.values():
         subcategory_candidates.sort(key=lambda candidate: (-candidate.get(ORDERS_COL, 0), candidate[ID_COL]))
 
     selected: list[dict[str, str]] = []
-    subcategories = sorted(by_subcategory)
+    subcategories = sorted(
+        by_subcategory,
+        key=lambda s: (-max((c.get(ORDERS_COL, 0) for c in by_subcategory[s]), default=0), s),
+    )
     round_index = 0
     limit = min(len(candidates), MAX_CANDIDATES)
     while len(selected) < limit:
@@ -1870,6 +2333,7 @@ def _candidate_payload(candidates: Iterable[dict[str, str]]) -> list[dict[str, s
             "specs": candidate["normalized_specs"],
             "category": candidate["primary_category"],
             "sub_category": candidate["sub_category"],
+            "popularity": f"{int(candidate.get(ORDERS_COL, 0))} orders",
         }
         for candidate in candidates
     ]
@@ -1942,13 +2406,16 @@ def top_up_selection(
     # Interleave rule-based candidates by subcategory
     by_subcat: dict[str, list[dict[str, str]]] = defaultdict(list)
     for c in rule_based:
-        key = c.get("sub_category") or c.get(TAX_COL, "")
+        key = c.get("tax_sub2") or c.get("sub_category") or c.get(TAX_COL, "")
         by_subcat[key].append(c)
     for subcat_cands in by_subcat.values():
         subcat_cands.sort(key=lambda c: (-c.get(ORDERS_COL, 0), c[ID_COL]))
 
     interleaved: list[dict[str, str]] = []
-    subcats = sorted(by_subcat)
+    subcats = sorted(
+        by_subcat,
+        key=lambda s: (-max((c.get(ORDERS_COL, 0) for c in by_subcat[s]), default=0), s),
+    )
     round_idx = 0
     while len(interleaved) < len(rule_based):
         added = False
@@ -1971,7 +2438,8 @@ def top_up_selection(
     return result
 
 
-def load_checkpoint(path: str) -> pd.DataFrame:
+def load_checkpoint(path: str, allow_new: bool = False) -> pd.DataFrame:
+    require_checkpoint(path, allow_new)
     if not os.path.exists(path):
         return pd.DataFrame(columns=[OUTPUT_ID_COL, *RELATION_COLUMNS])
     checkpoint = pd.read_csv(path, dtype=str, keep_default_na=False)
@@ -1998,7 +2466,11 @@ async def run(
     sample: int = 0,
     seed: int = 42,
     pids_only: set[str] | None = None,
+    top_selling: int = 0,
+    top_offset: int = 0,
+    allow_new_checkpoint: bool = False,
 ) -> int:
+    done = load_checkpoint(checkpoint_path, allow_new=allow_new_checkpoint)
     load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"))
     load_dotenv()
     api_key = os.getenv("GEMINI_API_KEY")
@@ -2011,13 +2483,14 @@ async def run(
         raise ValueError(f"{input_path} is missing columns: {sorted(missing)}")
     source = attach_taxonomy(source.drop_duplicates(subset=ID_COL, keep="first"))
     by_group = _candidate_indexes(source)
-    if sample:
+    if top_selling:
+        source = source.sort_values(by=ORDERS_COL, ascending=False).iloc[top_offset : top_offset + top_selling]
+    elif sample:
         active = source[source[ORDERS_COL] >= MIN_CANDIDATE_ORDERS]
         pool = active if len(active) >= sample else source
         sampled = pool.sample(n=min(sample * 3, len(pool)), random_state=seed)
         valid = [t for t in sampled.to_dict("records") if build_candidates(t, by_group)]
         source = pd.DataFrame(valid[:sample])
-    done = load_checkpoint(checkpoint_path)
     curated = load_curated_accessories()
     curated_ids = set(curated[OUTPUT_ID_COL])
     if pids_only:
@@ -2094,6 +2567,11 @@ def main() -> None:
     parser.add_argument(
         "--checkpoint", default=f"product_accessories.{CHECKPOINT_VERSION}.checkpoint.csv"
     )
+    parser.add_argument(
+        "--allow-new-checkpoint",
+        action="store_true",
+        help="Allow a missing checkpoint and start a new one; Gemini calls may incur costs.",
+    )
     parser.add_argument("--model", default=MODEL, choices=("gemini-3.1-flash-lite", "gemini-2.5-flash"))
     parser.add_argument(
         "--dry-run",
@@ -2106,14 +2584,26 @@ def main() -> None:
         default=0,
         help="Run Gemini on N random products only, using separate sample output/checkpoint files.",
     )
+    parser.add_argument(
+        "--top-selling",
+        type=int,
+        default=0,
+        help="Run Gemini on top N best-selling products by order volume.",
+    )
+    parser.add_argument(
+        "--top-offset",
+        type=int,
+        default=0,
+        help="Offset for --top-selling (e.g. 50 to run ranks 51-100).",
+    )
     parser.add_argument("--seed", type=int, default=42, help="Random seed for --sample.")
     parser.add_argument(
         "--rebuild-rules",
         action="store_true",
-        help="Rebuild only products affected by the newly added rules (rules 560-750).",
+        help="Rebuild only products affected by the newly added rules (rules 560-879).",
     )
     args = parser.parse_args()
-    if args.sample:
+    if args.sample or args.top_selling:
         if args.output == "product_accessories.csv":
             args.output = "product_accessories.sample.csv"
         if args.checkpoint == f"product_accessories.{CHECKPOINT_VERSION}.checkpoint.csv":
@@ -2136,13 +2626,13 @@ def main() -> None:
     if args.rebuild_rules:
         source_df = pd.read_csv(args.input, dtype=str, keep_default_na=False)
         source_df = attach_taxonomy(source_df.drop_duplicates(subset=ID_COL, keep="first"))
-        new_rule_indices = [f"rule{i}" for i in range(560, 755)]
+        new_rule_indices = [f"rule{i}" for i in range(560, 880)]
         pids_only = set()
         for r in source_df.to_dict("records"):
             groups = _matching_groups(r)
             if any(g in new_rule_indices for g in groups):
                 pids_only.add(r[ID_COL])
-        logger.info("Found %d products affected by rules 560-755 to regenerate.", len(pids_only))
+        logger.info("Found %d products affected by rules 560-880 to regenerate.", len(pids_only))
     try:
         failures = asyncio.run(
             run(
@@ -2153,6 +2643,9 @@ def main() -> None:
                 args.sample,
                 args.seed,
                 pids_only=pids_only,
+                top_selling=args.top_selling,
+                top_offset=args.top_offset,
+                allow_new_checkpoint=args.allow_new_checkpoint,
             )
         )
     except (OSError, RuntimeError, ValueError) as exc:

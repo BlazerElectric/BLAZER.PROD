@@ -32,6 +32,8 @@ def _tool_type(text: str) -> str:
         ("sawzall_blade", r"sawzall|recip.*blade|the torch|the ax|\btorch\b.*nitrus|nitrus.*carbide|demo demon.*recip|steel demon.*recip|super sawzall"),
         ("oscillating_blade", r"omt|oscillat|multi-tool blade|starlock|open-lok"),
         ("bandsaw_blade", r"band ?saw blade|compact.*band saw|deep cut.*band saw"),
+        ("datacomm_tester", r"tone and probe|scout pro|vdv5|vdv-500|tone.*probe|wiremap|network tester"),
+        ("punchdown_tool", r"punchdown|punch down|vdv427|66/110|110 blade|66 blade"),
         ("modular_crimper", r"modular.*crimp|vdv226|pass-thru crimp|compression crimper"),
         ("stripper", r"wire stripper|croc stripper|k12075|k11095|11045|11055|13 7[12] 8"),
         ("linemans", r"lineman|side-cutting plier|09 1[12] 240|d213"),
@@ -61,6 +63,9 @@ def _tool_type(text: str) -> str:
 def _lighting_type(text: str) -> str:
     """Identify lighting fixture sub-type to keep downlights with downlights, troffers with troffers, etc."""
     patterns = (
+        ("exit_combo", r"combo.*exit|exit.*combo|apc7|ccg\b|ccrrc"),
+        ("exit_sign", r"exit sign|exit unit|apx7|ceg\b|eveugwe"),
+        ("emergency_unit", r"emergency light|emergency unit|frog eye|apel|cu2\b|csweu"),
         ("step_light", r"step light|steplight|path light"),
         ("wallpack", r"wallpack|wall pack|wpled|xtor"),
         ("floodlight", r"floodlight|flood light|\bflood\b|ll1200|fled\d+"),
@@ -68,9 +73,11 @@ def _lighting_type(text: str) -> str:
         ("flush_mount", r"flush mount|semi-flush"),
         ("downlight", r"downlight|wafer|recessed|can light|flush wafer|kt-wdled|lrkr|retrofit kit"),
         ("panel_troffer", r"flat panel|troffer|\bcpx\b|\bcbt\b|backlit|back-lit|fpl-\d{2}|panel 2x[24]|panel 1x4"),
+        ("vapor_tight", r"vapor tight|vaportight|csvt|vpt"),
         ("strip_wrap", r"strip|wrap|linear|\bcss\b|\bcsl\b|slstp|l48|l96|cwp4|lsf8"),
         ("undercabinet_tape", r"undercabinet|tape light|spool|puck|tape/rope|blaze"),
         ("high_bay", r"high ?bay|low ?bay|ufo|\buhb\b|clh1|ibe|ibg|rebl|cprb"),
+        ("work_light", r"work light|temp light|temporary.*light|cordlight|string light|protemp"),
         ("tube_bulb", r"t8|t5|t12|tube|u-bend|a19|lamp|bulb"),
         ("accessory_guard", r"guard|cage|bracket|hanger|lens|louvre|trim|frame|whip|adapt|pico"),
     )
@@ -131,6 +138,14 @@ def find_similar_products(
             if t_amps and c_amps and (t_amps & c_amps):
                 score += 30
 
+            # Surge protection breaker modules
+            t_is_surge = bool(re.search(r"surge|spd|arrest", target_text, re.I))
+            c_is_surge = bool(re.search(r"surge|spd|arrest", c_text, re.I))
+            if t_is_surge and c_is_surge:
+                score += 150
+            elif t_is_surge != c_is_surge:
+                score -= 60
+
         # Tools: Prefer same tool type (e.g. strippers with strippers, drivers with drivers)
         if target_tool:
             c_tool = _tool_type(c_text)
@@ -162,7 +177,14 @@ def find_similar_products(
                     if t_carb and c_carb:
                         score += 40
             elif c_tool and c_tool != target_tool:
-                # penalize mixing unrelated tools (e.g. fish tape with screwdriver)
+                # Related datacom tools (crimpers, punchdowns, testers) have affinity with each other
+                datacom_tools = {"datacomm_tester", "punchdown_tool", "modular_crimper"}
+                if target_tool in datacom_tools and c_tool in datacom_tools:
+                    score += 60
+                else:
+                    # penalize mixing unrelated tools (e.g. fish tape with screwdriver)
+                    score -= 100
+            elif not c_tool and target_tool:
                 score -= 80
 
         # Brand consistency
@@ -179,29 +201,72 @@ def find_similar_products(
             c_decora = bool(re.search(r"decora|decorator|rocker", c_text, re.I))
             if t_decora == c_decora:
                 score += 20
+            else:
+                score -= 30
             # Hospital Grade (HG) receptacle affinity
             t_hg = bool(re.search(r"\bhg\b|hospital", target_text, re.I))
             c_hg = bool(re.search(r"\bhg\b|hospital", c_text, re.I))
             if t_hg and c_hg:
                 score += 100
             elif t_hg != c_hg:
-                score -= 40
-            # Wallplate gang count matching
+                score -= 60
+            # Wallplate matching: gang count and cutout opening style
             if "Wallplates" in target_node:
                 t_g = ga.gang_count(target)
                 c_g = ga.gang_count(c)
                 if t_g and c_g:
                     if t_g == c_g:
-                        score += 80
+                        score += 90
                     else:
-                        score -= 60
-                # Match opening style: 2 duplex vs toggle vs blank vs decora
-                t_2dup = bool(re.search(r"2\s*d(?:p)?lx|2\s*duplex|tp82", target_text, re.I))
-                c_2dup = bool(re.search(r"2\s*d(?:p)?lx|2\s*duplex|tp82", c_text, re.I))
-                if t_2dup and c_2dup:
+                        score -= 90
+                # Match opening style: duplex vs toggle vs decora vs blank vs round vs dryer
+                t_cut = ga.device_cutout(target)
+                c_cut = ga.device_cutout(c)
+                if t_cut and c_cut:
+                    if t_cut == c_cut:
+                        score += 120
+                    else:
+                        score -= 120
+                if (t_cut == "dryer_round" and c_cut != "dryer_round") or (t_cut != "dryer_round" and c_cut == "dryer_round"):
+                    score -= 150
+                # Match combo plates (e.g. 1-toggle 1-duplex TP18)
+                t_combo = bool(re.search(r"tp18|tp126|tp28|combination", target_text, re.I))
+                c_combo = bool(re.search(r"tp18|tp126|tp28|combination", c_text, re.I))
+                if t_combo == c_combo:
+                    score += 40
+                else:
+                    score -= 50
+                # Jumbo / Oversize plates
+                t_jumbo = bool(re.search(r"jumbo|tpj|oversize", target_text, re.I))
+                c_jumbo = bool(re.search(r"jumbo|tpj|oversize", c_text, re.I))
+                if t_jumbo == c_jumbo:
+                    score += 30
+                else:
+                    score -= 30
+
+            # Switches: match pole configuration (1-pole vs 3-way vs 4-way), dimmers vs standard switches
+            if "Switches" in target_node:
+                t_poles = "3-way" if bool(re.search(r"3-way|3way|3w\b", target_text, re.I)) else "4-way" if bool(re.search(r"4-way|4way|4w\b", target_text, re.I)) else "1-pole" if bool(re.search(r"1-pole|1p\b|single pole|sp\b", target_text, re.I)) else ""
+                c_poles = "3-way" if bool(re.search(r"3-way|3way|3w\b", c_text, re.I)) else "4-way" if bool(re.search(r"4-way|4way|4w\b", c_text, re.I)) else "1-pole" if bool(re.search(r"1-pole|1p\b|single pole|sp\b", c_text, re.I)) else ""
+                if t_poles and c_poles:
+                    if t_poles == c_poles:
+                        score += 70
+                    else:
+                        score -= 50
+
+                t_dim = bool(re.search(r"dimmer|dim\b", target_text, re.I))
+                c_dim = bool(re.search(r"dimmer|dim\b", c_text, re.I))
+                if t_dim == c_dim:
                     score += 80
-                elif t_2dup != c_2dup:
-                    score -= 40
+                else:
+                    score -= 70
+
+                t_occ = bool(re.search(r"occupancy|vacancy|motion|sensor", target_text, re.I))
+                c_occ = bool(re.search(r"occupancy|vacancy|motion|sensor", c_text, re.I))
+                if t_occ == c_occ:
+                    score += 60
+                else:
+                    score -= 60
 
         # Boxes: Keep box with box, cover with cover
         if "Boxes & Enclosures" in target_node:
@@ -210,17 +275,17 @@ def find_similar_products(
             if t_is_cover == c_is_cover:
                 score += 50
             else:
-                score -= 50
-            # Keep 4-square boxes with other 4-square / square boxes, not handy or single-gang switch boxes
+                score -= 120
+            # Keep 4-square with 4-square, round/ceiling with round/ceiling, gang with gang
             t_kind = ga.box_kind(target)
             c_kind = ga.box_kind(c)
             if t_kind and c_kind:
                 if t_kind == c_kind:
-                    score += 80
+                    score += 100
                 elif (t_kind, c_kind) in (("4sq", "4-11/16"), ("4-11/16", "4sq")):
                     score += 30
                 else:
-                    score -= 60
+                    score -= 100
             # Enclosure climate control / fans: keep filter fans with filter fans, and panels with panels
             t_is_fan = bool(re.search(r"filterfan|filter fan|exhaust filter|fan package|climate", target_text, re.I))
             c_is_fan = bool(re.search(r"filterfan|filter fan|exhaust filter|fan package|climate", c_text, re.I))
@@ -251,27 +316,55 @@ def find_similar_products(
                 score += 100
             elif t_is_mc != c_is_mc:
                 score -= 100
+            t_is_thhn = bool(re.search(r"\bthhn\b|\bthwn\b", target_text, re.I))
+            c_is_thhn = bool(re.search(r"\bthhn\b|\bthwn\b", c_text, re.I))
+            if t_is_thhn and c_is_thhn:
+                score += 80
+            elif t_is_thhn != c_is_thhn:
+                score -= 80
+
             t_is_al = bool(re.search(r"\bal\b|alum|xhhw|mhf|ser\b", target_text, re.I))
             c_is_al = bool(re.search(r"\bal\b|alum|xhhw|mhf|ser\b", c_text, re.I))
             if t_is_al != c_is_al:
                 score -= 60
             t_g = ga.gauge_range(target)
             c_g = ga.gauge_range(c)
-            if t_g and c_g and abs(t_g[0] - c_g[0]) < 1e-4:
-                score += 80
-                # Extra boost if exact conductor count matches (e.g. 12/2 with 12/2)
-                t_cond = re.search(r"\b(\d{1,2})/([2-4])\b", target_text)
-                c_cond = re.search(r"\b(\d{1,2})/([2-4])\b", c_text)
-                if t_cond and c_cond and t_cond.groups() == c_cond.groups():
-                    score += 60
+            if t_g and c_g:
+                diff = abs(t_g[0] - c_g[0])
+                if diff < 1e-4:
+                    score += 80
+                    # Extra boost if exact conductor count matches (e.g. 12/2 with 12/2)
+                    t_cond = re.search(r"\b(\d{1,2})/([2-4])\b", target_text)
+                    c_cond = re.search(r"\b(\d{1,2})/([2-4])\b", c_text)
+                    if t_cond and c_cond and t_cond.groups() == c_cond.groups():
+                        score += 60
+                else:
+                    ratio = max(t_g[0], c_g[0]) / max(min(t_g[0], c_g[0]), 0.1)
+                    if ratio <= 2.2:
+                        score += 40
+                    elif (t_g[0] >= 20 and c_g[0] <= 11) or (t_g[0] <= 11 and c_g[0] >= 20):
+                        score -= 100
             # Health Care Facility (HCF) cable affinity
             t_hcf = bool(re.search(r"hcf|health care", target_text, re.I))
             c_hcf = bool(re.search(r"hcf|health care", c_text, re.I))
             if t_hcf and c_hcf:
                 score += 80
 
-        # Conduit: Keep EMT with EMT, GRC/Rigid with GRC/Rigid, PVC with PVC, Sch 40 with Sch 40, Sch 80 with Sch 80
-        if "Conduit - Metallic" in target_node or "Conduit - Non-Metallic" in target_node:
+        # Conduit: Keep pipe with pipe, and fittings with fittings
+        if "Conduit" in target_node:
+            def _is_conduit_fitting(row: dict[str, str], text: str) -> bool:
+                raw = str(row.get("PRODUCT", "")).lower()
+                if re.search(r"^con\s+(?:emt|imc|grc|rigid|pvc)\s+.*conduit", raw):
+                    return False
+                return bool(re.search(r"connector|conn\b|coupling|cplg|fitting|adapter|locknut|bushing|strap", text, re.I))
+
+            t_is_fitting = _is_conduit_fitting(target, target_text)
+            c_is_fitting = _is_conduit_fitting(c, c_text)
+            if t_is_fitting != c_is_fitting:
+                score -= 150
+
+        # Conduit Material Matching: Keep EMT with EMT, GRC/Rigid with GRC/Rigid, PVC with PVC, Sch 40 with Sch 40, Sch 80 with Sch 80
+        if "Conduit - Metallic" in target_node or "Conduit - Non-Metallic" in target_node or "Conduit - Flexible" in target_node:
             t_is_emt = bool(re.search(r"\bemt\b", target_text, re.I))
             c_is_emt = bool(re.search(r"\bemt\b", c_text, re.I))
             if t_is_emt and c_is_emt:
@@ -283,6 +376,22 @@ def find_similar_products(
             if t_is_pvc and c_is_pvc:
                 # Match Schedule 40 vs Schedule 80
                 t_sch80 = bool(re.search(r"sched(?:ule)?[- ]?80|sch[- ]?80", target_text, re.I))
+                c_sch80 = bool(re.search(r"sched(?:ule)?[- ]?80|sch[- ]?80", c_text, re.I))
+                if t_sch80 == c_sch80:
+                    score += 60
+                else:
+                    score -= 30
+                # Trade size proximity match
+                t_sz = ga.trade_sizes(target)
+                c_sz = ga.trade_sizes(c)
+                if t_sz and c_sz:
+                    diff = abs(t_sz[0] - c_sz[0])
+                    if diff < 1e-4:
+                        score += 50
+                    elif diff <= 0.5:
+                        score += 30
+                    else:
+                        score -= 20
                 c_sch80 = bool(re.search(r"sched(?:ule)?[- ]?80|sch[- ]?80", c_text, re.I))
                 if t_sch80 == c_sch80:
                     score += 60
@@ -359,8 +468,8 @@ def find_similar_products(
 
         # Heavy duty receptacles (Dryer/Range/Welder): Keep with other heavy duty, not standard 15A duplex
         if "Receptacles" in target_node:
-            t_heavy = bool(re.search(r"dryer|range|welder|30a|50a|14-30|14-50|6-50|10-30", target_text, re.I))
-            c_heavy = bool(re.search(r"dryer|range|welder|30a|50a|14-30|14-50|6-50|10-30", c_text, re.I))
+            t_heavy = bool(re.search(r"dryer|range|welder|\b(?:30|50|60)\s?a(?:mp)?\b|14-30|14-50|14-60|6-50|10-30|10-50", target_text, re.I))
+            c_heavy = bool(re.search(r"dryer|range|welder|\b(?:30|50|60)\s?a(?:mp)?\b|14-30|14-50|14-60|6-50|10-30|10-50", c_text, re.I))
             if t_heavy == c_heavy:
                 score += 50
                 # Match specific application: dryer (14-30, 10-30, 30A 125/250V) vs range/ev (14-50, 50A)
@@ -371,7 +480,73 @@ def find_similar_products(
                 elif t_dryer != c_dryer:
                     score -= 40
             else:
-                score -= 50
+                score -= 100
+
+            # Meltric / Pin & Sleeve Industrial Disconnect Receptacles
+            t_is_meltric = bool(re.search(r"meltric|padlock pawl|\bdsn?\d{2}\b", target_text, re.I))
+            c_is_meltric = bool(re.search(r"meltric|padlock pawl|\bdsn?\d{2}\b", c_text, re.I))
+            if t_is_meltric != c_is_meltric:
+                score -= 200
+
+            # Severely penalize tele-power poles / cord drop poles on standard receptacles
+            t_pole = bool(re.search(r"\btpp\b|tele-power|cord drop|service pole|power pole", target_text, re.I))
+            c_pole = bool(re.search(r"\btpp\b|tele-power|cord drop|service pole|power pole", c_text, re.I))
+            if t_pole != c_pole:
+                score -= 200
+
+            # Match voltage (125V vs 250V)
+            t_250 = bool(re.search(r"250\s*v|6-15|6-20", target_text, re.I)) and not bool(re.search(r"125/250", target_text))
+            c_250 = bool(re.search(r"250\s*v|6-15|6-20", c_text, re.I)) and not bool(re.search(r"125/250", c_text))
+            if t_250 == c_250:
+                score += 40
+            else:
+                score -= 80
+
+            # Duplex vs Single outlet format
+            t_sgl = bool(re.search(r"single|sgl|5851|5351", target_text, re.I)) and not bool(re.search(r"duplex", target_text, re.I))
+            c_sgl = bool(re.search(r"single|sgl|5851|5351", c_text, re.I)) and not bool(re.search(r"duplex", c_text, re.I))
+            if t_sgl == c_sgl:
+                score += 50
+            else:
+                score -= 60
+
+            # Tamper resistant (TR) affinity
+            t_tr = bool(re.search(r"\btr\b|tamper", target_text, re.I))
+            c_tr = bool(re.search(r"\btr\b|tamper", c_text, re.I))
+            if t_tr and c_tr:
+                score += 40
+
+            # Weather resistant (WR) outdoor affinity
+            t_wr = bool(re.search(r"\bwr\b|weather", target_text, re.I))
+            c_wr = bool(re.search(r"\bwr\b|weather", c_text, re.I))
+            if t_wr and c_wr:
+                score += 50
+            elif t_wr != c_wr:
+                score -= 30
+
+            # Commercial Grade vs Residential Grade affinity
+            t_comm = bool(re.search(r"commercial|comm grd|spec(?:ification)? grade|cr15|cr20|br15|br20|5262|5362", target_text, re.I))
+            c_comm = bool(re.search(r"commercial|comm grd|spec(?:ification)? grade|cr15|cr20|br15|br20|5262|5362", c_text, re.I))
+            if t_comm and c_comm:
+                score += 40
+            elif t_comm != c_comm:
+                score -= 20
+
+            # USB receptacle matching: keep USB chargers with USB chargers, and standard outlets with standard outlets
+            t_usb = bool(re.search(r"\busb\b|charger", target_text, re.I))
+            c_usb = bool(re.search(r"\busb\b|charger", c_text, re.I))
+            if t_usb and c_usb:
+                score += 80
+            elif t_usb != c_usb:
+                score -= 40
+
+            # Kitchen Countertop Pop-Up Receptacle Kits
+            t_is_popup = bool(re.search(r"countertop|pop[- ]?up|surface mount.*receptacle kit|rct200", target_text, re.I))
+            c_is_popup = bool(re.search(r"countertop|pop[- ]?up|surface mount.*receptacle kit|rct200", c_text, re.I))
+            if t_is_popup and c_is_popup:
+                score += 150
+            elif t_is_popup != c_is_popup:
+                score -= 150
 
         # Lighting: Keep downlights with downlights, wallpacks with wallpacks, floods with floods, vanity with vanity
         if "Indoor Lighting" in target_node or "Outdoor Lighting" in target_node:
@@ -410,11 +585,27 @@ def find_similar_products(
                 if t_comm and c_comm:
                     score += 40
 
-            # Commercial troffers and flat panels: prioritize matching panels, troffers, and linear architectural fixtures
-            if t_lt == "panel_troffer":
-                if c_lt == "panel_troffer":
+            # Emergency & Exit fixtures: keep combos with combos, signs with signs, and emergency light units with light units
+            if t_lt in ("exit_combo", "exit_sign", "emergency_unit"):
+                if c_lt == t_lt:
+                    score += 100
+                elif c_lt in ("exit_combo", "exit_sign", "emergency_unit"):
+                    score += 40
+                else:
+                    score -= 80
+
+            # Vapor tight vs open strip
+            if t_lt == "vapor_tight":
+                if c_lt == "vapor_tight":
                     score += 100
                 elif c_lt == "strip_wrap":
+                    score += 50
+                else:
+                    score -= 60
+            elif t_lt == "strip_wrap":
+                if c_lt == "strip_wrap":
+                    score += 80
+                elif c_lt == "vapor_tight":
                     score += 40
                 else:
                     score -= 60
@@ -431,6 +622,40 @@ def find_similar_products(
                         c_norm = c_len.group(1) or ("24" if c_len.group(2) == "2" else "36" if c_len.group(2) == "3" else "48" if c_len.group(2) == "4" else "96")
                         if t_norm == c_norm:
                             score += 60
+                else:
+                    score -= 60
+
+            # Temporary & Jobsite Work Lights
+            if t_lt == "work_light":
+                if c_lt == "work_light":
+                    score += 120
+                else:
+                    score -= 80
+
+            # Commercial troffers and flat panels: prioritize matching panels, troffers, and linear architectural fixtures
+            if t_lt == "panel_troffer":
+                if c_lt == "panel_troffer":
+                    score += 100
+                elif c_lt == "strip_wrap":
+                    score += 40
+                else:
+                    score -= 60
+
+            # Outdoor flood lights vs screw-in flood light bulbs
+            if t_lt == "floodlight":
+                t_is_bulb = bool(re.search(r"\bbulb\b|par38|par30|br30|e26", target_text, re.I))
+                c_is_bulb = bool(re.search(r"\bbulb\b|par38|par30|br30|e26", c_text, re.I))
+                if t_is_bulb == c_is_bulb:
+                    score += 80
+                else:
+                    score -= 100
+
+            # Undercabinet and LED tape light: keep tape reels with tape reels, fixtures with fixtures, connectors with connectors
+            if t_lt == "undercabinet_tape":
+                t_is_conn = bool(re.search(r"connector|jumper|tape to tape|lead|splice", target_text, re.I))
+                c_is_conn = bool(re.search(r"connector|jumper|tape to tape|lead|splice", c_text, re.I))
+                if t_is_conn == c_is_conn:
+                    score += 70
                 else:
                     score -= 60
 
@@ -467,13 +692,23 @@ def find_similar_products(
                 score -= 60
 
         # Bulbs & Tubes: Keep linear tubes with linear tubes, screw-in bulbs with screw-in bulbs
-        if "Bulbs" in target_node:
-            t_is_tube = bool(re.search(r"\bt[58]\b|\bt12\b|linear|tube|u-bend", target_text, re.I))
-            c_is_tube = bool(re.search(r"\bt[58]\b|\bt12\b|linear|tube|u-bend", c_text, re.I))
-            if t_is_tube == c_is_tube:
-                score += 80
-            else:
-                score -= 80
+        if "Bulbs" in target_node or "Tube Type" in target_node:
+            t_is_tube = bool(re.search(r"\bt[58]\b|\bt12\b|linear.*tube|tube.*lamp|u-bend", target_text, re.I))
+            c_is_tube = bool(re.search(r"\bt[58]\b|\bt12\b|linear.*tube|tube.*lamp|u-bend", c_text, re.I))
+            if t_is_tube and c_is_tube:
+                score += 120
+                # Match length: 24in/2ft, 36in/3ft, 48in/4ft, 96in/8ft
+                t_len = re.search(r"\b(24|36|48|96)\s*(?:in|inch|\"|(?=t8|t5))|\b([2348])\s*ft\b", target_text, re.I)
+                c_len = re.search(r"\b(24|36|48|96)\s*(?:in|inch|\"|(?=t8|t5))|\b([2348])\s*ft\b", c_text, re.I)
+                if t_len and c_len:
+                    t_norm = t_len.group(1) or ("24" if t_len.group(2) == "2" else "36" if t_len.group(2) == "3" else "48" if t_len.group(2) == "4" else "96")
+                    c_norm = c_len.group(1) or ("24" if c_len.group(2) == "2" else "36" if c_len.group(2) == "3" else "48" if c_len.group(2) == "4" else "96")
+                    if t_norm == c_norm:
+                        score += 80
+                    elif abs(int(t_norm) - int(c_norm)) <= 12:
+                        score += 40
+            elif t_is_tube != c_is_tube:
+                score -= 100
 
         # Load Centers & Panelboards: Keep actual loadcenter panels with other loadcenters, and hardware with hardware
         if "Load Centers" in target_node:
@@ -491,6 +726,22 @@ def find_similar_products(
             elif t_is_prl != c_is_prl:
                 score -= 60
 
+            # Ground bar kits matching
+            t_is_gbk = bool(re.search(r"ground bar|gbk\d|gbkp", target_text, re.I))
+            c_is_gbk = bool(re.search(r"ground bar|gbk\d|gbkp", c_text, re.I))
+            if t_is_gbk and c_is_gbk:
+                score += 150
+            elif t_is_gbk != c_is_gbk:
+                score -= 80
+
+            # Series matching for residential load centers (Type CH vs Type BR vs QO vs Homeline)
+            t_is_ch = bool(re.search(r"\bch\b|\bchp\b|type ch", target_text, re.I)) and not bool(re.search(r"\bbr\b|\bbrp\b", target_text, re.I))
+            c_is_ch = bool(re.search(r"\bch\b|\bchp\b|type ch", c_text, re.I)) and not bool(re.search(r"\bbr\b|\bbrp\b", c_text, re.I))
+            if t_is_ch and c_is_ch:
+                score += 150
+            elif t_is_ch != c_is_ch and (t_is_ch or c_is_ch):
+                score -= 150
+
             # 3-Phase vs 1-Phase load centers
             t_3ph = bool(re.search(r"3\s*(?:ph|phase)|3br\d", target_text, re.I))
             c_3ph = bool(re.search(r"3\s*(?:ph|phase)|3br\d", c_text, re.I))
@@ -506,6 +757,15 @@ def find_similar_products(
                 score += 30
             else:
                 score -= 20
+
+        # Surge Protection / SPD vs Standalone Computer UPS Battery Backup Boxes
+        if "Power Quality" in target_node:
+            t_is_spd = bool(re.search(r"surge|spd|arrest|ig1200|ag3000|ag240|brnsurge|brpsurge|ds72", target_text, re.I)) and not bool(re.search(r"\bups\b|battery pack|minuteman|en550|etr1500", target_text, re.I))
+            c_is_spd = bool(re.search(r"surge|spd|arrest|ig1200|ag3000|ag240|brnsurge|brpsurge|ds72", c_text, re.I)) and not bool(re.search(r"\bups\b|battery pack|minuteman|en550|etr1500", c_text, re.I))
+            if t_is_spd and c_is_spd:
+                score += 150
+            elif t_is_spd != c_is_spd:
+                score -= 150
 
         # Relays: Keep phase/voltage/power monitors with other monitors, sockets with sockets
         if "Relays" in target_node:
@@ -652,7 +912,25 @@ def find_similar_products(
             t_p = re.search(r"\b([23])\s*(?:p|pole)\b", target_text, re.I)
             c_p = re.search(r"\b([23])\s*(?:p|pole)\b", c_text, re.I)
             if t_p and c_p and t_p.group(1) == c_p.group(1):
+                score += 50
+            elif t_p and c_p and t_p.group(1) != c_p.group(1):
+                score -= 40
+
+            # Double-throw (DT) vs single-throw (DG/DH) safety switches
+            t_dt = bool(re.search(r"\bdt\d|double throw", target_text, re.I))
+            c_dt = bool(re.search(r"\bdt\d|double throw", c_text, re.I))
+            if t_dt == c_dt:
                 score += 40
+            else:
+                score -= 80
+
+            # Spa panels vs industrial safety switches
+            t_spa = bool(re.search(r"spa panel|spa pack", target_text, re.I))
+            c_spa = bool(re.search(r"spa panel|spa pack", c_text, re.I))
+            if t_spa == c_spa:
+                score += 40
+            else:
+                score -= 80
 
             # NEMA 1 indoor vs NEMA 3R outdoor enclosure
             t_nema1 = bool(re.search(r"nema 1\b|nema1\b|\bngk\b|\bngb\b|\bugk\b|\bugb\b", target_text, re.I))
@@ -662,12 +940,12 @@ def find_similar_products(
             else:
                 score -= 30
 
-        # Data & Telecom Workstation: Keep data jacks (Cat5e / Cat6 / RJ45) with other data jacks
+        # Data & Telecom Workstation: Keep data jacks with data jacks, modular plugs with modular plugs, faceplates with faceplates
         if "Workstation" in target_node:
-            t_is_jack = bool(re.search(r"\bcat ?[56][ae]?\b|rj ?45|keystone jack|data jack|tracjack", target_text, re.I))
-            c_is_jack = bool(re.search(r"\bcat ?[56][ae]?\b|rj ?45|keystone jack|data jack|tracjack", c_text, re.I))
+            t_is_jack = bool(re.search(r"\bcat ?[56][ae]?\b|rj ?45|keystone jack|data jack|tracjack", target_text, re.I)) and not bool(re.search(r"plug\b|modular plug|connector\b", target_text, re.I)) and not bool(re.search(r"faceplate|wall\s*plate", target_text, re.I))
+            c_is_jack = bool(re.search(r"\bcat ?[56][ae]?\b|rj ?45|keystone jack|data jack|tracjack", c_text, re.I)) and not bool(re.search(r"plug\b|modular plug|connector\b", c_text, re.I)) and not bool(re.search(r"faceplate|wall\s*plate", c_text, re.I))
             if t_is_jack and c_is_jack:
-                score += 100
+                score += 120
                 # Match category level (Cat5e with Cat5e, Cat6 with Cat6)
                 t_cat = re.search(r"cat ?(5e?|6a?)", target_text, re.I)
                 c_cat = re.search(r"cat ?(5e?|6a?)", c_text, re.I)
@@ -676,21 +954,254 @@ def find_similar_products(
             elif t_is_jack != c_is_jack:
                 score -= 80
 
-        # Pilot Devices: Keep industrial pushbuttons with other pushbuttons, and selector switches with selector switches
-        if "Pilot Devices" in target_node:
-            t_is_pb = bool(re.search(r"pushbutton|push button|\bpb0[1-3]c\b|flush pb|momentary", target_text, re.I))
-            c_is_pb = bool(re.search(r"pushbutton|push button|\bpb0[1-3]c\b|flush pb|momentary", c_text, re.I))
-            if t_is_pb and c_is_pb:
+            t_is_plug = bool(re.search(r"modular plug|rj45 plug|ez-rj45|rj-45|100010|100003|pass-thru", target_text, re.I)) and not bool(re.search(r"faceplate|wall\s*plate", target_text, re.I))
+            c_is_plug = bool(re.search(r"modular plug|rj45 plug|ez-rj45|rj-45|100010|100003|pass-thru", c_text, re.I)) and not bool(re.search(r"faceplate|wall\s*plate", c_text, re.I))
+            if t_is_plug and c_is_plug:
+                score += 120
+            elif t_is_plug != c_is_plug:
+                score -= 80
+
+            t_is_fp = bool(re.search(r"faceplate|wall\s*plate|fpsk|wp340|wp1014", target_text, re.I))
+            c_is_fp = bool(re.search(r"faceplate|wall\s*plate|fpsk|wp340|wp1014", c_text, re.I))
+            if t_is_fp and c_is_fp:
+                score += 120
+                # Match port count (1-port with 1-port/2-port, 4-port with 4-port/6-port)
+                t_p = re.search(r"\b([1-6])\s*port\b", target_text, re.I)
+                c_p = re.search(r"\b([1-6])\s*port\b", c_text, re.I)
+                if t_p and c_p:
+                    if t_p.group(1) == c_p.group(1):
+                        score += 60
+                    elif abs(int(t_p.group(1)) - int(c_p.group(1))) <= 1:
+                        score += 30
+            elif t_is_fp != c_is_fp:
+                score -= 80
+
+            t_is_fconn = bool(re.search(r"f-type|f-conn|f compression|ex6xl|vdv812|f81\b", target_text, re.I))
+            c_is_fconn = bool(re.search(r"f-type|f-conn|f compression|ex6xl|vdv812|f81\b", c_text, re.I))
+            if t_is_fconn and c_is_fconn:
+                score += 150
+            elif t_is_fconn != c_is_fconn:
+                score -= 100
+
+        # Low Voltage Brackets: Keep brackets with brackets, and bridle rings / cable supports with bridle rings
+        if "Datacom/Low Voltage" in target_node:
+            t_is_lvb = bool(re.search(r"low voltage.*(?:bracket|device|plate|frame)|\blv[1-4]\b|\blvn[1-4]\b|sc100", target_text, re.I))
+            c_is_lvb = bool(re.search(r"low voltage.*(?:bracket|device|plate|frame)|\blv[1-4]\b|\blvn[1-4]\b|sc100", c_text, re.I))
+            if t_is_lvb and c_is_lvb:
+                score += 150
+                t_g = ga.gang_count(target)
+                c_g = ga.gang_count(c)
+                if t_g and c_g and t_g == c_g:
+                    score += 60
+                elif t_g and c_g and t_g != c_g:
+                    score -= 40
+            elif t_is_lvb != c_is_lvb:
+                score -= 100
+
+        # Fiber Optic Products: Keep Single-Mode with Single-Mode, Multimode with Multimode, match connectors and form factor
+        if "Fiber Optic" in target_node:
+            t_is_sm = bool(re.search(r"single[- ]?mode|\b9/125\b|\b8\.3/125\b|\bsm\b|os[12]\b", target_text, re.I))
+            c_is_sm = bool(re.search(r"single[- ]?mode|\b9/125\b|\b8\.3/125\b|\bsm\b|os[12]\b", c_text, re.I))
+            t_is_mm = bool(re.search(r"multi[- ]?mode|\b50/125\b|\b62\.5/125\b|\bmm\b|om[1-4]\b", target_text, re.I))
+            c_is_mm = bool(re.search(r"multi[- ]?mode|\b50/125\b|\b62\.5/125\b|\bmm\b|om[1-4]\b", c_text, re.I))
+            if (t_is_sm and c_is_sm) or (t_is_mm and c_is_mm):
+                score += 150
+            elif (t_is_sm and c_is_mm) or (t_is_mm and c_is_sm):
+                score -= 200
+
+            # Match connector interface (LC with LC, SC with SC, ST with ST)
+            t_lc = bool(re.search(r"\blc\b", target_text, re.I))
+            c_lc = bool(re.search(r"\blc\b", c_text, re.I))
+            if t_lc and c_lc:
+                score += 80
+            elif t_lc != c_lc and (t_lc or c_lc):
+                score -= 40
+
+            t_sc = bool(re.search(r"\bsc\b", target_text, re.I))
+            c_sc = bool(re.search(r"\bsc\b", c_text, re.I))
+            if t_sc and c_sc:
+                score += 80
+
+            # Form factor: patch jumper vs connector vs rack enclosure
+            t_is_jpr = bool(re.search(r"jumper|patch cable|cord", target_text, re.I))
+            c_is_jpr = bool(re.search(r"jumper|patch cable|cord", c_text, re.I))
+            if t_is_jpr and c_is_jpr:
                 score += 100
+            elif t_is_jpr != c_is_jpr:
+                score -= 80
+
+        # Low Voltage Cable: Keep Cat6/Cat5e with twisted pair, Coax (RG6) with Coax, Security/Access with Security
+        if "Low Voltage Cable" in target_node:
+            t_is_coax = bool(re.search(r"rg-?6|rg-?59|coax", target_text, re.I))
+            c_is_coax = bool(re.search(r"rg-?6|rg-?59|coax", c_text, re.I))
+            if t_is_coax and c_is_coax:
+                score += 120
+            elif t_is_coax != c_is_coax:
+                score -= 100
+
+            t_is_utp = bool(re.search(r"cat ?[56]|4-pair|cmr|cmp|reelex", target_text, re.I)) and not t_is_coax
+            c_is_utp = bool(re.search(r"cat ?[56]|4-pair|cmr|cmp|reelex", c_text, re.I)) and not c_is_coax
+            if t_is_utp and c_is_utp:
+                score += 100
+                t_c6 = bool(re.search(r"cat ?6", target_text, re.I))
+                c_c6 = bool(re.search(r"cat ?6", c_text, re.I))
+                if t_c6 == c_c6:
+                    score += 50
+            elif t_is_utp != c_is_utp:
+                score -= 80
+
+        # Video & Surveillance Equipment: Keep cameras with cameras, hard drives with hard drives, NVRs with NVRs, and mounts with mounts
+        if "Video & Surveillance" in target_node or "Surveillance" in target_node:
+            t_is_hdd = bool(re.search(r"hard drive|purple.*drive|\bhdd\b|sata.*drive", target_text, re.I))
+            c_is_hdd = bool(re.search(r"hard drive|purple.*drive|\bhdd\b|sata.*drive", c_text, re.I))
+            if t_is_hdd and c_is_hdd:
+                score += 150
+            elif t_is_hdd != c_is_hdd:
+                score -= 100
+
+            t_is_cam = bool(re.search(r"camera|dome|bullet|fisheye|turret|\bfd\d|\bms\d|\bib\d", target_text, re.I)) and not t_is_hdd
+            c_is_cam = bool(re.search(r"camera|dome|bullet|fisheye|turret|\bfd\d|\bms\d|\bib\d", c_text, re.I)) and not c_is_hdd
+            if t_is_cam and c_is_cam:
+                score += 120
+            elif t_is_cam != c_is_cam:
+                score -= 60
+
+            t_is_nvr = bool(re.search(r"\bnvr\b|recorder|\bdvr\b|\bnd\d", target_text, re.I)) and not t_is_hdd
+            c_is_nvr = bool(re.search(r"\bnvr\b|recorder|\bdvr\b|\bnd\d", c_text, re.I)) and not c_is_hdd
+            if t_is_nvr and c_is_nvr:
+                score += 120
+            elif t_is_nvr != c_is_nvr:
+                score -= 60
+
+            t_is_mount = bool(re.search(r"mounting adapter|bracket|pendant|wall mount|gooseneck|\bam-\d", target_text, re.I))
+            c_is_mount = bool(re.search(r"mounting adapter|bracket|pendant|wall mount|gooseneck|\bam-\d", c_text, re.I))
+            if t_is_mount and c_is_mount:
+                score += 120
+            elif t_is_mount != c_is_mount:
+                score -= 60
+
+        # Network Switches in Distribution Devices: Keep network switches with other network switches
+        if "Distribution Devices" in target_node:
+            t_is_net_sw = bool(re.search(r"switch|greennet|poe|gigabit.*switch", target_text, re.I)) and not bool(re.search(r"patch panel", target_text, re.I))
+            c_is_net_sw = bool(re.search(r"switch|greennet|poe|gigabit.*switch", c_text, re.I)) and not bool(re.search(r"patch panel", c_text, re.I))
+            if t_is_net_sw and c_is_net_sw:
+                score += 150
+            elif t_is_net_sw != c_is_net_sw:
+                score -= 80
+
+        # Pilot Devices: Keep industrial pushbuttons with other pushbuttons, selector switches with selector switches, and contact blocks with contact blocks
+        if "Pilot Devices" in target_node or "Pushbutton" in target_node:
+            t_is_block = bool(re.search(r"contact block|\bct0[1-3]c\b|\bb3t\d{2}\b|auxiliary contact", target_text, re.I))
+            c_is_block = bool(re.search(r"contact block|\bct0[1-3]c\b|\bb3t\d{2}\b|auxiliary contact", c_text, re.I))
+            if t_is_block and c_is_block:
+                score += 150
+            elif t_is_block != c_is_block:
+                score -= 100
+
+            t_is_plate = bool(re.search(r"legend plate|shroud", target_text, re.I))
+            c_is_plate = bool(re.search(r"legend plate|shroud", c_text, re.I))
+            if t_is_plate and c_is_plate:
+                score += 150
+            elif t_is_plate != c_is_plate:
+                score -= 100
+
+            # Emergency Stop / Mushroom operators
+            t_is_estop = bool(re.search(r"emergency stop|e-stop|twist release|mpet4|d7p-mt44|mushroom", target_text, re.I)) and not t_is_plate and not t_is_block
+            c_is_estop = bool(re.search(r"emergency stop|e-stop|twist release|mpet4|d7p-mt44|mushroom", c_text, re.I)) and not c_is_plate and not c_is_block
+            if t_is_estop and c_is_estop:
+                score += 150
+            elif t_is_estop != c_is_estop:
+                score -= 80
+
+            # Potentiometers
+            t_is_pot = bool(re.search(r"potentiometer|pot6a", target_text, re.I))
+            c_is_pot = bool(re.search(r"potentiometer|pot6a", c_text, re.I))
+            if t_is_pot and c_is_pot:
+                score += 150
+            elif t_is_pot != c_is_pot:
+                score -= 80
+
+        # Lampholders: Keep medium base screw-in sockets with screw-in sockets, and fluorescent tombstones with tombstones
+        if "Lampholders" in target_node:
+            t_is_tomb = bool(re.search(r"tombstone|bi-pin|g5|g13|fluorescent.*socket|t8.*socket|t12.*socket", target_text, re.I))
+            c_is_tomb = bool(re.search(r"tombstone|bi-pin|g5|g13|fluorescent.*socket|t8.*socket|t12.*socket", c_text, re.I))
+            if t_is_tomb and c_is_tomb:
+                score += 120
+            elif t_is_tomb != c_is_tomb:
+                score -= 100
+
+            t_is_keyless = bool(re.search(r"keyless", target_text, re.I))
+            c_is_keyless = bool(re.search(r"keyless", c_text, re.I))
+            t_is_pull = bool(re.search(r"pull chain|pullchain", target_text, re.I))
+            c_is_pull = bool(re.search(r"pull chain|pullchain", c_text, re.I))
+            if (t_is_keyless and c_is_keyless) or (t_is_pull and c_is_pull):
+                score += 60
+
+        # Timer Controls: Keep in-wall electronic/digital timers with in-wall timers, and heavy mechanical time clocks (T101/T104) with time clocks
+        if "Timer Controls" in target_node:
+            t_is_clock = bool(re.search(r"\bt10[1-4]\b|time switch|time clock|metal enclosure|nema 1.*timer|mechanical.*switch", target_text, re.I))
+            c_is_clock = bool(re.search(r"\bt10[1-4]\b|time switch|time clock|metal enclosure|nema 1.*timer|mechanical.*switch", c_text, re.I))
+            if t_is_clock and c_is_clock:
+                score += 120
+            elif t_is_clock != c_is_clock:
+                score -= 80
+
+        # Occupancy Sensors: Keep in-wall switch sensors with in-wall switch sensors, and ceiling 360 sensors with ceiling sensors
+        if "Occupancy Sensors" in target_node:
+            t_is_ceiling = bool(re.search(r"ceiling|360 degree|center mount|dt-3|dt-2", target_text, re.I))
+            c_is_ceiling = bool(re.search(r"ceiling|360 degree|center mount|dt-3|dt-2", c_text, re.I))
+            if t_is_ceiling and c_is_ceiling:
+                score += 100
+            elif t_is_ceiling != c_is_ceiling:
+                score -= 80
+
+            t_is_ppack = bool(re.search(r"power pack|bz-50|bz150", target_text, re.I))
+            c_is_ppack = bool(re.search(r"power pack|bz-50|bz150", c_text, re.I))
+            if t_is_ppack and c_is_ppack:
+                score += 120
+            elif t_is_ppack != c_is_ppack:
+                score -= 100
+
+            t_is_pb = bool(re.search(r"pushbutton|push button|\bpb0[1-3]c\b|flush pb|momentary|bs3dl", target_text, re.I)) and not t_is_block and not t_is_plate
+            c_is_pb = bool(re.search(r"pushbutton|push button|\bpb0[1-3]c\b|flush pb|momentary|bs3dl", c_text, re.I)) and not c_is_block and not c_is_plate
+            if t_is_pb and c_is_pb:
+                score += 120
                 # Boost matching 22.5mm vs 30.5mm size
-                t_22 = bool(re.search(r"22(?:\.5)?\s*mm|\bpb0\d\b", target_text, re.I))
-                c_22 = bool(re.search(r"22(?:\.5)?\s*mm|\bpb0\d\b", c_text, re.I))
+                t_22 = bool(re.search(r"22(?:\.5)?\s*mm|\bpb0\d\b|bs3", target_text, re.I))
+                c_22 = bool(re.search(r"22(?:\.5)?\s*mm|\bpb0\d\b|bs3", c_text, re.I))
                 if t_22 and c_22:
                     score += 50
             elif t_is_pb != c_is_pb:
                 score -= 60
 
-        # Starters & Contactors: Group Soft Starters together vs standard full-voltage starters/contactors
+        # Relays: Keep plug-in relays with plug-in relays, sockets with sockets, and enclosed/rib relays with enclosed relays
+        if "Relays" in target_node:
+            t_is_socket = bool(re.search(r"socket|base\b", target_text, re.I))
+            c_is_socket = bool(re.search(r"socket|base\b", c_text, re.I))
+            if t_is_socket == c_is_socket:
+                score += 120
+            else:
+                score -= 100
+
+            t_is_rib = bool(re.search(r"\brib\b|enclosed relay", target_text, re.I))
+            c_is_rib = bool(re.search(r"\brib\b|enclosed relay", c_text, re.I))
+            if t_is_rib == c_is_rib:
+                score += 80
+            else:
+                score -= 80
+
+            # Pin count matching (8-pin vs 11-pin vs 14-pin)
+            t_pins = re.search(r"\b(8|11|14)[- ]?pin\b|cr-u[0-9]+[ad]c([23])", target_text, re.I)
+            c_pins = re.search(r"\b(8|11|14)[- ]?pin\b|cr-u[0-9]+[ad]c([23])", c_text, re.I)
+            if t_pins and c_pins:
+                t_p_num = t_pins.group(1) or ("8" if t_pins.group(2) == "2" else "11")
+                c_p_num = c_pins.group(1) or ("8" if c_pins.group(2) == "2" else "11")
+                if t_p_num == c_p_num:
+                    score += 80
+                else:
+                    score -= 80
+
+        # Starters & Contactors: Group Soft Starters, Manual Motor Protectors, and Contactors cleanly
         if "Starters & Contactors" in target_node:
             t_is_soft = bool(re.search(r"softstart|soft start|pcs-\d{3}", target_text, re.I))
             c_is_soft = bool(re.search(r"softstart|soft start|pcs-\d{3}", c_text, re.I))
@@ -698,6 +1209,58 @@ def find_similar_products(
                 score += 150
             elif t_is_soft != c_is_soft:
                 score -= 80
+
+            t_is_mmp = bool(re.search(r"manual motor|motor protector|ms116|ms132|kt7", target_text, re.I))
+            c_is_mmp = bool(re.search(r"manual motor|motor protector|ms116|ms132|kt7", c_text, re.I))
+            if t_is_mmp and c_is_mmp:
+                score += 150
+            elif t_is_mmp != c_is_mmp:
+                score -= 100
+
+            t_is_cont = bool(re.search(r"contactor|dp\d{2}c|af\d{2}|ca7", target_text, re.I)) and not t_is_mmp
+            c_is_cont = bool(re.search(r"contactor|dp\d{2}c|af\d{2}|ca7", c_text, re.I)) and not c_is_mmp
+            if t_is_cont and c_is_cont:
+                score += 80
+            elif t_is_cont != c_is_cont:
+                score -= 60
+
+        # Terminal Blocks: Keep feed-through with feed-through, ground with ground, end stops with end stops, barriers with barriers, and jumpers with jumpers
+        if "Terminal Blocks" in target_node:
+            t_is_gnd = bool(re.search(r"\bground\b|\bgrnd\b|\.p\b|-pe\b|green.?yellow", target_text, re.I))
+            c_is_gnd = bool(re.search(r"\bground\b|\bgrnd\b|\.p\b|-pe\b|green.?yellow", c_text, re.I))
+            if t_is_gnd and c_is_gnd:
+                score += 150
+            elif t_is_gnd != c_is_gnd:
+                score -= 80
+
+            t_is_stop = bool(re.search(r"end stop|end bracket|bam4|bam2", target_text, re.I))
+            c_is_stop = bool(re.search(r"end stop|end bracket|bam4|bam2", c_text, re.I))
+            if t_is_stop and c_is_stop:
+                score += 150
+            elif t_is_stop != c_is_stop:
+                score -= 80
+
+            t_is_barr = bool(re.search(r"end section|end barrier|fem6|separator", target_text, re.I))
+            c_is_barr = bool(re.search(r"end section|end barrier|fem6|separator", c_text, re.I))
+            if t_is_barr and c_is_barr:
+                score += 150
+            elif t_is_barr != c_is_barr:
+                score -= 80
+
+            t_is_jmp = bool(re.search(r"jumper bar|jumper|bjmi", target_text, re.I))
+            c_is_jmp = bool(re.search(r"jumper bar|jumper|bjmi", c_text, re.I))
+            if t_is_jmp and c_is_jmp:
+                score += 150
+            elif t_is_jmp != c_is_jmp:
+                score -= 80
+
+            # Feed through matching
+            t_is_ft = not t_is_gnd and not t_is_stop and not t_is_barr and not t_is_jmp
+            c_is_ft = not c_is_gnd and not c_is_stop and not c_is_barr and not c_is_jmp
+            if t_is_ft and c_is_ft:
+                score += 80
+            elif t_is_ft != c_is_ft:
+                score -= 60
 
         # Safety Equipment: Keep Lockout / Tagout (LOTO) items together vs general PPE / caution tape
         if "Safety Equipment" in target_node:
@@ -837,6 +1400,26 @@ def find_similar_products(
                     score += 40
             elif t_is_head != c_is_head:
                 score -= 80
+
+        # Deeper taxonomy alignment (Subcategory 2 & 3 from product_taxonomy.csv)
+        t_sub2 = target.get("tax_sub2", "").strip()
+        c_sub2 = c.get("tax_sub2", "").strip()
+        if t_sub2 and c_sub2:
+            # Receptacles: don't penalize Tamper Resistant (TR) vs non-TR variants (e.g. 3232 vs 3232-TR)
+            is_recp_res = "Receptacles" in target_node and ("Residential" in t_sub2 and "Residential" in c_sub2)
+            if t_sub2 == c_sub2:
+                score += 60
+                t_sub3 = target.get("tax_sub3", "").strip()
+                c_sub3 = c.get("tax_sub3", "").strip()
+                if t_sub3 and c_sub3:
+                    if t_sub3 == c_sub3:
+                        score += 40
+                    else:
+                        score -= 20
+            elif is_recp_res:
+                score += 30
+            else:
+                score -= 40
 
         # Order volume tie-breaker
         score += min(c_orders, 500) / 10.0

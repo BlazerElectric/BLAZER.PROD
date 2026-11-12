@@ -29,6 +29,7 @@ from tenacity import (
 )
 from tqdm.asyncio import tqdm
 
+from checkpoint_safety import require_checkpoint
 from manufacturer_normalization import normalize_enriched_products
 
 MODEL = "gemini-3.1-flash-lite"
@@ -145,7 +146,8 @@ def _serialize(result: EnrichedProduct) -> dict:
     return row
 
 
-def load_checkpoint(path: str) -> pd.DataFrame:
+def load_checkpoint(path: str, allow_new: bool = False) -> pd.DataFrame:
+    require_checkpoint(path, allow_new)
     if os.path.exists(path):
         done = pd.read_csv(path, dtype=str, keep_default_na=False)
         return done.drop_duplicates(subset=ID_COL, keep="last")
@@ -158,7 +160,10 @@ def save_atomic(df: pd.DataFrame, path: str) -> None:
     os.replace(tmp, path)
 
 
-async def run(input_path: str, output_path: str, checkpoint_path: str) -> int:
+async def run(
+    input_path: str, output_path: str, checkpoint_path: str, allow_new_checkpoint: bool = False
+) -> int:
+    done = load_checkpoint(checkpoint_path, allow_new=allow_new_checkpoint)
     load_dotenv()
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
@@ -170,7 +175,6 @@ async def run(input_path: str, output_path: str, checkpoint_path: str) -> int:
         sys.exit(f"{input_path} is missing columns: {sorted(missing)}")
     source = source[[ID_COL, PRODUCT_COL]].drop_duplicates(subset=ID_COL, keep="first")
 
-    done = load_checkpoint(checkpoint_path)
     pending = source[~source[ID_COL].isin(set(done[ID_COL]))]
     logger.info("%d rows total, %d done, %d pending", len(source), len(done), len(pending))
 
@@ -220,9 +224,19 @@ def main() -> None:
     parser.add_argument("--input", default="products.csv")
     parser.add_argument("--output", default="enriched_products.csv")
     parser.add_argument("--checkpoint", default="enriched_products.checkpoint.csv")
+    parser.add_argument(
+        "--allow-new-checkpoint",
+        action="store_true",
+        help="Allow a missing checkpoint and start a new one; Gemini calls may incur costs.",
+    )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    failures = asyncio.run(run(args.input, args.output, args.checkpoint))
+    try:
+        failures = asyncio.run(
+            run(args.input, args.output, args.checkpoint, args.allow_new_checkpoint)
+        )
+    except FileNotFoundError as exc:
+        parser.error(str(exc))
     sys.exit(1 if failures else 0)
 
 

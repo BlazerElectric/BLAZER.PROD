@@ -2,7 +2,10 @@
 __pycache__/
 *.pyc
 *.checkpoint*.csv
+!enriched_products.checkpoint.csv
 product_accessories*.csv
+!product_accessories.csv
 similar_products.csv
+!similar_products.csv
 *.sample.csv
 *.tmp

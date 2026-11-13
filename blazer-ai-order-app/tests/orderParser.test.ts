@@ -31,10 +31,17 @@ describe("parseLine", () => {
     expect(parseLine("QO120 x 4")!.quantity).toBe(4);
   });
 
+  it("reads smart feet marks and keeps Unicode trade sizes", () => {
+    expect(parseLine("20’ #12 thhn")).toMatchObject({ quantity: 20, unit: "ft", query: "#12 thhn" });
+    expect(parseLine("2 2 ½” MA")).toMatchObject({ quantity: 2, query: '2 1/2" MA' });
+    expect(parseLine("2 ½” LB")).toMatchObject({ quantity: 2, query: '1/2" LB' });
+  });
+
   it("flags job names as headings only when unmatched and quantity-free", () => {
     expect(isLikelyHeading(parseLine("Smith residence - rough in")!, "none")).toBe(true);
     expect(isLikelyHeading(parseLine("Smith residence - rough in")!, "medium")).toBe(false);
     expect(isLikelyHeading(parseLine("5 widgets")!, "none")).toBe(false);
+    expect(isLikelyHeading(parseLine("quad rs cover")!, "none")).toBe(false);
   });
 
   it("turns cut notes into comments and footage", () => {
@@ -49,5 +56,17 @@ describe("parseOrderText", () => {
   it("skips headers/context and numbering", () => {
     const lines = parseOrderText("Job: Smith residence\nQTY DESCRIPTION\n1. 10 QO120\n2) 4 4sq box");
     expect(lines.map((l) => l.quantity)).toEqual([10, 4]);
+  });
+
+  it("splits long comma-separated material lists without splitting short spec phrases", () => {
+    const list = parseOrderText(
+      "200A feedthru panel, 30A BR, 2 20A BR, single gang bell box, 20A GFI, in use cover, ½” chase nipple, 20’ #12 thhn",
+    );
+    expect(list).toHaveLength(8);
+    expect(list[2]).toMatchObject({ quantity: 2, query: "20A BR" });
+    expect(list[6]).toMatchObject({ query: '1/2" chase nipple' });
+    expect(list[7]).toMatchObject({ quantity: 20, unit: "ft", query: "#12 thhn" });
+
+    expect(parseOrderText("20A breaker, 1 pole, 120V, QO series")).toHaveLength(1);
   });
 });

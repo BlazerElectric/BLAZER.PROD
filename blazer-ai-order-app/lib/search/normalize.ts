@@ -9,7 +9,11 @@ const PHRASES: Array<[RegExp, string]> = [
   [/\bweather[\s-]*proof\b/g, "weatherproof"],
   [/\btamper[\s-]*(?:resistant|resistance|proof)\b/g, "tr"],
   [/\bliquid[\s-]*tight\b/g, "liquidtight"],
+  [/\bfeed[\s-]*(?:thru|through)\b/g, "feedthru"],
+  [/\block[\s-]*rings?\b/g, "lockring"],
   [/\block[\s-]*nuts?\b/g, "locknut"],
+  [/\bmale[\s-]*adapters?\b/g, "maleadapter"],
+  [/\bfemale[\s-]*adapters?\b/g, "femaleadapter"],
   [/\bwire[\s-]*nuts?\b/g, "wirenut"],
   [/\bwall[\s-]*plates?\b/g, "plate"],
   [/\bjunction[\s-]*box(?:es)?\b/g, "jbox"],
@@ -63,6 +67,8 @@ const GROUPS: Record<string, string[]> = {
   square: ["sq", "sqr"],
   "4sq": ["4square", "foursquare"],
   afci: ["afc", "cafi", "cafci"],
+  locknut: ["lockring", "lockrings"],
+  maleadapter: ["ma"],
 };
 for (const [canonical, aliases] of Object.entries(GROUPS)) {
   for (const alias of aliases) SYNONYMS[alias] = canonical;
@@ -77,9 +83,26 @@ const STOPWORDS = new Set([
 const MIXED_FRACTION = /^\d+-\d+\/\d+$/;
 const FRACTION = /^\d+\/\d+$/;
 
+const FRACTION_GLYPHS: Record<string, string> = {
+  "¼": "1/4",
+  "½": "1/2",
+  "¾": "3/4",
+  "⅛": "1/8",
+  "⅜": "3/8",
+  "⅝": "5/8",
+  "⅞": "7/8",
+};
+
+export function normalizeSymbols(input: string): string {
+  return input
+    .replace(/(\d)([¼½¾⅛⅜⅝⅞])/g, "$1 $2")
+    .replace(/[¼½¾⅛⅜⅝⅞]/g, (fraction) => FRACTION_GLYPHS[fraction])
+    .replace(/[\u201c\u201d\u2033]/g, '"')
+    .replace(/[\u2018\u2019\u2032]/g, "'");
+}
+
 export function normalizeText(input: string): string {
-  let t = input.toLowerCase();
-  t = t.replace(/[\u201c\u201d\u2033]/g, '"').replace(/[\u2018\u2019\u2032]/g, "'");
+  let t = normalizeSymbols(input).toLowerCase();
   // "1 1/4" -> "1-1/4" (trade sizes)
   t = t.replace(/\b(\d+)\s+(\d+\/\d+)/g, "$1-$2");
   // inch marks and spelled inches after numbers: 3/4" , 2in , 1-1/4 inch

@@ -29,7 +29,7 @@ const PIN_QUALITY = 0.9;
 const PIN_BONUS = 0.3;
 const PIN_STEP = 0.08;
 /** Units that only make sense for wire, cable, tubing and other bulk goods. */
-const BULK_UNITS = new Set(["roll", "coil", "spool", "reel", "ft"]);
+const BULK_UNITS = new Set(["roll", "coil", "spool", "reel", "ft", "stick"]);
 const PIECE_CATEGORIES = new Set([
   "Fittings",
   "Connectors & Crimps",
@@ -42,6 +42,28 @@ const PIECE_CATEGORIES = new Set([
 ]);
 const BULK_UNIT_PENALTY = 0.6;
 const WIRE_CATEGORY = "Wire, Cable & Cord";
+const WIRE_SPEC_TOKENS = new Set(["thhn", "thwn", "xhhw", "mcm", "kcmil", "nmb"]);
+const RECEPTACLE_CATEGORY = "Wiring Devices";
+
+type ReceptacleForm = "single" | "duplex";
+type AdapterGender = "male" | "female";
+
+function receptacleForm(tokens: string[]): ReceptacleForm | undefined {
+  if (tokens.includes("duplex")) return "duplex";
+  if (tokens.some((token) => token === "single" || token === "sgl" || token === "sngl")) return "single";
+  return undefined;
+}
+
+function packageLength(product: ProductSummary): number | undefined {
+  const match = `${product.title} ${product.specs}`.match(/\b([\d,]+)\s*(?:feet|foot|ft)\b/i);
+  return match ? Number.parseInt(match[1].replace(/,/g, ""), 10) : undefined;
+}
+
+function adapterGender(tokens: string[]): AdapterGender | undefined {
+  if (tokens.includes("maleadapter") || (tokens.includes("male") && tokens.includes("adapter"))) return "male";
+  if (tokens.includes("femaleadapter") || (tokens.includes("female") && tokens.includes("adapter"))) return "female";
+  return undefined;
+}
 
 export interface SearchOptions {
   limit?: number;
@@ -265,6 +287,10 @@ export class SearchEngine {
     const specTokenCount = tokens.filter(isSpecToken).length;
     const specHits = new Uint8Array(N);
     const wantsSpecialty = tokens.some((t) => SPECIALTY_TOKENS.has(t));
+    const requestedReceptacleForm = receptacleForm(tokens);
+    const requestedAdapterGender = adapterGender(tokens);
+    const wantsIndoor = tokens.some((token) => token === "indoor" || token === "interior");
+    const wantsOutdoor = tokens.includes("outdoor");
     const pinRank = new Map<number, number>();
     rewrite.pinned.forEach((sku, k) => {
       const doc = this.bySku.get(sku.toLowerCase());
@@ -304,6 +330,32 @@ export class SearchEngine {
 
     const hits: SearchHit[] = [];
     for (const doc of touched) {
+      const product = this.docs[doc];
+      const productTokens = tokenize(`${product.title} ${product.specs}`);
+      if (tokens.includes("feedthru") && !productTokens.includes("feedthru") && !exactDocs.has(doc)) continue;
+      if (tokens.includes("cover") && !productTokens.includes("cover") && !exactDocs.has(doc)) continue;
+      if (product.subcategory === "Load Centers / Panelboards") {
+        const nema1 = productTokens.includes("nema") && productTokens.includes("1");
+        const nema3r = productTokens.includes("nema") && productTokens.includes("3r");
+        if (wantsIndoor && (productTokens.includes("outdoor") || nema3r) && !exactDocs.has(doc)) continue;
+        if (wantsOutdoor && (productTokens.includes("indoor") || nema1) && !exactDocs.has(doc)) continue;
+      }
+      if (requestedReceptacleForm && product.category === RECEPTACLE_CATEGORY && product.subcategory === "Receptacles") {
+        const candidateForm = receptacleForm(productTokens);
+        if (candidateForm && candidateForm !== requestedReceptacleForm && !exactDocs.has(doc)) continue;
+      }
+      if (requestedAdapterGender && product.category === "Fittings") {
+        const candidateGender = adapterGender(productTokens);
+        if (candidateGender && candidateGender !== requestedAdapterGender && !exactDocs.has(doc)) continue;
+      }
+      if (
+        bulkUnit &&
+        tokens.some((token) => WIRE_SPEC_TOKENS.has(token)) &&
+        product.category !== WIRE_CATEGORY &&
+        !exactDocs.has(doc)
+      ) {
+        continue;
+      }
       specMisses[doc] = specTokenCount - specHits[doc];
       const specFactor = Math.pow(SPEC_MISS_PENALTY, specMisses[doc]);
       let quality = totalIdf > 0 ? score[doc] / totalIdf : 0;
@@ -351,8 +403,43 @@ export class SearchEngine {
       !second ||
       top.score - second.score >= 0.05 ||
       (top.product.rank <= 200 && top.product.rank * 8 <= second.product.rank);
-    let confidence: MatchResult["confidence"] = top.exact || (top.quality >= 0.8 && dominant) ? "high" : "medium";
+    const exactSku = top.product.sku.toLowerCase() === query.trim().toLowerCase();
+    const topMpn = compactCode(top.product.mpn);
+    const packageLengths =
+      top.product.category === WIRE_CATEGORY && topMpn
+        ? new Set(
+            hits
+              .filter((hit) => compactCode(hit.product.mpn) === topMpn)
+              .map((hit) => packageLength(hit.product))
+              .filter((length): length is number => length !== undefined),
+          )
+        : new Set<number>();
+    const packageAmbiguous =
+      !exactSku && packageLengths.size > 1 && ![...packageLengths].some((length) => tokens.includes(String(length)));
+    let confidence: MatchResult["confidence"] =
+      (top.exact && !packageAmbiguous) || (top.quality >= 0.8 && dominant && !packageAmbiguous) ? "high" : "medium";
     const notes = slangNote ? [slangNote] : [];
+    if (packageAmbiguous) {
+      notes.push("Multiple package lengths are available — confirm the coil or spool length");
+    }
+    if (
+      !top.exact &&
+      tokens.some((token) => token === "breaker" || token === "br") &&
+      top.product.category === "Power Distribution" &&
+      top.product.subcategory === "Circuit Breakers" &&
+      !tokens.some((token) => /^[1-4]p$/.test(token))
+    ) {
+      confidence = "medium";
+      notes.push("Confirm breaker pole count and panel compatibility");
+    }
+    if (
+      tokens.includes("feedthru") &&
+      top.product.subcategory === "Circuit Breakers" &&
+      tokenize(top.product.title).includes("meter")
+    ) {
+      confidence = "medium";
+      notes.push("Confirm this meter-breaker assembly is the requested feed-through panel");
+    }
     // "a roll of romex": the cable type is clear but the gauge is a guess.
     if (!top.exact && top.product.category === WIRE_CATEGORY && !tokens.some(isSpecToken)) {
       confidence = "medium";

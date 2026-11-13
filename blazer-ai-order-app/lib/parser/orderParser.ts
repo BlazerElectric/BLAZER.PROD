@@ -1,4 +1,5 @@
 import type { ParsedLine } from "../types";
+import { normalizeSymbols } from "../search/normalize";
 
 const UNIT_WORDS: Record<string, string> = {
   ea: "ea", each: "ea", pc: "ea", pcs: "ea", piece: "ea", pieces: "ea", unit: "ea", units: "ea", qty: "ea", x: "ea",
@@ -86,6 +87,9 @@ function leadingQuantity(s: string): QtyMatch | null {
     const n = toInt(m[1]);
     const rest = m[2];
     if (SPEC_CONTEXT.test(rest)) return null;
+    if (n <= 3 && /^1\/2\b\s*"?\s*lb\b/i.test(rest)) {
+      return { quantity: n, unit: "ea", rest };
+    }
     // "1 1/4 emt" / "2 1/2 rigid" are trade sizes, not quantities.
     if (n <= 3 && /^(?:1\/4|1\/2|3\/4)\b/.test(rest)) return null;
     return { quantity: n, unit: "ea", rest };
@@ -170,7 +174,7 @@ export function parseLine(raw: string): ParsedLine | null {
   if (CONTEXT_LINE.test(original) && !/\d/.test(original.replace(/^po\s*#?\s*\d+/i, ""))) return null;
   if (!/[a-z]/i.test(original) && !/\d{3,}/.test(original)) return null;
 
-  const { text, comment, cutFeet } = extractComment(stripListMarker(original));
+  const { text, comment, cutFeet } = extractComment(stripListMarker(normalizeSymbols(original)));
   let working = cleanQuery(text);
   let quantity = 1;
   let unit = "ea";
@@ -208,7 +212,12 @@ export function parseLine(raw: string): ParsedLine | null {
  * and no catalog match; keep them out of the BOM.
  */
 export function isLikelyHeading(line: ParsedLine, confidence: string): boolean {
-  return confidence === "none" && !line.quantityExplicit && !/\d/.test(line.raw);
+  return (
+    confidence === "none" &&
+    !line.quantityExplicit &&
+    !/\d/.test(line.raw) &&
+    /\b(?:residence|jobsite)\b|-\s*rough[\s-]*in\b/i.test(line.raw)
+  );
 }
 
 /** Split pasted text (emails, panel schedules, takeoff lists) into order lines. */
@@ -217,8 +226,11 @@ export function parseOrderText(input: string, maxLines = 300): ParsedLine[] {
   for (const block of input.split(/\r?\n|;/)) {
     // "10 1/2 emt, 20 1/2 conn" -> separate items when every comma segment starts with a quantity.
     const segments = block.split(",");
-    const parts =
-      segments.length > 1 && segments.every((seg) => /^\s*\(?\d/.test(seg)) ? segments : [block];
+    // Long comma-delimited blocks are often pasted BOMs with implicit quantities.
+    const commaSeparatedOrder = segments.length >= 8;
+    const parts = segments.length > 1 && (commaSeparatedOrder || segments.every((seg) => /^\s*\(?\d/.test(seg)))
+      ? segments
+      : [block];
     for (const part of parts) {
       const parsed = parseLine(part);
       if (parsed) lines.push(parsed);

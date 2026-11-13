@@ -348,6 +348,66 @@ export class SearchEngine {
     for (const doc of touched) {
       const product = this.docs[doc];
       const productTokens = tokenize(`${product.title} ${product.specs}`);
+      if (!exactDocs.has(doc)) {
+        const text = `${product.title} ${product.mpn} ${product.specs}`;
+        if (tokens.includes("mc") && tokens.some((token) => /^\d+\/[234]$/.test(token))) {
+          if (product.category !== WIRE_CATEGORY || !/\bmc\b/i.test(text)) continue;
+          if (!tokens.some((token) => ["pcs", "luminary", "hcf"].includes(token)) &&
+              /\b(?:pcs|luminary|hcf)\b/i.test(text)) continue;
+          if (!tokens.some((token) => ["pvc", "coated", "jacketed"].includes(token)) &&
+              /\b(?:pvc coated|jacketed)\b/i.test(text)) continue;
+          const cableSize = tokens.find((token) => /^\d+\/[234]$/.test(token));
+          if (cableSize && !text.includes(cableSize)) continue;
+        }
+        if (tokens.includes("disconnect")) {
+          if (!/\b(?:disconnect|safety switch)\b/i.test(text)) continue;
+          if (tokens.includes("nonfusible") && !productTokens.includes("nonfusible")) continue;
+          if (tokens.filter((token) => /^\d+a$|^[1-4]p$|^\d+v$|^3r$/.test(token)).some((token) => !productTokens.includes(token))) continue;
+        }
+        if (tokens.includes("cover") && tokens.includes("1toggle")) {
+          if (!productTokens.includes("1toggle") || productTokens.includes("2toggle")) continue;
+          if (/\b(?:duplex|receptacle)\b/i.test(text) || /\btog\s*&/i.test(text)) continue;
+        }
+        if (tokens.includes("cover") && tokens.includes("blank") && !productTokens.includes("blank")) continue;
+        if (/\braised ground screws?\b/i.test(query) && !/\braised ground(?:ing)? screws?\b/i.test(text)) continue;
+        if (tokens.includes("toggle") && !tokens.includes("cover")) {
+          if (!/\b(?:toggle|switch)\b/i.test(text) || product.category !== RECEPTACLE_CATEGORY) continue;
+          if (tokens.filter((token) => /^\d+a$|^[1-4]p$|^ivory$/.test(token)).some((token) => !productTokens.includes(token))) continue;
+        }
+        if (tokens.includes("homeline") && !/\bhom(?:eline|\d)/i.test(text)) continue;
+        if (tokens.includes("myers") && !/\bmyers\b/i.test(text)) continue;
+        if (tokens.includes("hub") && !/\bhubs?\b/i.test(text)) continue;
+        if (tokens.includes("tapcon") && !/\btapcons?\b/i.test(text)) continue;
+        if (tokens.some((token) => token === "surge" || token === "spd") && !/\b(?:surge|spd|surgebreaker)\b/i.test(text)) continue;
+        if (tokens.includes("panel") && product.subcategory !== "Load Centers / Panelboards" && !tokens.includes("feedthru")) continue;
+        if (tokens.includes("breaker") && !tokens.includes("panel") && product.subcategory !== "Circuit Breakers") continue;
+        if (tokens.includes("meter") && tokens.includes("socket")) {
+          if (!/\bmeter(?:ed)?\s+socket\b/i.test(text)) continue;
+          if (tokens.includes("horn") && !/\bhorn bypass\b/i.test(text)) continue;
+          if (tokens.includes("ringless") && !productTokens.includes("ringless")) continue;
+        }
+        if (tokens.includes("rigid") && tokens.includes("mast") && !tokens.includes("kit")) {
+          if (product.category !== "Conduit, Strut & Raceways" || !productTokens.includes("rigid")) continue;
+        }
+        if (tokens.includes("rigid") && tokens.includes("conduit")) {
+          if (product.subcategory !== "Conduit - Metallic" || !productTokens.includes("rigid")) continue;
+          if (productTokens.some((token) => ["nipple", "coupling", "elbow"].includes(token))) continue;
+          if (productTokens.includes("aluminum") && !tokens.includes("aluminum")) continue;
+        }
+        if (tokens.includes("groundrod") && !productTokens.includes("groundrod")) continue;
+        if (tokens.includes("locknut") && !productTokens.includes("locknut")) continue;
+        if (tokens.includes("bushing") && !productTokens.includes("bushing")) continue;
+        if (tokens.includes("staples") && !/\bstaples?\b/i.test(text)) continue;
+        if (tokens.includes("thhn")) {
+          if (product.category !== WIRE_CATEGORY || !productTokens.includes("thhn")) continue;
+          if (tokens.filter((token) => /^(?:\d+\/0|\d+)$/.test(token)).some((token) => !productTokens.includes(token))) continue;
+          if (tokens.filter((token) => ["black", "white", "green"].includes(token)).some((token) => !productTokens.includes(token))) continue;
+          if (tokens.includes("copper") && productTokens.includes("aluminum")) continue;
+          if (tokens.includes("aluminum") && productTokens.includes("copper")) continue;
+          if (tokens.includes("solid") && productTokens.includes("stranded")) continue;
+          if (tokens.includes("stranded") && productTokens.includes("solid")) continue;
+        }
+      }
       if (wantsReceptacle && !exactDocs.has(doc) && (product.category !== RECEPTACLE_CATEGORY || product.subcategory !== RECEPTACLE_SUBCATEGORY)) {
         continue;
       }
@@ -372,6 +432,9 @@ export class SearchEngine {
         if (wantsStrap && wantsHoleCount && !productTokens.includes("hole")) continue;
       }
       if (product.subcategory === "Circuit Breakers" && !exactDocs.has(doc)) {
+        const ratings = tokens.filter((token) => /^\d+a$|^[1-4]p$/.test(token));
+        if (ratings.some((token) => !productTokens.includes(token))) continue;
+        if (!tokens.includes("tandem") && productTokens.includes("tandem")) continue;
         const candidateSpecialty = productTokens.filter((token) => SPECIALTY_TOKENS.has(token));
         if (
           (requestedSpecialty.length === 0 && candidateSpecialty.length > 0) ||
@@ -445,10 +508,11 @@ export class SearchEngine {
   match(query: string, hints: MatchHints = {}): MatchResult {
     const { hits: searchHits, rewrite, tokens } = this.run(query, { limit: 12, unit: hints.unit });
     const adapterRequest = tokens.includes("maleadapter") || tokens.includes("femaleadapter");
+    const contextualRequest = adapterRequest || tokens.some((token) => ["strap", "connector", "coupling", "cover"].includes(token));
     const materialSpecified = tokens.some((token) => MATERIAL_TOKENS.has(token));
     const context = hints.materialContext;
     const hits =
-      context && adapterRequest && !materialSpecified
+      context && contextualRequest && !materialSpecified
         ? searchHits
             .map((hit) => {
               const productTokens = tokenize(`${hit.product.title} ${hit.product.specs}`);
@@ -456,7 +520,7 @@ export class SearchEngine {
                 productTokens.includes(context.material) && productTokens.includes(context.tradeSize);
               return {
                 ...hit,
-                score: hit.score + (contextMatch ? QUOTE_CONTEXT_BONUS : 0),
+                score: hit.score + (contextMatch && hit.quality >= 0.4 ? QUOTE_CONTEXT_BONUS : 0),
               };
             })
             .sort((a, b) => b.score - a.score || a.product.rank - b.product.rank)
@@ -471,7 +535,19 @@ export class SearchEngine {
         product: null,
         alternatives: hits.filter((h) => h.quality >= 0.2).slice(0, 8).map((h) => h.product),
         similar: [],
-        ...(slangNote ? { note: slangNote } : {}),
+        ...(/\braised ground screws?\b/i.test(query)
+          ? { note: "Catalog matching does not verify the requested raised grounding screw provision; confirm the exact box" }
+          : slangNote ? { note: slangNote } : {}),
+      };
+    }
+    if (context?.material === "steel" && tokens.includes("cover") &&
+        /\b(?:non-metallic|pvc)\b/i.test(`${top.product.title} ${top.product.specs}`)) {
+      return {
+        confidence: "none",
+        product: null,
+        alternatives: hits.map((hit) => hit.product),
+        similar: [],
+        note: "Nearby cover specifies steel, but this candidate is non-metallic; confirm the correct metal cover rather than substituting it",
       };
     }
     const second = hits[1];
@@ -495,6 +571,57 @@ export class SearchEngine {
     let confidence: MatchResult["confidence"] =
       (top.exact && !packageAmbiguous) || (top.quality >= 0.8 && dominant && !packageAmbiguous) ? "high" : "medium";
     const notes = slangNote ? [slangNote] : [];
+    if (!top.exact && /^[a-z]{2,}\d{3,}[a-z]*$/i.test(query.trim()) &&
+        topMpn.startsWith(compactCode(query)) && topMpn !== compactCode(query)) {
+      confidence = "medium";
+      notes.push(`Exact requested part number is not available in the catalog; candidate ${top.product.mpn} has a suffix or variant that requires confirmation`);
+    }
+    if (!top.exact && tokens.includes("thhn") && tokens.some((token) => ["solid", "stranded"].includes(token))) {
+      const productTokens = tokenize(`${top.product.title} ${top.product.specs}`);
+      if (!productTokens.some((token) => ["solid", "stranded"].includes(token))) {
+        confidence = "medium";
+        notes.push("Confirm conductor stranding; catalog metadata does not establish solid versus stranded");
+      }
+    }
+    if (!top.exact && tokens.includes("mc") && tokens.some((token) => /^\d+\/[234]$/.test(token))) {
+      confidence = "medium";
+      notes.push("Confirm MC cable armor, conductor colors and requested coil length; lighting-control MC is not an automatic substitute");
+    }
+    if (!top.exact && tokens.includes("mc") && tokens.includes("connector")) {
+      confidence = "medium";
+      notes.push("Confirm connector cable range, knockout size and requested package count");
+    }
+    if (!top.exact && tokens.includes("cover")) {
+      confidence = "medium";
+      notes.push("Confirm cover material, device cutout and box mounting compatibility");
+    }
+    if (!top.exact && tokens.includes("groundrod") && !tokens.includes("clamp")) {
+      confidence = "medium";
+      notes.push("Confirm rod diameter and copper-clad versus solid copper construction");
+    }
+    if (!top.exact && tokens.includes("thhn") && tokens.some((token) => ["copper", "aluminum"].includes(token))) {
+      const productTokens = tokenize(`${top.product.title} ${top.product.specs}`);
+      if (!productTokens.some((token) => ["copper", "aluminum"].includes(token))) {
+        confidence = "medium";
+        notes.push("Catalog does not specify conductor material; confirm copper/aluminum before ordering");
+      }
+    }
+    if (!top.exact && tokens.includes("clamps") && tokens.includes("water")) {
+      confidence = "medium";
+      notes.push("Confirm water pipe diameter and grounding conductor range");
+    }
+    if (!top.exact && tokens.includes("meter") && tokens.includes("socket")) {
+      confidence = "medium";
+      notes.push("Confirm utility approval, terminal count and overhead/underground configuration");
+    }
+    if (!top.exact && tokens.includes("hub")) {
+      confidence = "medium";
+      notes.push("Confirm equipment model and hub mounting pattern; plate hubs and threaded hubs are not interchangeable");
+    }
+    if (!top.exact && tokens.includes("staples")) {
+      confidence = "medium";
+      notes.push("Staples must fit the final cable size and type, not the service amp rating; confirm package quantity");
+    }
     if (packageAmbiguous) {
       notes.push("Multiple package lengths are available — confirm the coil or spool length");
     }
@@ -518,7 +645,7 @@ export class SearchEngine {
       confidence = "medium";
       notes.push("Confirm receptacle voltage and single/duplex configuration");
     }
-    if (adapterRequest && !materialSpecified) {
+    if (contextualRequest && !materialSpecified && (context || adapterRequest)) {
       confidence = "medium";
       if (context) {
         const productTokens = tokenize(`${top.product.title} ${top.product.specs}`);
@@ -529,13 +656,13 @@ export class SearchEngine {
         );
         if (matchesContext) {
           notes.push(
-            `${context.material.toUpperCase()} is suggested by nearby ${context.tradeSize}-inch items in this quote — confirm adapter material`,
+            `${context.material.toUpperCase()} is suggested by nearby ${context.tradeSize} items in this quote — confirm ${adapterRequest ? "adapter" : "fitting/cover"} material`,
           );
         } else {
           notes.push(
-            `${context.material.toUpperCase()} appears on nearby ${context.tradeSize}-inch items, but the catalog match${
+            `${context.material.toUpperCase()} appears on nearby ${context.tradeSize} items, but the catalog match${
               candidateMaterial ? ` is ${candidateMaterial.toUpperCase()}` : " does not confirm the material"
-            } — confirm adapter material`,
+            } — confirm ${adapterRequest ? "adapter" : "fitting/cover"} material`,
           );
         }
       } else {

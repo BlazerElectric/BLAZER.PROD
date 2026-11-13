@@ -30,6 +30,10 @@ The catalog stays on the server. Phones never download the 7 MB JSON; they call 
 
 Pasted lines with no quantity, no numbers and no catalog match (for example `Smith residence - rough in`) are treated as job headings. They are listed under the BOM as "Skipped", and each one offers **Add to order notes** and **Add as item**. Every matched line, including green ones, has a **Change** button that opens the alternatives list and a catalog search.
 
+Conversational lists also separate quantities joined by "and" and preserve wire footage, grouped fitting quantities, and requested package counts. Inline revisions such as "or actually ... wait no ..." stay unmatched until the final cable specification is confirmed. Within each numbered quote, nearby same-size items can suggest adapter material, and a uniquely named panel family can carry over to breaker requests. Inferred specifications remain review-required; explicit Homeline, breaker pole/rating, conductor, and Myers requirements are not silently substituted. Catalog records do not establish stock availability or utility approval.
+
+Comma-separated THHN color lists repeat footage or spool length for each color while retaining gauge and stranding. Paired connectors/couplings can carry a size/style and an explicit "25 each" quantity; box/jar/bag quantities remain packages, with piece counts requiring confirmation. Ordinary MC does not silently select lighting-control or PVC-coated MC. Cover cutouts, non-fusible outdoor disconnect ratings, and requested grounding provisions are checked separately. A suffixed part-number candidate is not reported as an exact match. Starter/overload assemblies and unspecified phasing-tape assortments remain on hold for counter verification.
+
 ### Trade slang dictionary (`config/trade_slang.csv`)
 
 Counter staff can teach the app shop talk without a code change. Each row maps slang to catalog wording:

@@ -2,10 +2,11 @@ import "server-only";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { isLikelyHeading, parseOrderText } from "../parser/orderParser";
-import { inferAdapterMaterialContext, splitQuoteSections } from "../search/quoteContext";
+import { inferFittingMaterialContext, inferBreakerFamilyContext, splitQuoteSections } from "../search/quoteContext";
 import { SearchEngine } from "../search/engine";
 import { parseSlangCsv, type SlangEntry } from "../search/slang";
 import type { CatalogFile, ResolvedLine } from "../types";
+import { tokenize } from "../search/normalize";
 
 interface CatalogState {
   engine: SearchEngine;
@@ -74,9 +75,29 @@ export function resolveOrderText(text: string): ResolvedOrder {
   const parsed = splitQuoteSections(parseOrderText(text));
   skipped.push(...parsed.headings.map((line) => line.raw));
   for (const section of parsed.sections) {
+    const sectionStart = lines.length;
     for (const [index, line] of section.entries()) {
-      const materialContext = inferAdapterMaterialContext(section, index);
-      const match = engine.match(line.query, { unit: line.unit, materialContext });
+      let materialContext = inferFittingMaterialContext(section, index);
+      const previous = lines.length > sectionStart ? lines.at(-1) : undefined;
+      if (!materialContext && tokenize(line.query).includes("4sq") && tokenize(line.query).includes("cover") &&
+          previous?.product?.category === "Boxes & Enclosures" &&
+          tokenize(`${previous.product.title} ${previous.product.specs}`).includes("steel")) {
+        materialContext = { material: "steel", tradeSize: "4sq" };
+      }
+      if (line.needsClarification) {
+        lines.push({ ...line, confidence: "none", product: null, alternatives: [], similar: [], note: line.reviewNote });
+        continue;
+      }
+      const inferredFamily = inferBreakerFamilyContext(section, index);
+      const match = engine.match(inferredFamily ? `${line.query} ${inferredFamily}` : line.query, { unit: line.unit, materialContext });
+      const notes = [
+        match.note, line.reviewNote,
+        ...(inferredFamily ? [`${inferredFamily.toUpperCase()} family inferred from this quote's panel; confirm breaker compatibility`] : []),
+      ].filter(Boolean);
+      if (notes.length) {
+        match.note = notes.join(". ");
+        if (match.confidence === "high") match.confidence = "medium";
+      }
       if (isLikelyHeading(line, match.confidence)) skipped.push(line.raw);
       else lines.push({ ...line, ...match });
     }

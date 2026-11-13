@@ -61,6 +61,8 @@ export interface ParsedLine {
   unit: string;
   quantityExplicit: boolean;
   comment: string;
+  reviewNote?: string;
+  needsClarification?: boolean;
 }
 
 export interface ResolvedLine extends ParsedLine, MatchResult {}

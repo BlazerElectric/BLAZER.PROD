@@ -8,6 +8,14 @@ const PHRASES: Array<[RegExp, string]> = [
   [/\bfa(?=\s+pvc\b)/g, "female adapter"],
   [/\b1[\s-]*home\b/g, "1 hole"],
   [/\b1[\s-]*hole\b/g, "1 hole"],
+  [/\btwo[\s-]*hole\b/g, "2 hole"],
+  [/\bone[\s-]*hole\b/g, "1 hole"],
+  [/\bss(?=\s+(?:conn(?:ectors?)?|coup(?:lings?)?)\b)/g, "setscrew"],
+  [/\bnon[\s-]*(?:fused|fusible)\b/g, "nonfusible"],
+  [/\bsingle[\s-]*toggle\b/g, "1toggle"],
+  [/\b([12])[\s-]*(?:tog|toggles?)\b/g, "$1toggle"],
+  [/\bground[\s-]*fault(?: circuit interrupter)?\b/g, "gfci"],
+  [/\b(?:combination )?arc[\s-]*fault(?: protection)?\b/g, "afci"],
   [/\bset[\s-]*screw\b/g, "setscrew"],
   [/\bweather[\s-]*proof\b/g, "weatherproof"],
   [/\btamper[\s-]*(?:resistant|resistance|proof)\b/g, "tr"],
@@ -31,7 +39,7 @@ const PHRASES: Array<[RegExp, string]> = [
   [/\b(?:three|triple)[\s-]*gang\b/g, "3g"],
   [/\b(?:single|one)[\s-]*phase\b/g, "1ph"],
   [/\bthree[\s-]*phase\b/g, "3ph"],
-  [/\bground(?:ing)?[\s-]*rod\b/g, "groundrod"],
+  [/\bground(?:ing)?[\s-]*rods?\b/g, "groundrod"],
   [/\bgrd[\s-]*rod\b/g, "groundrod"],
 ];
 
@@ -57,6 +65,8 @@ const GROUPS: Record<string, string[]> = {
   gfci: ["gfi", "gfcis"],
   emt: ["thinwall"],
   rigid: ["grc", "rmc"],
+  copper: ["cu"],
+  aluminum: ["al"],
   nmb: ["romex", "nm"],
   fmc: ["flex", "flexible"],
   liquidtight: ["lfmc", "sealtite", "sealtight"],
@@ -73,6 +83,9 @@ const GROUPS: Record<string, string[]> = {
   afci: ["afc", "cafi", "cafci"],
   locknut: ["lockring", "lockrings"],
   maleadapter: ["ma"],
+  tapcon: ["tapcons"],
+  ivory: ["iv"],
+  toggle: ["toggles", "tog"],
 };
 for (const [canonical, aliases] of Object.entries(GROUPS)) {
   for (const alias of aliases) SYNONYMS[alias] = canonical;
@@ -107,6 +120,8 @@ export function normalizeSymbols(input: string): string {
 
 export function normalizeText(input: string): string {
   let t = normalizeSymbols(input).toLowerCase();
+  t = t.replace(/\b4[\s-]*square\b/g, "4sq");
+  t = t.replace(/(\d+\/\d+)x(\d+-\d+\/\d+)/g, "$1 $2");
   // "1 1/4" -> "1-1/4" (trade sizes)
   t = t.replace(/\b(\d+)\s+(\d+\/\d+)/g, "$1-$2");
   // inch marks and spelled inches after numbers: 3/4" , 2in , 1-1/4 inch

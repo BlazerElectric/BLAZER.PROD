@@ -45,6 +45,102 @@ describe("normalize", () => {
 });
 
 describe("SearchEngine", () => {
+  it("keeps ordinary MC away from lighting-control MC and respects specified THHN stranding", () => {
+    const parts = new SearchEngine([
+      product({ sku: "pcs", title: "12/2 MC-PCS LUMINARY 250FT COIL", category: "Wire, Cable & Cord", rank: 1 }),
+      product({ sku: "coated", title: "12/2 MC PVC COATED LITE 250FT COIL", category: "Wire, Cable & Cord", rank: 1 }),
+      product({ sku: "mc", title: "12/2 MC LITE 250FT COIL", category: "Wire, Cable & Cord" }),
+      product({ sku: "solid", title: "#10 THHN SOLID BLACK 500FT", category: "Wire, Cable & Cord" }),
+      product({ sku: "stranded", title: "#10 THHN STRANDED BLACK 500FT", category: "Wire, Cable & Cord", rank: 1 }),
+    ]);
+    expect(parts.match("12/2 mc 250ft", { unit: "coil" }).product?.sku).toBe("mc");
+    expect(parts.match("#10 thhn solid black 500ft", { unit: "spool" }).product?.sku).toBe("solid");
+  });
+
+  it("requires verified raised ground screw provisions and uses verified metal cover context", () => {
+    const parts = new SearchEngine([
+      product({ sku: "box", title: "4SQ DEEP BOX 1/2 & 3/4 KO", category: "Boxes & Enclosures" }),
+      product({ sku: "plastic", title: "4SQ BLANK PVC COVER", category: "Boxes & Enclosures", rank: 1 }),
+      product({ sku: "steel", title: "4SQ BLANK STEEL COVER", category: "Boxes & Enclosures" }),
+      product({ sku: "duplex", title: "4SQ DUPLEX STEEL COVER", category: "Boxes & Enclosures", rank: 1 }),
+    ]);
+    expect(parts.match("4sq deep box 1/2 & 3/4 ko with raised ground screws")).toMatchObject({
+      product: null,
+      note: expect.stringContaining("grounding screw provision"),
+    });
+    expect(parts.match("4sq blank covers", { materialContext: { material: "steel", tradeSize: "4sq" } })).toMatchObject({
+      product: { sku: "steel" },
+      confidence: "medium",
+    });
+    const plasticOnly = new SearchEngine([
+      product({ sku: "plastic", title: "4SQ BLANK PVC COVER", category: "Boxes & Enclosures" }),
+    ]);
+    expect(plasticOnly.match("4sq blank covers", { materialContext: { material: "steel", tradeSize: "4sq" } })).toMatchObject({
+      product: null,
+      note: expect.stringContaining("non-metallic"),
+    });
+  });
+
+  it("respects a non-fused outdoor disconnect and a single-toggle cover request", () => {
+    const parts = new SearchEngine([
+      product({ sku: "fusible", title: "30A 3P HEAVY DUTY FUSIBLE SAFETY SWITCH 600V NEMA 3R", category: "Power Distribution", rank: 1 }),
+      product({ sku: "indoor", title: "30A 3P HEAVY DUTY NON-FUSIBLE SAFETY SWITCH 600V NEMA 1", category: "Power Distribution", rank: 1 }),
+      product({ sku: "outdoor", title: "30A 3P HEAVY DUTY NON-FUSIBLE SAFETY SWITCH 600V NEMA 3R", category: "Power Distribution" }),
+      product({ sku: "double", title: "4SQ INDUSTRIAL RAISED COVER 2TOG SW", category: "Boxes & Enclosures", rank: 1 }),
+      product({ sku: "single", title: "4SQ INDUSTRIAL RAISED COVER 1TOG SW", category: "Boxes & Enclosures" }),
+    ]);
+    expect(parts.match("30a 3p heavy duty non-fused disconnect 600v nema 3r").product?.sku).toBe("outdoor");
+    expect(parts.match("4sq industrial raised covers for single toggle").product?.sku).toBe("single");
+  });
+
+  it("flags a suffix variant rather than claiming the exact requested breaker exists", () => {
+    const parts = new SearchEngine([
+      product({ sku: "bab-h", title: "CUT BAB3040H BRKR", mpn: "BAB3040H", category: "Power Distribution", subcategory: "Circuit Breakers" }),
+    ]);
+    expect(parts.match("BAB3040")).toMatchObject({
+      confidence: "medium",
+      note: expect.stringContaining("suffix or variant"),
+    });
+    expect(parts.match("BAB3040H").confidence).toBe("high");
+  });
+
+  it("does not substitute BR panels, plate hubs, or breakers for explicit Homeline and Myers requests", () => {
+    const serviceParts = new SearchEngine([
+      product({ sku: "br-panel", title: "EATON BR 200A MAIN BREAKER PANEL 40 SPACE INDOOR", category: "Power Distribution", subcategory: "Load Centers / Panelboards" }),
+      product({ sku: "plate-hub", title: "2 IN PLATE TYPE HUB", category: "Fittings" }),
+      product({ sku: "meter-offset", title: "2 IN METER OFFSET", category: "Fittings", rank: 1 }),
+      product({ sku: "hom-breaker", title: "HOMELINE 200A BREAKER", category: "Power Distribution", subcategory: "Circuit Breakers" }),
+    ]);
+    expect(serviceParts.match("200 amp homeline main breaker panel 40 space indoor").product).toBeNull();
+    expect(serviceParts.match("2in Myers hub").product).toBeNull();
+    expect(serviceParts.match("2in hub for the meter").product?.sku).toBe("plate-hub");
+    expect(serviceParts.match("200a whole house surge spd for homeline").product).toBeNull();
+  });
+
+  it("matches Tapcon dimensions without selecting similarly sized fuses", () => {
+    const parts = new SearchEngine([
+      product({ sku: "fuse", title: "1/4 X 1-1/4 GLASS FUSE", category: "Fuses & Accessories", rank: 1 }),
+      product({ sku: "tapcon", title: "1/4 X 1-1/4 TAPCON CONCRETE SCREW", category: "Fasteners & Hardware" }),
+    ]);
+    expect(parts.match("1/4x1-1/4 tapcons").product?.sku).toBe("tapcon");
+  });
+
+  it("respects explicit breaker poles and conductor gauge, material and color", () => {
+    const serviceParts = new SearchEngine([
+      product({ sku: "hom120", title: "HOMELINE 20A 1P BREAKER", category: "Power Distribution", subcategory: "Circuit Breakers" }),
+      product({ sku: "hom220", title: "HOMELINE 20A 2P BREAKER", category: "Power Distribution", subcategory: "Circuit Breakers" }),
+      product({ sku: "hom220-gfi", title: "HOMELINE 20A 2P GROUND FAULT BREAKER", category: "Power Distribution", subcategory: "Circuit Breakers", rank: 1 }),
+      product({ sku: "white-cu", title: "2/0 THHN CU WHITE", category: "Wire, Cable & Cord" }),
+      product({ sku: "black-cu", title: "2/0 THHN CU BLACK", category: "Wire, Cable & Cord" }),
+      product({ sku: "white-al", title: "2/0 THHN AL WHITE", category: "Wire, Cable & Cord" }),
+    ]);
+    expect(serviceParts.match("20A 1P Homeline breaker").product?.sku).toBe("hom120");
+    expect(serviceParts.match("20A 2P Homeline breaker").product?.sku).toBe("hom220");
+    expect(serviceParts.match("20A 2P Homeline GFCI breaker").product?.sku).toBe("hom220-gfi");
+    expect(serviceParts.match("2/0 thhn copper white", { unit: "ft" }).product?.sku).toBe("white-cu");
+    expect(serviceParts.match("4/0 thhn copper white", { unit: "ft" }).product).toBeNull();
+  });
+
   it("matches exact SKU and MPN with high confidence", () => {
     expect(engine.match("3024").product?.sku).toBe("3024");
     const byMpn = engine.match("QO-120");
@@ -116,7 +212,7 @@ describe("SearchEngine", () => {
     expect(adapters.match("3/4 MA", { materialContext: { material: "pvc", tradeSize: "3/4" } })).toMatchObject({
       product: { sku: "pvc-ma" },
       confidence: "medium",
-      note: expect.stringContaining("PVC is suggested by nearby 3/4-inch items"),
+      note: expect.stringContaining("PVC is suggested by nearby 3/4 items"),
     });
     expect(adapters.match("3/4 ENT MA", { materialContext: { material: "pvc", tradeSize: "3/4" } }).product?.sku).toBe("ent-ma");
     expect(adapters.match("3/4 MA", { materialContext: { material: "emt", tradeSize: "3/4" } }).note).toContain(

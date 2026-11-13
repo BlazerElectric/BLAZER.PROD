@@ -33,8 +33,38 @@ export function OrderDesk() {
       <EmbedBridge />
       <Header onHealth={onHealth} />
 
-      <main className="mx-auto grid max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-start">
-        <div className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+      <main className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 sm:py-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
+        <div className="flex flex-col gap-5 border-b border-smoke-700 pb-5 sm:flex-row sm:items-end sm:justify-between lg:col-span-2">
+          <div className="max-w-3xl">
+            <p className="flex items-center gap-2 text-[11px] font-bold tracking-[0.16em] text-blazer-700 uppercase">
+              <span className="h-1 w-6 rounded-full bg-blazer-orange" aria-hidden />
+              Built for the counter · Ready for the jobsite
+            </p>
+            <h1 className="mt-2 text-3xl leading-tight font-bold tracking-tight text-blazer-950 sm:text-4xl">
+              Turn job lists into <span className="text-blazer-900">ready-to-review orders.</span>
+            </h1>
+            <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600 sm:text-base">
+              Paste a customer takeoff or build one with the AI assistant. Check every match before it reaches your Blazer order.
+            </p>
+          </div>
+          <ol aria-label="Order workflow" className="flex shrink-0 flex-wrap items-center gap-2 text-xs font-semibold text-slate-700">
+            {[
+              ["01", "Build"],
+              ["02", "Review"],
+              ["03", "Send"],
+            ].map(([number, label], index) => (
+              <li key={number} className="flex items-center gap-2">
+                {index > 0 && <span className="hidden h-px w-3 bg-smoke-700 sm:block" aria-hidden />}
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-smoke-700 bg-white px-2.5 py-1.5 shadow-sm">
+                  <span className={`font-mono text-[10px] ${index === 0 ? "text-blazer-orange" : "text-blazer-700"}`}>{number}</span>
+                  {label}
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <div className="min-w-0 rounded-2xl border border-smoke-700 border-t-[3px] border-t-blazer-orange bg-white p-4 shadow-[0_8px_24px_rgba(23,45,97,0.06)] sm:p-6">
           <div role="tablist" aria-label="Ordering mode" className="mb-6 grid grid-cols-2 gap-1 rounded-xl bg-slate-100 p-1">
             {TABS.map(({ id, label, hint, Icon }) => {
               const active = mode === id;
@@ -56,7 +86,9 @@ export function OrderDesk() {
                   }}
                   tabIndex={active ? 0 : -1}
                   className={`flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition sm:justify-start ${
-                    active ? "bg-white text-blazer-800 shadow" : "text-slate-600 hover:text-blazer-800"
+                    active
+                      ? "bg-white text-blazer-900 shadow-sm ring-1 ring-slate-200"
+                      : "text-slate-600 hover:bg-white/70 hover:text-blazer-800"
                   }`}
                 >
                   <Icon className="size-5 shrink-0" aria-hidden />

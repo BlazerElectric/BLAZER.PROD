@@ -1,16 +1,21 @@
 @import "tailwindcss";
 
 @theme {
-  --color-blazer-950: #001a33;
-  --color-blazer-900: #002447;
-  --color-blazer-800: #003366;
-  --color-blazer-700: #0b4a8f;
-  --color-blazer-600: #1559c4;
-  --color-blazer-500: #2a6fdb;
-  --color-blazer-300: #93b4e6;
-  --color-blazer-200: #c7d8f2;
-  --color-blazer-100: #e3ecf9;
-  --color-blazer-50: #f2f6fc;
+  --color-blazer-950: #172d61;
+  --color-blazer-900: #224191;
+  --color-blazer-800: #224191;
+  --color-blazer-700: #1b367b;
+  --color-blazer-600: #315ba4;
+  --color-blazer-500: #5eb0e5;
+  --color-blazer-300: #9acbea;
+  --color-blazer-200: #c9e5f5;
+  --color-blazer-100: #e7f3fa;
+  --color-blazer-50: #f3f8fc;
+  --color-blazer-orange: #ee5a35;
+  --color-smoke-700: #d2d6d8;
+  --color-smoke-600: #eceeee;
+  --color-smoke-500: #f4f4f4;
+  --color-smoke-400: #f9f9f9;
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, monospace;
 }
@@ -20,8 +25,13 @@ html {
 }
 
 body {
-  background: #ffffff;
+  background: #f4f4f4;
   color: #0f172a;
+}
+
+::selection {
+  background: #c9e5f5;
+  color: #172d61;
 }
 
 :focus-visible {

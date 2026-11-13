@@ -26,7 +26,7 @@ export function OrderPanel() {
     <aside
       id="order-panel"
       aria-labelledby="order-heading"
-      className="embed-auto-height scroll-mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:sticky lg:top-4 lg:flex lg:max-h-[calc(100vh-2rem)] lg:flex-col"
+      className="embed-auto-height scroll-mt-4 rounded-2xl border border-smoke-700 border-t-[3px] border-t-blazer-500 bg-white p-4 shadow-[0_8px_24px_rgba(23,45,97,0.06)] lg:sticky lg:top-4 lg:flex lg:max-h-[calc(100vh-2rem)] lg:flex-col"
     >
       <div className="flex items-center justify-between gap-2">
         <h2 id="order-heading" className="flex items-center gap-2 text-lg font-semibold text-blazer-900">
@@ -72,8 +72,10 @@ export function OrderPanel() {
       <div className="mt-3 min-h-0 flex-1 lg:overflow-y-auto lg:pr-1">
         {lines.length === 0 ? (
           <div className="rounded-xl border-2 border-dashed border-slate-200 p-6 text-center">
-            <ClipboardList className="mx-auto size-8 text-slate-300" aria-hidden />
-            <p className="mt-2 text-sm font-medium text-slate-700">Your order is empty</p>
+            <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-blazer-50">
+              <ClipboardList className="size-6 text-blazer-600" aria-hidden />
+            </span>
+            <p className="mt-3 text-sm font-semibold text-blazer-950">Your order is empty</p>
             <p className="text-xs text-slate-500">Paste a material list or ask the AI assistant to build one.</p>
           </div>
         ) : (

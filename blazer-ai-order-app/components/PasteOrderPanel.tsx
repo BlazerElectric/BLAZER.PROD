@@ -99,7 +99,7 @@ export function PasteOrderPanel() {
         </p>
       </div>
 
-      <div className="rounded-xl border border-slate-300 bg-white shadow-sm focus-within:border-blazer-600 focus-within:ring-2 focus-within:ring-blazer-100">
+      <div className="overflow-hidden rounded-xl border border-smoke-700 bg-white shadow-sm transition focus-within:border-blazer-600 focus-within:ring-2 focus-within:ring-blazer-100">
         <label htmlFor="order-text" className="sr-only">
           Order text
         </label>
@@ -116,9 +116,9 @@ export function PasteOrderPanel() {
           rows={12}
           spellCheck={false}
           placeholder={"20 sticks 3/4 EMT\n50 3/4 emt sscr conn\n500' #12 THHN blk str\n10 QO120"}
-          className="block w-full resize-y rounded-t-xl border-0 bg-transparent p-4 font-mono text-sm leading-6 outline-none placeholder:text-slate-400"
+          className="block w-full resize-y border-0 bg-transparent p-4 font-mono text-sm leading-6 outline-none placeholder:text-slate-400"
         />
-        <div className="flex flex-wrap items-center gap-2 border-t border-slate-200 bg-slate-50 px-3 py-2">
+        <div className="flex flex-wrap items-center gap-2 border-t border-smoke-600 bg-smoke-400 px-3 py-2">
           <button
             type="button"
             onClick={() => setText(EXAMPLE)}
@@ -142,7 +142,7 @@ export function PasteOrderPanel() {
             type="button"
             onClick={() => void build()}
             disabled={!text.trim() || loading}
-            className="inline-flex items-center gap-1.5 rounded-lg bg-blazer-800 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blazer-700 disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 rounded-lg bg-blazer-800 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blazer-700 focus-visible:ring-4 focus-visible:ring-blazer-200 disabled:opacity-50"
           >
             {loading ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Wand2 className="size-4" aria-hidden />}
             Build bill of materials

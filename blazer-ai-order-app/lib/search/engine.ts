@@ -1,6 +1,7 @@
 import type { CatalogProduct, MatchResult, ProductSummary, SearchHit } from "../types";
 import { boundedEditDistance, maxTypoDistance } from "./fuzzy";
 import { compactCode, isSpecToken, tokenize } from "./normalize";
+import { MATERIAL_TOKENS, type QuoteMaterialContext } from "./quoteContext";
 import { SlangDictionary, type SlangEntry, type SlangRewrite } from "./slang";
 
 const FIELD_WEIGHTS = {
@@ -41,15 +42,18 @@ const PIECE_CATEGORIES = new Set([
   "Lamps, Bulbs & Ballast",
 ]);
 const BULK_UNIT_PENALTY = 0.6;
+const QUOTE_CONTEXT_BONUS = 0.22;
 const WIRE_CATEGORY = "Wire, Cable & Cord";
 const WIRE_SPEC_TOKENS = new Set(["thhn", "thwn", "xhhw", "mcm", "kcmil", "nmb"]);
 const RECEPTACLE_CATEGORY = "Wiring Devices";
+const RECEPTACLE_SUBCATEGORY = "Receptacles";
+const FITTING_CATEGORIES = new Set(["Fittings", "Connectors & Crimps"]);
 
 type ReceptacleForm = "single" | "duplex";
 type AdapterGender = "male" | "female";
 
 function receptacleForm(tokens: string[]): ReceptacleForm | undefined {
-  if (tokens.includes("duplex")) return "duplex";
+  if (tokens.includes("duplex") || tokens.includes("dup")) return "duplex";
   if (tokens.some((token) => token === "single" || token === "sgl" || token === "sngl")) return "single";
   return undefined;
 }
@@ -75,6 +79,7 @@ export interface SearchOptions {
 
 export interface MatchHints {
   unit?: string;
+  materialContext?: QuoteMaterialContext;
 }
 
 export interface EngineOptions {
@@ -287,7 +292,18 @@ export class SearchEngine {
     const specTokenCount = tokens.filter(isSpecToken).length;
     const specHits = new Uint8Array(N);
     const wantsSpecialty = tokens.some((t) => SPECIALTY_TOKENS.has(t));
+    const requestedSpecialty = tokens.filter((token) => SPECIALTY_TOKENS.has(token));
+    const wantsReceptacle = tokens.includes("receptacle");
+    const wantsConnector = tokens.includes("connector");
+    const wantsCoupling = tokens.includes("coupling");
+    const wantsStrap = tokens.includes("strap");
+    const wantsClip = tokens.includes("clip");
+    const wantsHoleCount = tokens.includes("hole") || tokens.some((token) => /^\d+hole$/.test(token));
+    const wantsMcAccessory =
+      tokens.includes("mc") &&
+      tokens.some((token) => token === "connector" || token === "coupling" || token === "strap" || token === "clip");
     const requestedReceptacleForm = receptacleForm(tokens);
+    const requestedVoltage = tokens.some((token) => /^\d{2,3}v$/.test(token));
     const requestedAdapterGender = adapterGender(tokens);
     const wantsIndoor = tokens.some((token) => token === "indoor" || token === "interior");
     const wantsOutdoor = tokens.includes("outdoor");
@@ -332,6 +348,38 @@ export class SearchEngine {
     for (const doc of touched) {
       const product = this.docs[doc];
       const productTokens = tokenize(`${product.title} ${product.specs}`);
+      if (wantsReceptacle && !exactDocs.has(doc) && (product.category !== RECEPTACLE_CATEGORY || product.subcategory !== RECEPTACLE_SUBCATEGORY)) {
+        continue;
+      }
+      if (wantsMcAccessory && !exactDocs.has(doc)) {
+        const mcCompatible =
+          productTokens.includes("mc") ||
+          product.subcategory.toLowerCase().includes("mc") ||
+          /\barmored cable\b/i.test(product.specs);
+        if (!mcCompatible) continue;
+      }
+      if (FITTING_CATEGORIES.has(product.category) && !exactDocs.has(doc)) {
+        const isConnector = productTokens.includes("connector");
+        const isCoupling = productTokens.includes("coupling");
+        if (wantsConnector && isCoupling && !isConnector) continue;
+        if (wantsCoupling && isConnector && !isCoupling) continue;
+      }
+      if (!exactDocs.has(doc)) {
+        const isStrap = productTokens.includes("strap") || product.subcategory.toLowerCase().includes("strap");
+        const isClip = productTokens.includes("clip") || product.subcategory.toLowerCase().includes("clip");
+        if (wantsStrap && !isStrap) continue;
+        if (wantsClip && !isClip) continue;
+        if (wantsStrap && wantsHoleCount && !productTokens.includes("hole")) continue;
+      }
+      if (product.subcategory === "Circuit Breakers" && !exactDocs.has(doc)) {
+        const candidateSpecialty = productTokens.filter((token) => SPECIALTY_TOKENS.has(token));
+        if (
+          (requestedSpecialty.length === 0 && candidateSpecialty.length > 0) ||
+          requestedSpecialty.some((token) => !candidateSpecialty.includes(token))
+        ) {
+          continue;
+        }
+      }
       if (tokens.includes("feedthru") && !productTokens.includes("feedthru") && !exactDocs.has(doc)) continue;
       if (tokens.includes("cover") && !productTokens.includes("cover") && !exactDocs.has(doc)) continue;
       if (product.subcategory === "Load Centers / Panelboards") {
@@ -343,6 +391,17 @@ export class SearchEngine {
       if (requestedReceptacleForm && product.category === RECEPTACLE_CATEGORY && product.subcategory === "Receptacles") {
         const candidateForm = receptacleForm(productTokens);
         if (candidateForm && candidateForm !== requestedReceptacleForm && !exactDocs.has(doc)) continue;
+      }
+      if (
+        wantsReceptacle &&
+        !requestedReceptacleForm &&
+        !requestedVoltage &&
+        product.category === RECEPTACLE_CATEGORY &&
+        product.subcategory === RECEPTACLE_SUBCATEGORY &&
+        receptacleForm(productTokens) === "single" &&
+        !exactDocs.has(doc)
+      ) {
+        continue;
       }
       if (requestedAdapterGender && product.category === "Fittings") {
         const candidateGender = adapterGender(productTokens);
@@ -384,7 +443,24 @@ export class SearchEngine {
 
   /** Resolve a free-text request to a product with a confidence grade and alternatives. */
   match(query: string, hints: MatchHints = {}): MatchResult {
-    const { hits, rewrite, tokens } = this.run(query, { limit: 12, unit: hints.unit });
+    const { hits: searchHits, rewrite, tokens } = this.run(query, { limit: 12, unit: hints.unit });
+    const adapterRequest = tokens.includes("maleadapter") || tokens.includes("femaleadapter");
+    const materialSpecified = tokens.some((token) => MATERIAL_TOKENS.has(token));
+    const context = hints.materialContext;
+    const hits =
+      context && adapterRequest && !materialSpecified
+        ? searchHits
+            .map((hit) => {
+              const productTokens = tokenize(`${hit.product.title} ${hit.product.specs}`);
+              const contextMatch =
+                productTokens.includes(context.material) && productTokens.includes(context.tradeSize);
+              return {
+                ...hit,
+                score: hit.score + (contextMatch ? QUOTE_CONTEXT_BONUS : 0),
+              };
+            })
+            .sort((a, b) => b.score - a.score || a.product.rank - b.product.rank)
+        : searchHits;
     const slangNote = rewrite.applied
       .map(({ term, entry }) => `Trade term "${term}" → ${entry.notes || entry.searchAs}`)
       .join("; ");
@@ -433,6 +509,60 @@ export class SearchEngine {
       notes.push("Confirm breaker pole count and panel compatibility");
     }
     if (
+      !top.exact &&
+      tokens.includes("receptacle") &&
+      top.product.category === RECEPTACLE_CATEGORY &&
+      top.product.subcategory === RECEPTACLE_SUBCATEGORY &&
+      (!receptacleForm(tokens) || !tokens.some((token) => /^\d{2,3}v$/.test(token)))
+    ) {
+      confidence = "medium";
+      notes.push("Confirm receptacle voltage and single/duplex configuration");
+    }
+    if (adapterRequest && !materialSpecified) {
+      confidence = "medium";
+      if (context) {
+        const productTokens = tokenize(`${top.product.title} ${top.product.specs}`);
+        const matchesContext =
+          productTokens.includes(context.material) && productTokens.includes(context.tradeSize);
+        const candidateMaterial = productTokens.find(
+          (token) => MATERIAL_TOKENS.has(token) && token !== context.material,
+        );
+        if (matchesContext) {
+          notes.push(
+            `${context.material.toUpperCase()} is suggested by nearby ${context.tradeSize}-inch items in this quote — confirm adapter material`,
+          );
+        } else {
+          notes.push(
+            `${context.material.toUpperCase()} appears on nearby ${context.tradeSize}-inch items, but the catalog match${
+              candidateMaterial ? ` is ${candidateMaterial.toUpperCase()}` : " does not confirm the material"
+            } — confirm adapter material`,
+          );
+        }
+      } else {
+        notes.push("Raceway material is unspecified — confirm the adapter type");
+      }
+    }
+    if (
+      tokens.includes("barrel") &&
+      tokens.includes("connector") &&
+      !tokenize(`${top.product.title} ${top.product.specs}`).includes("barrel")
+    ) {
+      confidence = "medium";
+      notes.push("Confirm the double-barrel fitting style; the catalog match is a different connector design");
+    }
+    if (/\bsplices?\b/i.test(query) && /\b\d+\s+splices?\/kit\b/i.test(`${top.product.title} ${top.product.specs}`)) {
+      confidence = "medium";
+      notes.push("Catalog package has multiple splices per kit — confirm whether quantity means kits or individual splices");
+    }
+    if (/\bsmall\b/i.test(query) && /\bheat\s*shrink/i.test(`${top.product.title} ${top.product.specs}`)) {
+      confidence = "medium";
+      notes.push("Confirm heat-shrink conductor range and length");
+    }
+    if (/lamps?\s+(?:sold\s+)?sep/i.test(`${top.product.title} ${top.product.specs}`) && !tokens.some((token) => token === "lamp" || token === "tube")) {
+      confidence = "medium";
+      notes.push("Lamps or tubes are sold separately — confirm whether they should be added");
+    }
+    if (
       tokens.includes("feedthru") &&
       top.product.subcategory === "Circuit Breakers" &&
       tokenize(top.product.title).includes("meter")
@@ -441,7 +571,7 @@ export class SearchEngine {
       notes.push("Confirm this meter-breaker assembly is the requested feed-through panel");
     }
     // "a roll of romex": the cable type is clear but the gauge is a guess.
-    if (!top.exact && top.product.category === WIRE_CATEGORY && !tokens.some(isSpecToken)) {
+    if (!top.exact && top.product.category === WIRE_CATEGORY && !tokens.includes("holder") && !tokens.some(isSpecToken)) {
       confidence = "medium";
       notes.push("No wire size given — confirm the gauge/conductor count");
     }

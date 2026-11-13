@@ -2,6 +2,7 @@ import "server-only";
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { isLikelyHeading, parseOrderText } from "../parser/orderParser";
+import { inferAdapterMaterialContext, splitQuoteSections } from "../search/quoteContext";
 import { SearchEngine } from "../search/engine";
 import { parseSlangCsv, type SlangEntry } from "../search/slang";
 import type { CatalogFile, ResolvedLine } from "../types";
@@ -70,10 +71,15 @@ export function resolveOrderText(text: string): ResolvedOrder {
   const engine = getEngine();
   const lines: ResolvedLine[] = [];
   const skipped: string[] = [];
-  for (const line of parseOrderText(text)) {
-    const match = engine.match(line.query, { unit: line.unit });
-    if (isLikelyHeading(line, match.confidence)) skipped.push(line.raw);
-    else lines.push({ ...line, ...match });
+  const parsed = splitQuoteSections(parseOrderText(text));
+  skipped.push(...parsed.headings.map((line) => line.raw));
+  for (const section of parsed.sections) {
+    for (const [index, line] of section.entries()) {
+      const materialContext = inferAdapterMaterialContext(section, index);
+      const match = engine.match(line.query, { unit: line.unit, materialContext });
+      if (isLikelyHeading(line, match.confidence)) skipped.push(line.raw);
+      else lines.push({ ...line, ...match });
+    }
   }
   return { lines, skipped };
 }

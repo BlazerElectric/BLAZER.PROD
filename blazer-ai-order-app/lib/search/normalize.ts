@@ -5,6 +5,9 @@
  */
 
 const PHRASES: Array<[RegExp, string]> = [
+  [/\bfa(?=\s+pvc\b)/g, "female adapter"],
+  [/\b1[\s-]*home\b/g, "1 hole"],
+  [/\b1[\s-]*hole\b/g, "1 hole"],
   [/\bset[\s-]*screw\b/g, "setscrew"],
   [/\bweather[\s-]*proof\b/g, "weatherproof"],
   [/\btamper[\s-]*(?:resistant|resistance|proof)\b/g, "tr"],
@@ -35,9 +38,10 @@ const PHRASES: Array<[RegExp, string]> = [
 /** Token -> canonical token. Applied to both index and query tokens. */
 const SYNONYMS: Record<string, string> = {};
 const GROUPS: Record<string, string[]> = {
-  receptacle: ["recp", "recpt", "rec", "recep", "recept", "receptacles", "outlet", "outlets", "recpts"],
+  receptacle: ["recp", "recpt", "rec", "recep", "recept", "receptacles", "outlet", "outlets", "recpts", "receipts"],
   connector: ["conn", "connectors", "cnctr", "connecter", "conns"],
   coupling: ["cplg", "couplings", "coup", "cplgs", "coupler"],
+  clip: ["clips"],
   breaker: ["bkr", "breakers", "brkr", "bkrs"],
   ground: ["grd", "gnd", "grnd", "grounding"],
   white: ["wht", "wh"],

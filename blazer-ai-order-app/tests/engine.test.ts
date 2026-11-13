@@ -25,7 +25,15 @@ const engine = new SearchEngine([
   product({ sku: "3024", title: "SQD QO120 20A 1P PLUG-ON BREAKER", brand: "Square D", mpn: "QO120", rank: 8, similar: ["3025"] }),
   product({ sku: "3025", title: "SQD QO115 15A 1P PLUG-ON BREAKER", brand: "Square D", mpn: "QO115", rank: 20 }),
   product({ sku: "1021", title: "12/2 NM-B W/G 250FT ROMEX", brand: "Southwire", category: "Wire", rank: 2, search_keywords: ["romex"] }),
-  product({ sku: "5000", title: "LEVITON 20A DUPLEX RECEPTACLE WHITE", brand: "Leviton", mpn: "5362-W", rank: 40 }),
+  product({
+    sku: "5000",
+    title: "LEVITON 20A DUPLEX RECEPTACLE WHITE",
+    brand: "Leviton",
+    mpn: "5362-W",
+    category: "Wiring Devices",
+    subcategory: "Receptacles",
+    rank: 40,
+  }),
 ]);
 
 describe("normalize", () => {
@@ -51,10 +59,269 @@ describe("SearchEngine", () => {
 
   it("tolerates typos", () => {
     expect(engine.search("levitn duplex recepticle")[0]?.product.sku).toBe("5000");
+    expect(engine.match("20A receipts").product?.sku).toBe("5000");
   });
 
   it("prefers the requested trade size over a more popular size", () => {
     expect(engine.search("3/4 emt conduit")[0]?.product.sku).toBe("1420");
+  });
+
+  it("flags unspecified male-adapter material and unverified double-barrel equivalents", () => {
+    const fittings = new SearchEngine([
+      product({
+        sku: "ent-ma",
+        title: "3/4 IN ENT MALE ADAPTER THREADED",
+        category: "Fittings",
+        subcategory: "ENT Fittings",
+      }),
+      product({
+        sku: "mc-snap-lock",
+        title: "3/8 IN MC DOUBLE SNAP LOCK CONNECTOR",
+        category: "Fittings",
+        subcategory: "MC, NMB Cable Fittings",
+      }),
+    ]);
+
+    expect(fittings.match("3/4 MA")).toMatchObject({
+      product: { sku: "ent-ma" },
+      confidence: "medium",
+      note: expect.stringContaining("Raceway material is unspecified"),
+    });
+    expect(fittings.match("MC double barrel connector")).toMatchObject({
+      product: { sku: "mc-snap-lock" },
+      confidence: "medium",
+      note: expect.stringContaining("Confirm the double-barrel fitting style"),
+    });
+  });
+
+  it("uses nearby quote material to rank an abbreviated adapter without raising confidence", () => {
+    const adapters = new SearchEngine([
+      product({
+        sku: "ent-ma",
+        title: "3/4 IN ENT MALE ADAPTER THREADED",
+        category: "Fittings",
+        subcategory: "ENT Fittings",
+        rank: 1,
+      }),
+      product({
+        sku: "pvc-ma",
+        title: "3/4 SCH 40 PVC MALE ADAPTER",
+        category: "Fittings",
+        subcategory: "PVC Fittings",
+        rank: 999999,
+      }),
+    ]);
+
+    expect(adapters.match("3/4 MA").product?.sku).toBe("ent-ma");
+    expect(adapters.match("3/4 MA", { materialContext: { material: "pvc", tradeSize: "3/4" } })).toMatchObject({
+      product: { sku: "pvc-ma" },
+      confidence: "medium",
+      note: expect.stringContaining("PVC is suggested by nearby 3/4-inch items"),
+    });
+    expect(adapters.match("3/4 ENT MA", { materialContext: { material: "pvc", tradeSize: "3/4" } }).product?.sku).toBe("ent-ma");
+    expect(adapters.match("3/4 MA", { materialContext: { material: "emt", tradeSize: "3/4" } }).note).toContain(
+      "catalog match is ENT",
+    );
+  });
+
+  it("normalizes compact one-hole strap shorthand before matching size", () => {
+    const straps = new SearchEngine([
+      product({
+        sku: "wrong-size",
+        title: "3/4 IN EMT 1 HOLE STRAP STL",
+        category: "Fittings",
+        subcategory: "Straps",
+      }),
+      product({
+        sku: "half-inch-strap",
+        title: "1/2 IN EMT 1 HOLE STRAP STL",
+        category: "Fittings",
+        subcategory: "Straps",
+      }),
+      product({
+        sku: "lug",
+        title: "250 CU 1-HOLE LONG 1/2 STUD LUG",
+        category: "Connectors & Crimps",
+        subcategory: "Lugs & Split Bolts",
+      }),
+    ]);
+
+    expect(straps.match('1/2" EMT 1Hole straps').product?.sku).toBe("half-inch-strap");
+  });
+
+  it("keeps explicit connector and coupling requests on the requested fitting type", () => {
+    const fittings = new SearchEngine([
+      product({
+        sku: "coupling",
+        title: "1/2 EMT RT COMPRESSION COUPLING",
+        category: "Fittings",
+        subcategory: "EMT Fittings",
+        rank: 1,
+      }),
+      product({
+        sku: "connector",
+        title: "1/2 EMT RT COMPRESSION CONNECTOR",
+        category: "Fittings",
+        subcategory: "EMT Fittings",
+        rank: 999999,
+      }),
+    ]);
+
+    expect(fittings.search("1/2 EMT RT connector")[0]?.product.sku).toBe("connector");
+    expect(fittings.search("1/2 EMT RT coupling")[0]?.product.sku).toBe("coupling");
+  });
+
+  it("filters non-MC parts from MC fitting searches", () => {
+    const mcParts = new SearchEngine([
+      product({
+        sku: "terminal",
+        title: "SINGLE TAPE TO WIRE TERMINAL BLOCK CONNECTOR",
+        category: "Lighting Fixtures, Control",
+        subcategory: "Indoor Lighting",
+        rank: 1,
+      }),
+      product({
+        sku: "mc-connector",
+        title: "3/8 MC CABLE SINGLE SCREW CONNECTOR",
+        category: "Fittings",
+        subcategory: "MC, NMB Cable Fittings",
+        rank: 999999,
+      }),
+      product({
+        sku: "emt-strap",
+        title: "3/4 EMT 1 HOLE STRAP",
+        category: "Fittings",
+        subcategory: "EMT Fittings",
+        rank: 1,
+      }),
+      product({
+        sku: "mc-strap",
+        title: "MC CABLE 1 HOLE STRAP",
+        category: "Fittings",
+        subcategory: "MC Cable Fittings",
+        rank: 999999,
+      }),
+      product({
+        sku: "mc-clip",
+        title: "MC/AC CABLE BEAM CLIP",
+        category: "Fittings",
+        subcategory: "Clips, Clamps, Hangers",
+        rank: 1,
+      }),
+      product({
+        sku: "mc-fitting",
+        title: "MC FITTING AL 1 IN NPT",
+        category: "Fittings",
+        subcategory: "MC, NMB Cable Fittings",
+        rank: 1,
+      }),
+    ]);
+
+    expect(mcParts.search("MC single connector")[0]?.product.sku).toBe("mc-connector");
+    expect(mcParts.search("MC 1-home straps")[0]?.product.sku).toBe("mc-strap");
+    expect(mcParts.search("MC beam clips")[0]?.product.sku).toBe("mc-clip");
+  });
+
+  it("does not substitute specialty breakers when a standard breaker was requested", () => {
+    const breakers = new SearchEngine([
+      product({
+        sku: "gfci",
+        title: "SQUARE D HOMELINE 20A 1P GFCI BREAKER",
+        category: "Power Distribution",
+        subcategory: "Circuit Breakers",
+        rank: 1,
+      }),
+      product({
+        sku: "standard",
+        title: "SQUARE D HOMELINE 20A 1P BREAKER",
+        category: "Power Distribution",
+        subcategory: "Circuit Breakers",
+        rank: 999999,
+      }),
+    ]);
+
+    expect(breakers.match("20A 1P Square D Homeline breaker").product?.sku).toBe("standard");
+    expect(breakers.match("20A 1P Square D Homeline GFCI breaker").product?.sku).toBe("gfci");
+  });
+
+  it("translates FA PVC and flags underspecified receptacles and package counts", () => {
+    const products = new SearchEngine([
+      product({
+        sku: "male",
+        title: "3/4 SCH 40 PVC MALE ADAPTER",
+        category: "Fittings",
+        subcategory: "PVC Fittings",
+        rank: 1,
+      }),
+      product({
+        sku: "female",
+        title: "3/4 SCH 40 PVC FEMALE ADAPTER",
+        category: "Fittings",
+        subcategory: "PVC Fittings",
+        rank: 999999,
+      }),
+      product({
+        sku: "splice",
+        title: "MECHANICAL SPLICE CONNECTOR UP TO #6 2 SPLICES/KIT",
+        category: "Connectors & Crimps",
+        subcategory: "Mechanical Connectors",
+      }),
+      product({
+        sku: "strip-light",
+        title: "4 FOOT LED STRIP LIGHTS 2 LAMP",
+        specs: "T8 Tubes, Lamps Sold Separately",
+        category: "Lighting Fixtures, Control",
+        subcategory: "Indoor Lighting",
+      }),
+    ]);
+
+    expect(products.match("3/4 FA PVC").product?.sku).toBe("female");
+    expect(engine.match("20A receipts")).toMatchObject({
+      product: { sku: "5000" },
+      confidence: "medium",
+      note: expect.stringContaining("Confirm receptacle voltage"),
+    });
+    expect(products.match("mechanical splices up to size #6").note).toMatch(/quantity means kits or individual splices/i);
+    expect(products.match("4ft strip lights").note).toMatch(/sold separately/i);
+  });
+
+  it("prefers a common duplex receptacle over an unspecified 250V single receptacle", () => {
+    const receptacles = new SearchEngine([
+      product({
+        sku: "special-single",
+        title: "20A 250V SINGLE RECEPTACLE NEMA 6-20R",
+        category: "Wiring Devices",
+        subcategory: "Receptacles",
+        rank: 1,
+      }),
+      product({
+        sku: "standard-duplex",
+        title: "20A 125V DUPLEX RECEPTACLE NEMA 5-20R",
+        category: "Wiring Devices",
+        subcategory: "Receptacles",
+        rank: 999999,
+      }),
+    ]);
+
+    expect(receptacles.match("20A receptacle")).toMatchObject({
+      product: { sku: "standard-duplex" },
+      confidence: "medium",
+      note: expect.stringContaining("Confirm receptacle voltage"),
+    });
+    expect(receptacles.match("20A 250V single receptacle").product?.sku).toBe("special-single");
+  });
+
+  it("does not mistake wire-holder hardware for a request missing wire size", () => {
+    const holders = new SearchEngine([
+      product({
+        sku: "holder",
+        title: "PORCELAIN SCREW-IN WIRE HOLDER",
+        category: "Wire, Cable & Cord",
+        subcategory: "Service Wire",
+      }),
+    ]);
+
+    expect(holders.match("wire holder screw in").note).toBeUndefined();
   });
 
   it("does not match a single receptacle to a duplex request", () => {

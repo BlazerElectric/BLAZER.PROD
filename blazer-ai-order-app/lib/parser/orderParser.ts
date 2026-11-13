@@ -168,6 +168,13 @@ const HEADER_LINE = /^(?:qty|quantity|item|description|desc|part|material|materi
 const CONTEXT_LINE =
   /^(?:material(?:s)?\s+list|job|project|customer|po\s*#?|p\.o\.|ship\s*to|deliver(?:y)?|attn|subject|date|from|to|thanks|thank you|regards)\b.*?(?::|-|$)/i;
 
+const QUOTE_SECTION = /^quote\s*(?:#\s*)?\d+\s*:?\s*$/i;
+const DOCUMENT_TITLE = /^(?:[a-z][a-z0-9&'.-]*\s+){1,4}quotes?$/i;
+
+export function isQuoteSection(line: ParsedLine): boolean {
+  return QUOTE_SECTION.test(line.raw);
+}
+
 export function parseLine(raw: string): ParsedLine | null {
   const original = raw.replace(/\t+/g, " ").trim();
   if (!original || !/[a-z0-9]/i.test(original) || HEADER_LINE.test(original)) return null;
@@ -213,10 +220,12 @@ export function parseLine(raw: string): ParsedLine | null {
  */
 export function isLikelyHeading(line: ParsedLine, confidence: string): boolean {
   return (
-    confidence === "none" &&
-    !line.quantityExplicit &&
-    !/\d/.test(line.raw) &&
-    /\b(?:residence|jobsite)\b|-\s*rough[\s-]*in\b/i.test(line.raw)
+    isQuoteSection(line) ||
+    (!line.quantityExplicit && DOCUMENT_TITLE.test(line.raw)) ||
+    (confidence === "none" &&
+      !line.quantityExplicit &&
+      !/\d/.test(line.raw) &&
+      /\b(?:residence|jobsite)\b|-\s*rough[\s-]*in\b/i.test(line.raw))
   );
 }
 

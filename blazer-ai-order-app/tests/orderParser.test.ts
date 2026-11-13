@@ -44,6 +44,13 @@ describe("parseLine", () => {
     expect(isLikelyHeading(parseLine("quad rs cover")!, "none")).toBe(false);
   });
 
+  it("recognizes quote titles and numbered quote separators even if they match catalog text", () => {
+    expect(isLikelyHeading(parseLine("Flying Diamond Quotes")!, "high")).toBe(true);
+    expect(isLikelyHeading(parseLine("QUOTE 1:")!, "medium")).toBe(true);
+    expect(isLikelyHeading(parseLine("QUOTE #3:")!, "high")).toBe(true);
+    expect(isLikelyHeading(parseLine("20A receptacles")!, "high")).toBe(false);
+  });
+
   it("turns cut notes into comments and footage", () => {
     const line = parseLine("12 thhn white (5 cuts @ 50ft)")!;
     expect(line.comment).toMatch(/5 cuts @ 50ft/);

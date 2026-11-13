@@ -2,6 +2,8 @@
 
 Recommendation and catalog enrichment engine for electrical wholesale e-commerce.
 
+The [`blazer-ai-order-app/`](blazer-ai-order-app/README.md) directory contains the Next.js AI Order Desk. It consumes `blazer_web_catalog.json`, is deployed to Vercel and is embedded in the Billtrust storefront. Re-deploy it after each catalog refresh.
+
 ## Setup
 
 Install the Python dependencies with:

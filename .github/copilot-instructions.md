@@ -8,6 +8,11 @@ This repository manages product catalog enrichment and recommendation datasets f
 ## Architecture
 Flat, single-directory Python project: a six-stage data pipeline that transforms `products.csv` (raw `BLAZER ID,PRODUCT` rows) into `blazer_web_catalog.json` for the Vercel-hosted storefront.
 
+The one exception is `blazer-ai-order-app/`, a separate Next.js 16 + TypeScript + Tailwind app (the AI Order Desk). It reads `blazer_web_catalog.json`, which is copied into `data/` by `npm run sync-catalog` / `prebuild`. The Python pipeline must keep the JSON schema stable for it.
+- Work inside that directory with npm: `npm run lint`, `npm run typecheck`, `npm test` (Vitest) and `npm run build`. CI runs these in `.github/workflows/order-app.yml`.
+- Gemini runs only server-side (`lib/ai/gemini.ts`). AI suggestions must be resolved to real catalog SKUs through `lib/search/engine.ts`.
+- Billtrust DOM automation lives in `public/billtrust-bridge.js`. It talks to the app through the origin-checked postMessage protocol in `lib/billtrust/protocol.ts`; keep both in sync, and never use `"*"` origins or inject HTML.
+
 ```
 products.csv ──► enrich_catalog.py (Gemini) ──► enriched_products.csv
                                                    │

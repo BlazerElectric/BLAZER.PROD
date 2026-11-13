@@ -1,0 +1,35 @@
+name: Order App
+
+on:
+  push:
+    paths:
+      - "blazer-ai-order-app/**"
+      - "blazer_web_catalog.json"
+      - ".github/workflows/order-app.yml"
+  pull_request:
+    paths:
+      - "blazer-ai-order-app/**"
+      - "blazer_web_catalog.json"
+      - ".github/workflows/order-app.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: blazer-ai-order-app
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: blazer-ai-order-app/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build

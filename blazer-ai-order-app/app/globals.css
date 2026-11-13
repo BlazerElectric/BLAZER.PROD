@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+@theme {
+  --color-blazer-950: #001a33;
+  --color-blazer-900: #002447;
+  --color-blazer-800: #003366;
+  --color-blazer-700: #0b4a8f;
+  --color-blazer-600: #1559c4;
+  --color-blazer-500: #2a6fdb;
+  --color-blazer-300: #93b4e6;
+  --color-blazer-200: #c7d8f2;
+  --color-blazer-100: #e3ecf9;
+  --color-blazer-50: #f2f6fc;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background: #ffffff;
+  color: #0f172a;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-blazer-600);
+  outline-offset: 2px;
+}
+
+/* Embedded in Billtrust: the iframe is auto-sized to the document, so viewport-relative
+   heights and sticky panels would feed back into the measured height. Unlayered rules
+   intentionally override Tailwind utilities. */
+html[data-embedded] .embed-auto-height {
+  min-height: 0;
+  max-height: none;
+  position: static;
+}
+
+/* position: fixed is relative to the full-height iframe, so a bottom bar would sit off-screen. */
+html[data-embedded] .embed-hide {
+  display: none;
+}

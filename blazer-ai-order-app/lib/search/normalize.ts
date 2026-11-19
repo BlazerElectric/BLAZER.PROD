@@ -5,7 +5,7 @@
  */
 
 const PHRASES: Array<[RegExp, string]> = [
-  [/\bfa(?=\s+pvc\b)/g, "female adapter"],
+  [/\bfa(?=\s+(?:pvc\b|$)|$)/g, "female adapter"],
   [/\b1[\s-]*home\b/g, "1 hole"],
   [/\b1[\s-]*hole\b/g, "1 hole"],
   [/\btwo[\s-]*hole\b/g, "2 hole"],
@@ -19,6 +19,8 @@ const PHRASES: Array<[RegExp, string]> = [
   [/\bset[\s-]*screw\b/g, "setscrew"],
   [/\bweather[\s-]*proof\b/g, "weatherproof"],
   [/\btamper[\s-]*(?:resistant|resistance|proof)\b/g, "tr"],
+  [/\bweather[\s-]*resistant\b/g, "wr"],
+  [/\b(45|90)\s*deg(?:ree)?s?\b/g, "$1 degree"],
   [/\bliquid[\s-]*tight\b/g, "liquidtight"],
   [/\bfeed[\s-]*(?:thru|through)\b/g, "feedthru"],
   [/\block[\s-]*rings?\b/g, "lockring"],
@@ -78,6 +80,7 @@ const GROUPS: Record<string, string[]> = {
   conduit: ["cond"],
   box: ["boxes"],
   strap: ["straps"],
+  nut: ["nuts"],
   square: ["sq", "sqr"],
   "4sq": ["4square", "foursquare"],
   afci: ["afc", "cafi", "cafci"],

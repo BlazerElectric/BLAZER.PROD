@@ -94,6 +94,17 @@ describe("parseOrderText", () => {
     expect(lines.slice(0, 8).every((line) => line.reviewNote?.includes("each listed color"))).toBe(true);
   });
 
+  it("splits tabular 500-foot wire spools by color and flags the missing wire type", () => {
+    const lines = parseOrderText("500'\tBlk, Red, Blue, White #!2 500' Spools (Solid)");
+    expect(lines.map((line) => [line.quantity, line.unit, line.query])).toEqual([
+      [500, "ft", "#12 solid black wire 500ft"],
+      [500, "ft", "#12 solid red wire 500ft"],
+      [500, "ft", "#12 solid blue wire 500ft"],
+      [500, "ft", "#12 solid white wire 500ft"],
+    ]);
+    expect(lines.every((line) => line.reviewNote?.includes("wire type"))).toBe(true);
+  });
+
   it("preserves coil length and container contents without treating them as ordered container quantities", () => {
     const lines = parseOrderText(
       "throw in a 250ft coil of 12/2 mc lite and a 250ft roll of 12/3 mc, " +

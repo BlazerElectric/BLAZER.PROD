@@ -271,7 +271,9 @@ export function parseLine(raw: string): ParsedLine | null {
             : cablePackage || containerCount
               ? "Confirm requested package length or piece count against the catalog package"
               : /\bper-color quantity\b/i.test(original)
-                ? "Quantity repeated for each listed color; confirm per-color footage and package length"
+              ? /\bwire type not specified\b/i.test(original)
+                ? `Quantity applies per listed color; confirm ${original.match(/#!(\d+)/i) ? `#!${original.match(/#!(\d+)/i)?.[1]} as #1${original.match(/#!(\d+)/i)?.[1]}, ` : ""}wire type and spool length`
+                : "Quantity repeated for each listed color; confirm per-color footage and package length"
                 : ["box", "bag", "jar", "pack"].includes(unit)
                   ? "Confirm the number of pieces supplied per requested package"
                   : undefined;
@@ -312,10 +314,42 @@ function expandWireColors(input: string): string {
   );
 }
 
+function expandTabularWireSpools(input: string): string {
+  const color = "(?:black|blk|red|blue|blu|white|wht|green|grn)";
+  const colors = `${color}(?:\\s*,\\s*(?:and\\s+)?${color})+`;
+  const pattern = new RegExp(
+    `(^|\\n)([ \\t]*)(\\d[\\d,]*)\\s*(?:'|ft\\b|feet\\b)\\s+(${colors})\\s+#\\s*(?:!(\\d+)|(\\d+))\\s+(\\d[\\d,]*)\\s*(?:'|ft\\b|feet\\b)\\s*(?:spools?|reels?)\\s*\\((solid|stranded)\\)(?=\\s*(?:\\n|$))`,
+    "gi",
+  );
+  return input.replace(pattern, (
+    _match,
+    prefix: string,
+    indent: string,
+    footage: string,
+    requestedColors: string,
+    typoGauge: string | undefined,
+    explicitGauge: string | undefined,
+    spoolLength: string,
+    strand: string,
+  ) => {
+    const gauge = typoGauge ? `1${typoGauge}` : explicitGauge;
+    if (!gauge) return _match;
+    const correctionNote = typoGauge ? ` and #!${typoGauge} read as #${gauge}` : "";
+    const colorName: Record<string, string> = {
+      blk: "black", blu: "blue", wht: "white", grn: "green",
+    };
+    return requestedColors.split(/\s*,\s*(?:and\s+)?/i).map((value) => {
+      const normalizedColor = colorName[value.toLowerCase()] ?? value.toLowerCase();
+      return `${prefix}${indent}${footage}' #${gauge} ${strand.toLowerCase()} ${normalizedColor} wire ${spoolLength}ft -- per-color quantity from wire list${correctionNote} and wire type not specified`;
+    }).join("\n");
+  });
+}
+
 /** Split pasted text (emails, panel schedules, takeoff lists) into order lines. */
 export function parseOrderText(input: string, maxLines = 300): ParsedLine[] {
   const lines: ParsedLine[] = [];
   const conversational = /\b(?:throw in|gimme|give me|grab|same thing|oh and|add \d|or actually|wait no|let me know if)\b/i.test(input);
+  input = expandTabularWireSpools(input);
   if (conversational) input = expandWireColors(input);
   for (const block of input.split(conversational ? /\r?\n|;|\.\s+(?=[a-z0-9])/i : /\r?\n|;/)) {
     // "10 1/2 emt, 20 1/2 conn" -> separate items when every comma segment starts with a quantity.

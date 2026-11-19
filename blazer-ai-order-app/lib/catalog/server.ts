@@ -7,6 +7,7 @@ import { SearchEngine } from "../search/engine";
 import { parseSlangCsv, type SlangEntry } from "../search/slang";
 import type { CatalogFile, ResolvedLine } from "../types";
 import { tokenize } from "../search/normalize";
+import { quantityInCatalogBoxes, quantityInCatalogPackages } from "../order/quantity";
 
 interface CatalogState {
   engine: SearchEngine;
@@ -90,9 +91,29 @@ export function resolveOrderText(text: string): ResolvedOrder {
       }
       const inferredFamily = inferBreakerFamilyContext(section, index);
       const match = engine.match(inferredFamily ? `${line.query} ${inferredFamily}` : line.query, { unit: line.unit, materialContext });
+      const packageQuantity = match.product
+        ? quantityInCatalogPackages(line.quantity, line.unit, match.product)
+        : undefined;
+      const boxQuantity = match.product
+        ? quantityInCatalogBoxes(line.quantity, line.unit, match.product)
+        : undefined;
       const notes = [
         match.note, line.reviewNote,
         ...(inferredFamily ? [`${inferredFamily.toUpperCase()} family inferred from this quote's panel; confirm breaker compatibility`] : []),
+        ...(packageQuantity
+          ? [
+              `${line.quantity} ft requested; ${packageQuantity.assumedLength ? "assuming standard" : "catalog lists"} ${packageQuantity.packageLength}-ft lengths, so ${packageQuantity.quantity} ${packageQuantity.quantity === 1 ? "package" : "packages"} will be submitted${
+                packageQuantity.excessLength > 0 ? ` (${packageQuantity.excessLength} ft extra)` : ""
+              }`,
+            ]
+          : []),
+        ...(boxQuantity
+          ? [
+              `${line.quantity} pieces requested; catalog box contains ${boxQuantity.piecesPerBox} pieces, so ${boxQuantity.quantity} ${
+                boxQuantity.quantity === 1 ? "box" : "boxes"
+              } will be submitted${boxQuantity.excessPieces > 0 ? ` (${boxQuantity.excessPieces} extra pieces)` : ""}`,
+            ]
+          : []),
       ].filter(Boolean);
       if (notes.length) {
         match.note = notes.join(". ");

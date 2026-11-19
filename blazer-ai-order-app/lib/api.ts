@@ -1,4 +1,4 @@
-import type { ChatMessage, ChatResponse, ProductSummary, ResolvedLine, SearchHit } from "./types";
+import type { ChatMessage, ChatResponse, OrderContextLine, ProductSummary, ResolvedLine, SearchHit } from "./types";
 
 async function json<T>(res: Response): Promise<T> {
   const body = await res.json().catch(() => ({}));
@@ -36,11 +36,11 @@ export async function fetchRelated(sku: string): Promise<RelatedProducts> {
   return json<RelatedProducts>(await fetch(`/api/products/${encodeURIComponent(sku)}`));
 }
 
-export async function sendChat(messages: ChatMessage[], cartSummary: string): Promise<ChatResponse> {
+export async function sendChat(messages: ChatMessage[], cartSummary: string, orderLines: OrderContextLine[] = []): Promise<ChatResponse> {
   const res = await fetch("/api/chat", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages, cartSummary }),
+    body: JSON.stringify({ messages, cartSummary, orderLines }),
   });
   return json<ChatResponse>(res);
 }

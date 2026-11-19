@@ -6,6 +6,7 @@ import { draftSummary } from "@/lib/api";
 import { submitToBilltrust } from "@/lib/billtrust/client";
 import { LIMITS, buildSubmitPayload, formatQuickPad, type SubmitPayload, type SubmitResult } from "@/lib/billtrust/protocol";
 import { buildShippingSummary } from "@/lib/order/summary";
+import { quantityInCatalogBoxes, quantityInCatalogPackages } from "@/lib/order/quantity";
 import { needsReview, useOrderStore } from "@/store/orderStore";
 
 function CopyBlock({ label, value, rows = 4 }: { label: string; value: string; rows?: number }) {
@@ -153,7 +154,30 @@ export function SubmitPanel() {
       shippingText = [shippingText.trim(), ...sourcing].filter(Boolean).join("\n");
     }
     const payload = buildSubmitPayload(
-      lines.map((l) => ({ sku: l.product?.sku, quantity: l.quantity, comment: l.comment })),
+      lines.map((l) => {
+        const packageQuantity = l.product
+          ? quantityInCatalogPackages(l.quantity, l.unit, l.product)
+          : undefined;
+        const boxQuantity = l.product
+          ? quantityInCatalogBoxes(l.quantity, l.unit, l.product)
+          : undefined;
+        const packageComment = packageQuantity
+          ? `${l.quantity} ft requested; ${packageQuantity.quantity} x ${packageQuantity.packageLength}-ft ${
+              packageQuantity.assumedLength ? "assumed " : ""
+            }package${packageQuantity.quantity === 1 ? "" : "s"}${
+              packageQuantity.excessLength > 0 ? ` (${packageQuantity.excessLength} ft extra)` : ""
+            }`
+          : boxQuantity
+            ? `${l.quantity} pieces requested; ${boxQuantity.quantity} box${
+                boxQuantity.quantity === 1 ? "" : "es"
+              } of ${boxQuantity.piecesPerBox}${boxQuantity.excessPieces > 0 ? ` (${boxQuantity.excessPieces} extra pieces)` : ""}`
+            : "";
+        return {
+          sku: l.product?.sku,
+          quantity: packageQuantity?.quantity ?? boxQuantity?.quantity ?? l.quantity,
+          comment: [packageComment, l.comment].filter(Boolean).join("; "),
+        };
+      }),
       shippingText,
     );
 
@@ -206,8 +230,8 @@ export function SubmitPanel() {
         <div role="alert" className="flex gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-900 ring-1 ring-amber-300">
           <AlertTriangle className="mt-0.5 size-4 shrink-0" aria-hidden />
           <p>
-            {reviewCount} line{reviewCount === 1 ? " is" : "s are"} still marked <strong>Review match</strong>. Submit
-            anyway? Click submit again to confirm.
+            {reviewCount} line{reviewCount === 1 ? " is" : "s are"} still marked <strong>Review match</strong>.
+            {bridge === "connected" ? " Submit anyway?" : " Prepare QuickPad text anyway?"}
           </p>
         </div>
       )}
@@ -224,8 +248,8 @@ export function SubmitPanel() {
         disabled={submitting || matchedCount === 0}
         className="flex w-full items-center justify-center gap-2 rounded-xl bg-blazer-800 px-4 py-3 text-base font-bold text-white shadow-md hover:bg-blazer-700 focus-visible:ring-4 focus-visible:ring-blazer-200 disabled:opacity-50"
       >
-        {submitting ? <Loader2 className="size-5 animate-spin" aria-hidden /> : <Send className="size-5" aria-hidden />}
-        {confirmReview ? "Confirm & submit to Billtrust Cart" : "Submit to Billtrust Cart"}
+        {submitting ? <Loader2 className="size-5 animate-spin" aria-hidden /> : bridge === "connected" ? <Send className="size-5" aria-hidden /> : <ClipboardCopy className="size-5" aria-hidden />}
+        {bridge === "connected" ? confirmReview ? "Confirm & submit to Billtrust Cart" : "Submit to Billtrust Cart" : confirmReview ? "Confirm & prepare QuickPad" : "Copy for QuickPad"}
       </button>
       {bridge !== "connected" && (
         <p className="text-center text-xs text-slate-500">

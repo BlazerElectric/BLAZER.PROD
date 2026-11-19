@@ -16,11 +16,10 @@ const SOURCE: Record<OrderLine["source"], { label: string; Icon: typeof Bot }> =
   search: { label: "Search", Icon: Search },
 };
 
-export function BomLineCard({ line }: { line: OrderLine }) {
+export function BomLineCard({ line, number, onRemove, onClarify }: { line: OrderLine; number: number; onRemove: () => void; onClarify: () => void }) {
   const updateLine = useOrderStore((s) => s.updateLine);
   const selectProduct = useOrderStore((s) => s.selectProduct);
   const confirmLine = useOrderStore((s) => s.confirmLine);
-  const removeLine = useOrderStore((s) => s.removeLine);
   const [showAccessories, setShowAccessories] = useState(false);
   const [changing, setChanging] = useState(false);
   const reviewing = needsReview(line);
@@ -34,28 +33,32 @@ export function BomLineCard({ line }: { line: OrderLine }) {
   const showRaw = line.source !== "search" && line.rawText && line.rawText !== line.product?.title;
 
   return (
-    <li className={`rounded-xl border border-l-4 border-slate-200 bg-white p-3 shadow-sm ${STATE_BORDER[state]}`}>
+    <li className={`rounded-lg border border-l-4 border-slate-200 bg-white p-3 shadow-sm ${STATE_BORDER[state]}`}>
       <div className="flex items-start gap-2">
         <div className="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold text-slate-500">Line {number}</span>
           <ConfidenceBadge line={line} />
           <span className="inline-flex items-center gap-1 text-[11px] font-medium tracking-wide text-slate-500 uppercase">
             <SourceIcon className="size-3" aria-hidden /> {sourceLabel}
           </span>
           {showRaw && (
-            <span className="min-w-0 truncate text-xs text-slate-500" title={line.rawText}>
+            <span className="w-full break-words text-xs text-slate-600" title={line.rawText}>
               “{line.rawText}”
             </span>
           )}
         </div>
         <button
           type="button"
-          onClick={() => removeLine(line.id)}
+          onClick={onRemove}
+          title="Remove line"
           className="rounded-md p-1 text-slate-400 hover:bg-rose-50 hover:text-rose-700"
           aria-label="Remove line"
         >
           <Trash2 className="size-4" aria-hidden />
         </button>
       </div>
+
+      {reviewing && <button type="button" onClick={onClarify} className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-blazer-800 hover:underline"><MessageSquareText className="size-3.5" aria-hidden /> Ask about line {number}</button>}
 
       {line.product ? (
         <div className="mt-2 flex items-start gap-2">

@@ -1,8 +1,9 @@
 import type { CatalogProduct, MatchResult, ProductSummary, SearchHit } from "../types";
 import { boundedEditDistance, maxTypoDistance } from "./fuzzy";
-import { compactCode, isSpecToken, tokenize } from "./normalize";
+import { compactCode, isSpecToken, normalizeText, tokenize } from "./normalize";
 import { MATERIAL_TOKENS, type QuoteMaterialContext } from "./quoteContext";
 import { SlangDictionary, type SlangEntry, type SlangRewrite } from "./slang";
+import { catalogPackageLength } from "../order/quantity";
 
 const FIELD_WEIGHTS = {
   mpn: 5,
@@ -45,6 +46,7 @@ const BULK_UNIT_PENALTY = 0.6;
 const QUOTE_CONTEXT_BONUS = 0.22;
 const WIRE_CATEGORY = "Wire, Cable & Cord";
 const WIRE_SPEC_TOKENS = new Set(["thhn", "thwn", "xhhw", "mcm", "kcmil", "nmb"]);
+const WIRE_COLOR_TOKENS = new Set(["black", "red", "blue", "white", "green", "gray"]);
 const RECEPTACLE_CATEGORY = "Wiring Devices";
 const RECEPTACLE_SUBCATEGORY = "Receptacles";
 const FITTING_CATEGORIES = new Set(["Fittings", "Connectors & Crimps"]);
@@ -58,15 +60,33 @@ function receptacleForm(tokens: string[]): ReceptacleForm | undefined {
   return undefined;
 }
 
-function packageLength(product: ProductSummary): number | undefined {
-  const match = `${product.title} ${product.specs}`.match(/\b([\d,]+)\s*(?:feet|foot|ft)\b/i);
-  return match ? Number.parseInt(match[1].replace(/,/g, ""), 10) : undefined;
-}
-
 function adapterGender(tokens: string[]): AdapterGender | undefined {
   if (tokens.includes("maleadapter") || (tokens.includes("male") && tokens.includes("adapter"))) return "male";
   if (tokens.includes("femaleadapter") || (tokens.includes("female") && tokens.includes("adapter"))) return "female";
   return undefined;
+}
+
+function meetsRequiredFeatures(query: string, tokens: string[], product: ProductSummary, productTokens = tokenize(`${product.title} ${product.specs}`)): boolean {
+  if (tokens.includes("receptacle")) {
+    const required = tokens.filter((token) => ["gfci", "afci", "tr", "wr"].includes(token));
+    if (required.some((token) => !productTokens.includes(token))) return false;
+  }
+  if (tokens.includes("nmb")) {
+    if (!productTokens.includes("nmb")) return false;
+    const cablePattern = /\b(?:18|16|14|12|10|8|6|4|3|2|1)\/[234](?:\/[234])?(?![\d/])/;
+    const requestedCable = normalizeText(query).match(cablePattern)?.[0];
+    const candidateCable = normalizeText(`${product.title} ${product.mpn}`).match(cablePattern)?.[0];
+    if (requestedCable && requestedCable !== candidateCable) return false;
+  }
+  if (tokens.includes("rigid") && !tokens.includes("pvc") && tokens.some((token) => ["elbow", "90", "45"].includes(token))) {
+    const text = `${product.title} ${product.specs}`;
+    if (!/\b(?:elb|elbow)\b/i.test(text) || !/\b(?:rigid|grc|rmc|rgs|galv(?:anized)?)\b/i.test(text)) return false;
+    if (productTokens.some((token) => ["pvc", "emt"].includes(token))) return false;
+    if (tokens.filter((token) => /^\d+(?:-\d+)?\/\d+$/.test(token)).some((token) => !productTokens.includes(token))) return false;
+    const angle = tokens.find((token) => token === "90" || token === "45");
+    if (angle && !new RegExp(`\\b${angle}\\s*(?:deg|degree|degrees)?`, "i").test(text)) return false;
+  }
+  return true;
 }
 
 export interface SearchOptions {
@@ -297,6 +317,8 @@ export class SearchEngine {
     const wantsConnector = tokens.includes("connector");
     const wantsCoupling = tokens.includes("coupling");
     const wantsStrap = tokens.includes("strap");
+    const wantsNut = tokens.includes("nut");
+    const wantsSpecializedNut = tokens.includes("spring") || tokens.includes("channel");
     const wantsClip = tokens.includes("clip");
     const wantsHoleCount = tokens.includes("hole") || tokens.some((token) => /^\d+hole$/.test(token));
     const wantsMcAccessory =
@@ -316,6 +338,12 @@ export class SearchEngine {
       }
     });
     const bulkUnit = Boolean(options.unit && BULK_UNITS.has(options.unit));
+    const requestedWireColors = tokens.filter((token) => WIRE_COLOR_TOKENS.has(token));
+    const wireOrder = bulkUnit && (
+      tokens.includes("wire") ||
+      tokens.some((token) => WIRE_SPEC_TOKENS.has(token)) ||
+      (requestedWireColors.length > 0 && tokens.some((token) => ["solid", "stranded"].includes(token)))
+    );
 
     tokens.forEach((token, idx) => {
       const alts = this.expand(token, Boolean(options.prefixLast) && idx === tokens.length - 1);
@@ -348,6 +376,7 @@ export class SearchEngine {
     for (const doc of touched) {
       const product = this.docs[doc];
       const productTokens = tokenize(`${product.title} ${product.specs}`);
+      if (!meetsRequiredFeatures(query, tokens, product, productTokens)) continue;
       if (!exactDocs.has(doc)) {
         const text = `${product.title} ${product.mpn} ${product.specs}`;
         if (tokens.includes("mc") && tokens.some((token) => /^\d+\/[234]$/.test(token))) {
@@ -378,6 +407,7 @@ export class SearchEngine {
         if (tokens.includes("myers") && !/\bmyers\b/i.test(text)) continue;
         if (tokens.includes("hub") && !/\bhubs?\b/i.test(text)) continue;
         if (tokens.includes("tapcon") && !/\btapcons?\b/i.test(text)) continue;
+        if (tokens.includes("threads") && !/\bthread(?:s|ed|er|ing)?\b/i.test(text)) continue;
         if (tokens.some((token) => token === "surge" || token === "spd") && !/\b(?:surge|spd|surgebreaker)\b/i.test(text)) continue;
         if (tokens.includes("panel") && product.subcategory !== "Load Centers / Panelboards" && !tokens.includes("feedthru")) continue;
         if (tokens.includes("breaker") && !tokens.includes("panel") && product.subcategory !== "Circuit Breakers") continue;
@@ -398,6 +428,16 @@ export class SearchEngine {
         if (tokens.includes("locknut") && !productTokens.includes("locknut")) continue;
         if (tokens.includes("bushing") && !productTokens.includes("bushing")) continue;
         if (tokens.includes("staples") && !/\bstaples?\b/i.test(text)) continue;
+        if (wantsNut && (
+          !productTokens.includes("nut") ||
+          (!wantsSpecializedNut && product.category !== "Fasteners & Hardware")
+        )) continue;
+        if (bulkUnit && tokens.includes("emt") &&
+            (product.category !== "Conduit, Strut & Raceways" ||
+             product.subcategory !== "Conduit - Metallic" ||
+             !productTokens.includes("emt") ||
+             !productTokens.includes("conduit") ||
+             ["elbow", "coupling", "connector", "nipple"].some((token) => productTokens.includes(token)))) continue;
         if (tokens.includes("thhn")) {
           if (product.category !== WIRE_CATEGORY || !productTokens.includes("thhn")) continue;
           if (tokens.filter((token) => /^(?:\d+\/0|\d+)$/.test(token)).some((token) => !productTokens.includes(token))) continue;
@@ -430,6 +470,16 @@ export class SearchEngine {
         if (wantsStrap && !isStrap) continue;
         if (wantsClip && !isClip) continue;
         if (wantsStrap && wantsHoleCount && !productTokens.includes("hole")) continue;
+        if (wantsStrap) {
+          const dimension = query.match(
+            /\b(\d+(?:\s+\d+\/\d+|-\d+\/\d+|\/\d+)?)(?=\s*(?:"|in\b|inch(?:es)?\b))/i,
+          )?.[1];
+          if (dimension) {
+            const requestedSizes = tokenize(dimension).filter(isSpecToken);
+            const productSpecTokens = tokenize(product.specs || product.title);
+            if (requestedSizes.some((size) => !productSpecTokens.includes(size))) continue;
+          }
+        }
       }
       if (product.subcategory === "Circuit Breakers" && !exactDocs.has(doc)) {
         const ratings = tokens.filter((token) => /^\d+a$|^[1-4]p$/.test(token));
@@ -477,6 +527,18 @@ export class SearchEngine {
         !exactDocs.has(doc)
       ) {
         continue;
+      }
+      if (wireOrder && !exactDocs.has(doc)) {
+        if (product.category !== WIRE_CATEGORY) continue;
+        if (requestedWireColors.some((color) => !productTokens.includes(color))) continue;
+        if (tokens.includes("solid") && productTokens.includes("stranded")) continue;
+        if (tokens.includes("stranded") && productTokens.includes("solid")) continue;
+        if (requestedWireColors.length === 1 && !tokens.includes("stripe")) {
+          const stripedColor = `${product.title} ${product.specs}`.match(
+            /\b(black|red|blue|white|green|gray|grey)\s+(?:with|w\/)\s+(?:[a-z-]+\s+)?stripe\b/i,
+          )?.[1];
+          if (stripedColor && !requestedWireColors.includes(stripedColor.toLowerCase())) continue;
+        }
       }
       specMisses[doc] = specTokenCount - specHits[doc];
       const specFactor = Math.pow(SPEC_MISS_PENALTY, specMisses[doc]);
@@ -562,7 +624,7 @@ export class SearchEngine {
         ? new Set(
             hits
               .filter((hit) => compactCode(hit.product.mpn) === topMpn)
-              .map((hit) => packageLength(hit.product))
+              .map((hit) => catalogPackageLength(hit.product))
               .filter((length): length is number => length !== undefined),
           )
         : new Set<number>();
@@ -708,7 +770,7 @@ export class SearchEngine {
       confidence,
       product: top.product,
       alternatives: hits.slice(1, 9).map((h) => h.product),
-      similar: this.summariesFor(similarSkus),
+      similar: this.summariesFor(similarSkus).filter((product) => meetsRequiredFeatures(query, tokens, product)),
       ...(notes.length ? { note: notes.join(". ") } : {}),
     };
   }

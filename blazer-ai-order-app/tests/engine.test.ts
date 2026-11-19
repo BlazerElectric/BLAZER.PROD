@@ -45,6 +45,44 @@ describe("normalize", () => {
 });
 
 describe("SearchEngine", () => {
+  it("requires requested GFCI, tamper and weather resistance on receptacles", () => {
+    const parts = new SearchEngine([
+      product({ sku: "plain", title: "20A WHITE TR WR RECEPTACLE", category: "Wiring Devices", subcategory: "Receptacles", rank: 1 }),
+      product({ sku: "indoor", title: "20A WHITE TR GFCI RECEPTACLE", category: "Wiring Devices", subcategory: "Receptacles", rank: 2 }),
+      product({ sku: "outdoor", title: "20A WHITE GFCI RECEPTACLE TAMPER RESISTANT WEATHER RESISTANT", category: "Wiring Devices", subcategory: "Receptacles", similar: ["plain", "indoor"] }),
+    ]);
+    const match = parts.match("20a tr wr gfci recept white");
+    expect(match.product?.sku).toBe("outdoor");
+    expect(match.alternatives).toEqual([]);
+    expect(match.similar).toEqual([]);
+    expect(new SearchEngine([product({ sku: "plain", title: "20A WHITE TR WR RECEPTACLE", category: "Wiring Devices", subcategory: "Receptacles" })]).match("20a tr wr gfci recept white").product).toBeNull();
+  });
+
+  it("does not substitute 12/2/2 or MC for ordinary 12/2 Romex despite contradictory metadata", () => {
+    const parts = new SearchEngine([
+      product({ sku: "extra", title: "COP NM-B-12/2/2 WG 250 COIL", specs: "12 AWG, 2 Conductors plus Ground", rank: 1 }),
+      product({ sku: "mc", title: "12/2 MC CABLE 250 COIL", rank: 2 }),
+      product({ sku: "ordinary", title: "COP NM-B-12/2-CU-WG 250 COIL", similar: ["extra", "mc"] }),
+    ]);
+    const match = parts.match("romex 12-2 250ft coil");
+    expect(match.product?.sku).toBe("ordinary");
+    expect(match.alternatives).toEqual([]);
+    expect(match.similar).toEqual([]);
+    expect(parts.match("romex 12/2/2 250ft coil").product?.sku).toBe("extra");
+  });
+
+  it("requires a same-size galvanized rigid elbow rather than PVC or EMT", () => {
+    const parts = new SearchEngine([
+      product({ sku: "pvc", title: "2-1/2 SCH 40 90 DEG ELBOW PVC", rank: 1 }),
+      product({ sku: "emt", title: "ELB 2-1/2 90DEG EMT ELBOW", rank: 2 }),
+      product({ sku: "small", title: "ELB 1/2 90DEG GALV ELBOW", rank: 3 }),
+      product({ sku: "rigid", title: "ELB 2-1/2 90DEG GALV ELBOW" }),
+    ]);
+    const match = parts.match("2-1/2 rigid 90 coupling");
+    expect(match.product?.sku).toBe("rigid");
+    expect(match.alternatives).toEqual([]);
+  });
+
   it("keeps ordinary MC away from lighting-control MC and respects specified THHN stranding", () => {
     const parts = new SearchEngine([
       product({ sku: "pcs", title: "12/2 MC-PCS LUMINARY 250FT COIL", category: "Wire, Cable & Cord", rank: 1 }),
@@ -160,6 +198,56 @@ describe("SearchEngine", () => {
 
   it("prefers the requested trade size over a more popular size", () => {
     expect(engine.search("3/4 emt conduit")[0]?.product.sku).toBe("1420");
+  });
+
+  it("does not match nuts to washers and keeps requested strap sizes exact", () => {
+    const fasteners = new SearchEngine([
+      product({ sku: "washer", title: "3/8 X 1-1/4 FENDER WASHER", category: "Fasteners & Hardware", subcategory: "Nuts, Bolts, Washers", rank: 1 }),
+      product({ sku: "spring-nut", title: "3/8 SPRING NUT", category: "Conduit, Strut & Raceways", subcategory: "Strut", rank: 1 }),
+      product({ sku: "nut", title: "3/8-16 HEX NUT", category: "Fasteners & Hardware", subcategory: "Nuts, Bolts, Washers" }),
+    ]);
+    expect(fasteners.match("3/8 nuts").product?.sku).toBe("nut");
+    expect(fasteners.match("3/8 channel nuts").product?.sku).toBe("spring-nut");
+
+    const straps = new SearchEngine([
+      product({ sku: "half-strap", title: "C-1100x1/2 EMT STRAP", category: "Fittings", subcategory: "Straps", specs: "1/2 Inch Trade Size", rank: 1 }),
+      product({ sku: "two-inch-strap", title: "C-1100x2 EMT STRAP", category: "Fittings", subcategory: "Straps", specs: "2 Inch Trade Size" }),
+    ]);
+    expect(straps.match('2" EMT strut straps').product?.sku).toBe("two-inch-strap");
+  });
+
+  it("prefers EMT conduit over elbows for a footage request", () => {
+    const conduit = new SearchEngine([
+      product({ sku: "elbow", title: "2-1/2 22-1/2 DEG EMT ELBOW", category: "Conduit, Strut & Raceways", subcategory: "Conduit - Metallic", rank: 1 }),
+      product({ sku: "emt", title: "2-1/2 EMT CONDUIT 10FT", category: "Conduit, Strut & Raceways", subcategory: "Conduit - Metallic" }),
+    ]);
+    expect(conduit.match("2-1/2 EMT", { unit: "ft" }).product?.sku).toBe("emt");
+  });
+
+  it("does not substitute striped wire for a solid-color spool", () => {
+    const wire = new SearchEngine([
+      product({ sku: "striped", title: "12 THHN SOLID WHITE WITH BLUE STRIPE 500FT", category: "Wire, Cable & Cord", rank: 1 }),
+      product({ sku: "blue", title: "12 THHN SOLID BLUE 500FT", category: "Wire, Cable & Cord" }),
+    ]);
+    expect(wire.match("#12 solid blue wire 500ft", { unit: "ft" }).product?.sku).toBe("blue");
+  });
+
+  it("interprets a trailing FA as a female adapter, not an unrelated product series", () => {
+    const adapters = new SearchEngine([
+      product({ sku: "light", title: "RAB X17 FA 15W LED FIXTURE", category: "Lighting Fixtures, Control", rank: 1 }),
+      product({ sku: "female", title: "1 IN SCH 40 PVC FEMALE ADAPTER", category: "Fittings" }),
+    ]);
+    expect(adapters.match('1" FA').product?.sku).toBe("female");
+  });
+
+  it("does not turn an unknown red-and-threads kit into a red drill-bit set", () => {
+    const products = new SearchEngine([
+      product({ sku: "drill-set", title: "RED GRANITE CARBIDE HAMMER DRILL BIT SET", category: "Tools & Meters" }),
+    ]);
+    expect(products.match("Reds and Threads Kit")).toMatchObject({
+      confidence: "none",
+      product: null,
+    });
   });
 
   it("flags unspecified male-adapter material and unverified double-barrel equivalents", () => {
@@ -643,6 +731,7 @@ describe("trade slang", () => {
       "slang,search_as,skus,notes",
       "asshole|black asshole,plastic push in connector,766|768,Push-in NM connector",
       "colorado jim|cj,cable support strap studs,,Stud cable support",
+      "reds and threads|red and threads|reds & threads,plastic anchor kit #10 phil slot 10x1 screw 1/4 bit,388,Red-and-threads plastic anchor kit",
     ].join("\n"),
   );
   const slangEngine = new SearchEngine(
@@ -650,6 +739,7 @@ describe("trade slang", () => {
       product({ sku: "766", title: "ARL NM94 0.37IN PLASTIC PUSH IN CONNECTOR", category: "Fittings", specs: "3/8 Inch", rank: 322 }),
       product({ sku: "768", title: "ARL NM95 0.75IN PLASTIC PUSH IN CONNECTOR", category: "Fittings", specs: "3/4 Inch", rank: 901 }),
       product({ sku: "237384", title: "PHX CSS Cable Support Strap for Wood or Metal Studs", category: "Fittings", rank: 8403 }),
+      product({ sku: "388", title: "CUL 39820 #10 PHIL/SLOT PLASTIC ANCHOR KIT 10X1 SCREW 1/4 BIT", category: "Fasteners & Hardware" }),
       product({ sku: "2915", title: "RCR50 1/2 ROMEX CONNECTOR", category: "Fittings", rank: 30, search_keywords: ["romex connector"] }),
       product({ sku: "1026", title: "NM-B 14/2 250 COIL", category: "Wire, Cable & Cord", rank: 14, search_keywords: ["romex"] }),
     ],
@@ -665,6 +755,13 @@ describe("trade slang", () => {
     expect(jim.product?.sku).toBe("237384");
     expect(jim.note).toMatch(/colorado jim/);
     expect(slangEngine.match("black assholes").product?.sku).toBe("766");
+  });
+
+  it("pins reds and threads to the matching anchor kit", () => {
+    expect(slangEngine.match("Reds and Threads Kit")).toMatchObject({
+      product: { sku: "388" },
+      note: expect.stringContaining("Red-and-threads plastic anchor kit"),
+    });
   });
 
   it("lets sizes pick between pinned SKUs", () => {

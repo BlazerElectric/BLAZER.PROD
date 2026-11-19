@@ -9,6 +9,7 @@ export type BridgeStatus = "checking" | "connected" | "standalone" | "embedded-n
 export interface ChatEntry extends ChatMessage {
   id: string;
   suggestions?: ChatSuggestion[];
+  appliedSuggestions?: number[];
 }
 
 export interface NewLineInput {
@@ -37,6 +38,8 @@ interface OrderState {
   setShippingInstructions: (value: string) => void;
   appendChat: (entry: Omit<ChatEntry, "id">) => void;
   clearChat: () => void;
+  applySuggestions: (entryId: string, indices: number[]) => void;
+  restoreLine: (line: OrderLine, index: number) => void;
   setBridge: (status: BridgeStatus) => void;
 }
 
@@ -47,8 +50,10 @@ const newId = () =>
 
 /** Embedded third-party iframes may have storage blocked or partitioned; fall back to memory. */
 const memory = new Map<string, string>();
+let storageRestored = false;
 const safeStorage: StateStorage = {
   getItem: (name) => {
+    storageRestored = true;
     try {
       return window.localStorage.getItem(name);
     } catch {
@@ -56,6 +61,7 @@ const safeStorage: StateStorage = {
     }
   },
   setItem: (name, value) => {
+    if (!storageRestored) return;
     try {
       window.localStorage.setItem(name, value);
     } catch {
@@ -163,6 +169,46 @@ export const useOrderStore = create<OrderState>()(
       appendChat: (entry) => set((state) => ({ chat: [...state.chat, { ...entry, id: newId() }].slice(-60) })),
 
       clearChat: () => set({ chat: [] }),
+
+      applySuggestions: (entryId, indices) => set((state) => {
+        const entry = state.chat.find((message) => message.id === entryId);
+        if (!entry?.suggestions) return {};
+        const applied = new Set(entry.appliedSuggestions ?? []);
+        const lines = [...state.lines];
+        for (const index of new Set(indices)) {
+          const suggestion: ChatSuggestion | undefined = entry.suggestions[index];
+          if (!suggestion || applied.has(index)) continue;
+          const target = suggestion.lineId ? lines.findIndex((line) => line.id === suggestion.lineId) : -1;
+          if (suggestion.lineId && target < 0) continue;
+          const previous = target >= 0 ? lines[target] : undefined;
+          const line: OrderLine = {
+            id: previous?.id ?? newId(),
+            source: previous?.source ?? "chat",
+            rawText: previous?.rawText ?? suggestion.description,
+            quantity: clampQty(suggestion.quantity),
+            unit: suggestion.unit,
+            comment: suggestion.note || previous?.comment || "",
+            confidence: suggestion.match.confidence,
+            confirmed: false,
+            product: suggestion.match.product,
+            alternatives: suggestion.match.alternatives,
+            similar: suggestion.match.similar,
+            manualText: suggestion.match.product ? "" : suggestion.description,
+            reason: [suggestion.reason, suggestion.match.note].filter(Boolean).join(" · "),
+          };
+          if (target >= 0) lines[target] = line;
+          else lines.push(line);
+          applied.add(index);
+        }
+        return { lines, chat: state.chat.map((message) => message.id === entryId ? { ...message, appliedSuggestions: [...applied] } : message) };
+      }),
+
+      restoreLine: (line, index) => set((state) => {
+        if (state.lines.some((item) => item.id === line.id)) return {};
+        const lines = [...state.lines];
+        lines.splice(Math.min(index, lines.length), 0, line);
+        return { lines };
+      }),
 
       setBridge: (status) => set({ bridge: status }),
     }),

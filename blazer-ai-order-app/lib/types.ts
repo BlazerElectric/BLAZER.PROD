@@ -93,6 +93,7 @@ export interface ChatMessage {
 }
 
 export interface ChatSuggestion {
+  lineId?: string;
   description: string;
   quantity: number;
   unit: string;
@@ -104,4 +105,12 @@ export interface ChatSuggestion {
 export interface ChatResponse {
   reply: string;
   suggestions: ChatSuggestion[];
+}
+
+export interface OrderContextLine {
+  id: string;
+  description: string;
+  quantity: number;
+  unit: string;
+  comment: string;
 }

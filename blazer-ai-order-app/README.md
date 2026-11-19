@@ -30,7 +30,7 @@ blazer_web_catalog.json ──(scripts/sync-catalog.mjs)──► data/ ──�
 
 The catalog stays on the server. Phones never download the 7 MB JSON; they call the search and parse APIs instead.
 
-Pasted lines with no quantity, no numbers and no catalog match (for example `Smith residence - rough in`) are treated as job headings. They are listed under the BOM as "Skipped", and each one offers **Add to order notes** and **Add as item**. Every matched line, including green ones, has a **Change** button that opens the alternatives list and a catalog search.
+Within parser-routed lists, lines with no quantity, no numbers and no catalog match (for example `Smith residence - rough in`) are treated as job headings. They are listed under the BOM as "Skipped", and each one offers **Add to order notes** and **Add as item**. Ready lines have a **Change** button; review-required lines show alternatives and catalog search directly.
 
 Conversational lists also separate quantities joined by "and" and preserve wire footage, grouped fitting quantities, and requested package counts. Inline revisions such as "or actually ... wait no ..." stay unmatched until the final cable specification is confirmed. Within each numbered quote, nearby same-size items can suggest adapter material, and a uniquely named panel family can carry over to breaker requests. Inferred specifications remain review-required; explicit Homeline, breaker pole/rating, conductor, and Myers requirements are not silently substituted. Catalog records do not establish stock availability or utility approval.
 
@@ -67,9 +67,54 @@ npm run dev                    # predev copies ../blazer_web_catalog.json into d
 | `npm run typecheck` / `npm run lint` | Static checks |
 | `npm run build` | Production build (prebuild syncs the catalog) |
 
-Material-list ordering and search work without a Gemini key. The shared workspace reports when conversation is unavailable, retains failed messages for retry, and leaves the active order untouched. Conversation includes up to 100 current lines; longer orders should be clarified in smaller groups. AI response quality and catalog compatibility still require verification; combining the input does not certify substitutions.
+Material-list ordering and search work without a Gemini key. The shared workspace reports when conversation is unavailable, retains failed messages for retry, and leaves the active order untouched. Only the first 100 current order lines are included in conversation context; use direct line editing/catalog search for later lines. AI response quality and catalog compatibility still require verification; combining the input does not certify substitutions.
 
 Receptacle requests require explicitly listed GFCI/AFCI protection and requested TR/WR features. Ordinary NM-B conductor configurations cannot select extra-neutral or MC cable, and rigid-metal elbow requests reject PVC, EMT and different trade sizes. These requirements also filter related alternatives. AI-supplied SKUs do not override the catalog matcher or automatically earn high confidence.
+
+## Team Acceptance Testing
+
+Production: https://blazer-ai-order-desk.vercel.app/
+
+The 2026-11-19 app release is commit `1e00a0a` on `Blazer-Quick-Order`. It passed 85 app tests, 97 pipeline tests, lint, typechecking, production build and desktop/mobile browser checks. A real production Gemini clarification returned the existing line ID, SKU `1097`, 250 feet and the original cut note. Browser tests used controlled assistant responses for repeatability; no live cart was submitted.
+
+Use a fresh order for this repeatable list:
+
+```text
+20 sticks 3/4 emt
+50 - 3/4 emt sscr conn
+(25) 3/4 emt couplings
+500' #12 THHN blk str
+12 thhn white (5 cuts @ 50ft)
+250 ft #12 thhn green stranded
+30 4 sq box 2-1/8 deep
+30 4 sq blank covers
+100 3/4 emt one hole straps
+10 QO120
+4 QO230
+2 QO120CAFIC
+romex 12-2 250ft coil x 3
+2 rolls 14/2 romex 250ft
+6 20a tr wr gfci recept white
+10 duplex recept 20a white
+10 1g white duplex wallplates
+50 colorado jims
+100 red heads
+2 1/2 rigid 90 w/ coupling
+```
+
+- Expect all 20 items to remain, including unmatched items. Line 5 should show 250 feet with `5 cuts @ 50ft`.
+- With the current catalog, line 13 selects ordinary 12/2 NM-B SKU `1021`, line 20 selects galvanized rigid elbow `1337`, and the GFCI and exact `QO120CAFIC` requests remain unmatched rather than receiving unverified replacements. Catalog changes can alter these expectations.
+- Ask about line 5 and specify stranded white THHN. Inspect the proposal before applying it: it should update that line without adding a duplicate or losing quantity/cut notes. Assistant prose may say "updated" before application; the proposal's applied state and active order are authoritative.
+- Refresh and verify products, quantities, cut notes, shipping notes and conversation survive. Exercise the attention filter, removal undo and mobile order navigation.
+- In standalone mode, inspect **Copy for QuickPad** output and package conversions. Do not send a real cart as part of casual testing; the embedded Billtrust handoff still needs an explicitly authorized live-site check.
+- For feedback, record the exact input and follow-up, expected product/SKU, actual product/SKU, quantity/unit/note differences, browser/device and a screenshot. Redact customer information and prioritize incompatible confident matches or lost items over cosmetic issues.
+
+### Remaining Limits
+
+- List-versus-conversation routing is heuristic. Report unexpected routing with the exact wording.
+- Saving is local to the browser/origin, not account-synced. If iframe/browser storage is blocked, the memory fallback does not survive reload.
+- Ambiguous quantities/sizes, package round-ups, catalog metadata conflicts and installation compatibility still require human review. A confidence label does not certify fit, availability or code compliance.
+- Live Billtrust selectors, comment transfer and shipping-note transfer have not been verified by the standalone production checks.
 
 ## Deploying to Vercel
 
